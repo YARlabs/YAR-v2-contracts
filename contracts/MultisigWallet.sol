@@ -5,7 +5,7 @@ import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/Sig
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract MultisigWallet {
-    uint256 public requiredSigners;
+    uint256 public requiredSignersCount;
     mapping(address => bool) public signers;
     uint256 public signersCount;
 
@@ -15,7 +15,7 @@ contract MultisigWallet {
     constructor(uint256 _requiredSigners, address[] memory _signers) {
         require(_requiredSigners > 0, "_requiredSigners must be greater than zero!");
         require(_signers.length >= _requiredSigners, "_requiredSigners > _signers.length");
-        requiredSigners = _requiredSigners;
+        requiredSignersCount = _requiredSigners;
         for (uint256 i; i < _signers.length; ++i) {
             require(_signers[i] != address(0), "_signers contains zero address!");
             require(signers[_signers[i]] == false, "signer exists!");
@@ -53,7 +53,7 @@ contract MultisigWallet {
             alreadyVerified[_messageHash][_signers[i]] = true;
             ++verifiedSignsCount;
         }
-        require(verifiedSignsCount >= requiredSigners, "requiredSigners!");
+        require(verifiedSignsCount >= requiredSignersCount, "requiredSigners!");
 
         (bool success, ) = _target.call{ value: _value }(_data);
         require(success, "transaction call failure!");

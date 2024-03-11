@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import { ERC1967ProxyCreate2 } from "./utils/ERC1967ProxyCreate2.sol";
 import { IssuedERC721 } from "./tokens/IssuedERC721.sol";
 import { IAddressBook } from "./interfaces/IAddressBook.sol";
 
 contract BridgeERC721 is IERC721Receiver, UUPSUpgradeable {
+    using SafeERC20 for IERC20Metadata;
+
     IAddressBook public addressBook;
 
     address public validator;
@@ -27,6 +33,9 @@ contract BridgeERC721 is IERC721Receiver, UUPSUpgradeable {
     address public issuedTokenImplementation;
 
     uint256 public initBlock;
+
+    /// @notice Signatures have already been registered
+    mapping(bytes32 => bool) public alreadyVerified;
 
     event TransferToOtherChain(
         bytes32 indexed transferId,
@@ -102,8 +111,45 @@ contract BridgeERC721 is IERC721Receiver, UUPSUpgradeable {
         address _transferedToken,
         uint256 _tokenId,
         uint256 _targetChain,
-        bytes calldata _recipient
-    ) external {
+        bytes calldata _recipient,
+        address _feeToken,
+        uint256 _fees,
+        uint256 _signatureExpired,
+        bytes calldata _signature
+    ) external payable {
+        IAddressBook _addressBook = addressBook;
+
+        address _treasury = _addressBook.treasury();
+        require(_feeToken == _addressBook.feeToken(), "fee token changed!");
+        if (_feeToken == address(0)) {
+            require(msg.value == _fees, "msg.value != _fees");
+            (bool success, ) = _treasury.call{ value: _fees }("");
+            require(success, "native token transfer failed!");
+        } else {
+            IERC20Metadata(_feeToken).safeTransferFrom(msg.sender, _treasury, _fees);
+        }
+
+        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
+            keccak256(
+                abi.encodePacked(
+                    block.chainid,
+                    address(this),
+                    BridgeERC721.tranferToOtherChain.selector,
+                    msg.sender,
+                    _transferedToken,
+                    _tokenId,
+                    _targetChain,
+                    _recipient,
+                    _feeToken,
+                    _fees,
+                    _signatureExpired
+                )
+            )
+        );
+        require(alreadyVerified[messageHash] == false, "signature already used!");
+        addressBook.requireTrasferApprover(messageHash, _signature);
+        alreadyVerified[messageHash] = true;
+
         bool isIssuedToken = issuedTokens[_transferedToken];
         uint256 initialChain = currentChain;
         uint256 _nonce = nonce++;

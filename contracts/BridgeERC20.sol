@@ -4,6 +4,8 @@ pragma solidity 0.8.18;
 import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import { ERC1967ProxyCreate2 } from "./utils/ERC1967ProxyCreate2.sol";
 import { IssuedERC20 } from "./tokens/IssuedERC20.sol";
@@ -34,6 +36,9 @@ contract BridgeERC20 is UUPSUpgradeable {
     string public nativeSymbol;
     uint8 public nativeDecimals;
     uint256 public nativeTransferGasLimit;
+
+    /// @notice Signatures have already been registered
+    mapping(bytes32 => bool) public alreadyVerified;
 
     event TransferToOtherChain(
         bytes32 indexed transferId,
@@ -91,7 +96,6 @@ contract BridgeERC20 is UUPSUpgradeable {
         _disableInitializers();
     }
 
-
     function getTransferId(uint256 _nonce, uint256 _initialChain) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, _initialChain));
     }
@@ -100,9 +104,46 @@ contract BridgeERC20 is UUPSUpgradeable {
         address _transferedToken,
         uint256 _amount,
         uint256 _targetChain,
-        bytes calldata _recipient
+        bytes calldata _recipient,
+        address _feeToken,
+        uint256 _fees,
+        uint256 _signatureExpired,
+        bytes calldata _signature
     ) external payable {
         require(_amount > 0, "BridgeERC20: _amount < 0");
+
+        IAddressBook _addressBook = addressBook;
+
+        address _treasury = _addressBook.treasury();
+        require(_feeToken == _addressBook.feeToken(), "fee token changed!");
+        if (_feeToken == address(0)) {
+            require(msg.value == _fees, "msg.value != _fees");
+            (bool success, ) = _treasury.call{value: _fees}("");
+            require(success, "native token transfer failed!");
+        } else {
+            IERC20Metadata(_feeToken).safeTransferFrom(msg.sender, _treasury, _fees);
+        }
+
+        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
+            keccak256(
+                abi.encodePacked(
+                    block.chainid,
+                    address(this),
+                    BridgeERC20.tranferToOtherChain.selector,
+                    msg.sender,
+                    _transferedToken,
+                    _amount,
+                    _targetChain,
+                    _recipient,
+                    _feeToken,
+                    _fees,
+                    _signatureExpired
+                )
+            )
+        );
+        require(alreadyVerified[messageHash] == false, "signature already used!");
+        addressBook.requireTrasferApprover(messageHash, _signature);
+        alreadyVerified[messageHash] = true;
 
         bool isIssuedToken = issuedTokens[_transferedToken];
         uint256 initialChain = currentChain;

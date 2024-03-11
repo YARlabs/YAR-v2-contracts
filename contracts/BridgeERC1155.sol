@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { IERC1155MetadataURI } from "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import { ERC1967ProxyCreate2 } from "./utils/ERC1967ProxyCreate2.sol";
 import { IssuedERC1155 } from "./tokens/IssuedERC1155.sol";
 import { IAddressBook } from "./interfaces/IAddressBook.sol";
 
 contract BridgeERC1155 is IERC1155Receiver, UUPSUpgradeable {
+    using SafeERC20 for IERC20Metadata;
+
     IAddressBook public addressBook;
 
     address public validator;
@@ -27,6 +33,9 @@ contract BridgeERC1155 is IERC1155Receiver, UUPSUpgradeable {
     address public issuedTokenImplementation;
 
     uint256 public initBlock;
+
+    /// @notice Signatures have already been registered
+    mapping(bytes32 => bool) public alreadyVerified;
 
     event TransferToOtherChain(
         bytes32 indexed transferId,
@@ -138,9 +147,47 @@ contract BridgeERC1155 is IERC1155Receiver, UUPSUpgradeable {
         uint256 _tokenId,
         uint256 _amount,
         uint256 _targetChain,
-        bytes calldata _recipient
-    ) external {
+        bytes calldata _recipient,
+        address _feeToken,
+        uint256 _fees,
+        uint256 _signatureExpired,
+        bytes calldata _signature
+    ) external payable {
         require(_amount > 0, "BridgeERC1155: amount == 0");
+
+        IAddressBook _addressBook = addressBook;
+
+        address _treasury = _addressBook.treasury();
+        require(_feeToken == _addressBook.feeToken(), "fee token changed!");
+        if (_feeToken == address(0)) {
+            require(msg.value == _fees, "msg.value != _fees");
+            (bool success, ) = _treasury.call{ value: _fees }("");
+            require(success, "native token transfer failed!");
+        } else {
+            IERC20Metadata(_feeToken).safeTransferFrom(msg.sender, _treasury, _fees);
+        }
+
+        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
+            keccak256(
+                abi.encodePacked(
+                    block.chainid,
+                    address(this),
+                    BridgeERC1155.tranferToOtherChain.selector,
+                    msg.sender,
+                    _transferedToken,
+                    _tokenId,
+                    _amount,
+                    _targetChain,
+                    _recipient,
+                    _feeToken,
+                    _fees,
+                    _signatureExpired
+                )
+            )
+        );
+        require(alreadyVerified[messageHash] == false, "signature already used!");
+        addressBook.requireTrasferApprover(messageHash, _signature);
+        alreadyVerified[messageHash] = true;
 
         bool isIssuedToken = issuedTokens[_transferedToken];
         uint256 initialChain = currentChain;
@@ -184,75 +231,6 @@ contract BridgeERC1155 is IERC1155Receiver, UUPSUpgradeable {
             abi.encode(msg.sender),
             _recipient,
             tokenUri
-        );
-    }
-
-    function batchTranferToOtherChain(
-        address _transferedToken,
-        uint256[] memory _tokenIds,
-        uint256[] memory _amounts,
-        uint256 _targetChain,
-        bytes calldata _recipient
-    ) external {
-        uint256 tokensLength = _tokenIds.length;
-        require(tokensLength > 0, "BridgeERC1155: _tokenIds.length == 0");
-        require(
-            tokensLength == _amounts.length,
-            "BridgeERC1155: _tokenIds.length != _amounts.length"
-        );
-        for (uint256 i; i < tokensLength; i++) {
-            require(_amounts[i] > 0, "BridgeERC1155: _amounts contains zero value!");
-        }
-
-        bool isIssuedToken = issuedTokens[_transferedToken];
-        uint256 initialChain = currentChain;
-        uint256 _nonce = nonce++;
-        uint256 originalChain;
-        bytes memory originalToken;
-        string[] memory tokenUris;
-
-        if (isIssuedToken) {
-            // There ISSUED token
-            IssuedERC1155 issuedToken = IssuedERC1155(_transferedToken);
-
-            (originalChain, originalToken) = issuedToken.getOriginalTokenInfo();
-            tokenUris = issuedToken.uriBatch(_tokenIds);
-            if (originalChain == _targetChain && isProxyChain) {
-                issuedToken.permissionedBatchTransferFrom(
-                    msg.sender,
-                    address(this),
-                    _tokenIds,
-                    _amounts
-                );
-            } else {
-                issuedToken.burnBatch(msg.sender, _tokenIds, _amounts);
-            }
-        } else {
-            // There ORIGINAL token
-            IERC1155MetadataURI token = IERC1155MetadataURI(_transferedToken);
-            originalChain = initialChain;
-            originalToken = abi.encode(_transferedToken);
-            tokenUris = new string[](tokensLength);
-            for (uint256 i; i < tokensLength; i++) {
-                try token.uri(_tokenIds[i]) returns (string memory _tokenUri) {
-                    tokenUris[i] = _tokenUri;
-                } catch {}
-            }
-            token.safeBatchTransferFrom(msg.sender, address(this), _tokenIds, _amounts, "");
-        }
-
-        emit BatchTransferToOtherChain(
-            getTransferId(_nonce, initialChain),
-            _nonce,
-            initialChain,
-            originalChain,
-            originalToken,
-            _targetChain,
-            _tokenIds,
-            _amounts,
-            abi.encode(msg.sender),
-            _recipient,
-            tokenUris
         );
     }
 
@@ -353,114 +331,6 @@ contract BridgeERC1155 is IERC1155Receiver, UUPSUpgradeable {
                 sender,
                 _recipient,
                 _tokenUri
-            );
-        }
-    }
-
-    function batchTranferFromOtherChain(
-        uint256 _externalNonce,
-        uint256 _originalChain,
-        bytes calldata _originalToken,
-        uint256 _initialChain,
-        uint256 _targetChain,
-        uint256[] memory _tokenIds,
-        uint256[] memory _amounts,
-        bytes calldata _sender,
-        bytes calldata _recipient,
-        string[] memory _tokenUris
-    ) external {
-        addressBook.requireTransferValidator(msg.sender);
-
-        require(_tokenIds.length > 0, "BridgeERC1155: _tokenIds.length == 0");
-        require(
-            _tokenIds.length == _amounts.length,
-            "BridgeERC1155: _tokenIds.length != _amounts.length"
-        );
-        require(
-            !registeredNonces[_initialChain][_externalNonce],
-            "BridgeERC1155: nonce already registered"
-        );
-
-        registeredNonces[_initialChain][_externalNonce] = true;
-
-        uint256 _currentChain = currentChain;
-
-        require(_initialChain != _currentChain, "BridgeERC1155: initialChain == currentChain");
-
-        if (_currentChain == _targetChain) {
-            // This is TARGET chain
-            address recipientAddress = abi.decode(_recipient, (address));
-
-            if (currentChain == _originalChain) {
-                // This is ORIGINAL chain
-                address originalTokenAddress = abi.decode(_originalToken, (address));
-                IERC1155MetadataURI(originalTokenAddress).safeBatchTransferFrom(
-                    address(this),
-                    recipientAddress,
-                    _tokenIds,
-                    _amounts,
-                    ""
-                );
-            } else {
-                // This is SECONDARY chain
-                address issuedTokenAddress = getIssuedTokenAddress(_originalChain, _originalToken);
-                if (!isIssuedTokenPublished(issuedTokenAddress))
-                    publishNewToken(_originalChain, _originalToken);
-
-                IssuedERC1155(issuedTokenAddress).mintBatch(
-                    recipientAddress,
-                    _tokenIds,
-                    _amounts,
-                    _tokenUris
-                );
-            }
-
-            emit BatchTransferFromOtherChain(
-                getTransferId(_externalNonce, _initialChain),
-                _externalNonce,
-                _originalChain,
-                _originalToken,
-                _initialChain,
-                _targetChain,
-                _tokenIds,
-                _amounts,
-                _sender,
-                _recipient
-            );
-        } else {
-            // This is PROXY chain
-            require(isProxyChain, "BridgeERC1155: Only proxy bridge!");
-
-            address issuedTokenAddress = getIssuedTokenAddress(_originalChain, _originalToken);
-            if (!isIssuedTokenPublished(issuedTokenAddress))
-                publishNewToken(_originalChain, _originalToken);
-
-            if (_targetChain == _originalChain) {
-                // BURN PROXY ISSUED TOKENS
-                IssuedERC1155(issuedTokenAddress).burnBatch(address(this), _tokenIds, _amounts);
-            } else if (_initialChain == _originalChain) {
-                // LOCK PROXY ISSUED TOKENS
-                IssuedERC1155(issuedTokenAddress).mintBatch(
-                    address(this),
-                    _tokenIds,
-                    _amounts,
-                    _tokenUris
-                );
-            }
-
-            bytes memory sender = _sender; // TODO: fix Error HH600
-            emit BatchTransferToOtherChain(
-                getTransferId(_externalNonce, _initialChain),
-                _externalNonce,
-                _initialChain,
-                _originalChain,
-                _originalToken,
-                _targetChain,
-                _tokenIds,
-                _amounts,
-                sender,
-                _recipient,
-                _tokenUris
             );
         }
     }
