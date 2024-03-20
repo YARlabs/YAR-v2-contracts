@@ -16,10 +16,6 @@ contract BridgeERC20 is UUPSUpgradeable {
 
     IAddressBook public addressBook;
 
-    address public validator;
-
-    uint256 public currentChain;
-
     uint256 public nonce;
 
     bool public isProxyChain;
@@ -45,11 +41,11 @@ contract BridgeERC20 is UUPSUpgradeable {
         uint256 nonce,
         uint256 initialChain,
         uint256 originalChain,
-        bytes originalTokenAddress,
+        address originalTokenAddress,
         uint256 targetChain,
         uint256 tokenAmount,
-        bytes sender,
-        bytes recipient,
+        address sender,
+        address recipient,
         string tokenName,
         string tokenSymbol,
         uint8 tokenDecimals
@@ -59,18 +55,21 @@ contract BridgeERC20 is UUPSUpgradeable {
         bytes32 indexed transferId,
         uint256 externalNonce,
         uint256 originalChain,
-        bytes originalToken,
+        address originalToken,
         uint256 initialChain,
         uint256 targetChain,
         uint256 amount,
-        bytes sender,
-        bytes recipient
+        address sender,
+        address recipient
     );
+
+    function currentChain() external view returns(uint256) {
+        return addressBook.chainId();
+    }
 
     function initialize(
         address _addressBook,
         bool _isProxyChain,
-        address _validator,
         string memory _nativeName,
         string memory _nativeSymbol,
         uint8 _nativeDecimals,
@@ -78,10 +77,8 @@ contract BridgeERC20 is UUPSUpgradeable {
     ) public initializer {
         addressBook = IAddressBook(_addressBook);
         initBlock = block.number;
-        currentChain = block.chainid;
         isProxyChain = _isProxyChain;
         issuedTokenImplementation = address(new IssuedERC20());
-        validator = _validator;
         nativeName = _nativeName;
         nativeSymbol = _nativeSymbol;
         nativeDecimals = _nativeDecimals;
@@ -104,7 +101,7 @@ contract BridgeERC20 is UUPSUpgradeable {
         address _transferedToken,
         uint256 _amount,
         uint256 _targetChain,
-        bytes calldata _recipient,
+        address _recipient,
         address _feeToken,
         uint256 _fees,
         uint256 _signatureExpired,
@@ -114,20 +111,11 @@ contract BridgeERC20 is UUPSUpgradeable {
 
         IAddressBook _addressBook = addressBook;
 
-        address _treasury = _addressBook.treasury();
-        require(_feeToken == _addressBook.feeToken(), "fee token changed!");
-        if (_feeToken == address(0)) {
-            require(msg.value == _fees, "msg.value != _fees");
-            (bool success, ) = _treasury.call{value: _fees}("");
-            require(success, "native token transfer failed!");
-        } else {
-            IERC20Metadata(_feeToken).safeTransferFrom(msg.sender, _treasury, _fees);
-        }
+        require(block.timestamp <= _signatureExpired, "_signatureExpired!");
 
-        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
-            keccak256(
+        bytes32 messageHash = keccak256(
                 abi.encodePacked(
-                    block.chainid,
+                    _addressBook.chainId(),
                     address(this),
                     BridgeERC20.tranferToOtherChain.selector,
                     msg.sender,
@@ -139,17 +127,26 @@ contract BridgeERC20 is UUPSUpgradeable {
                     _fees,
                     _signatureExpired
                 )
-            )
-        );
+            );
         require(alreadyVerified[messageHash] == false, "signature already used!");
-        addressBook.requireTrasferApprover(messageHash, _signature);
+        _addressBook.requireTransferApprover(messageHash, _signature);
         alreadyVerified[messageHash] = true;
 
+        address _treasury = _addressBook.treasury();
+        require(_feeToken == _addressBook.feeToken(), "fee token changed!");
+        if (_feeToken == address(0)) {
+            require(msg.value == _fees, "msg.value != _fees");
+            (bool success, ) = _treasury.call{ value: _fees }("");
+            require(success, "native token transfer failed!");
+        } else {
+            IERC20Metadata(_feeToken).safeTransferFrom(msg.sender, _treasury, _fees);
+        }
+
         bool isIssuedToken = issuedTokens[_transferedToken];
-        uint256 initialChain = currentChain;
+        uint256 initialChain = _addressBook.chainId();
         uint256 _nonce = nonce++;
         uint256 originalChain;
-        bytes memory originalToken;
+        address originalToken;
         string memory tokenName;
         string memory tokenSymbol;
         uint8 tokenDecimals;
@@ -167,7 +164,7 @@ contract BridgeERC20 is UUPSUpgradeable {
         } else {
             // There ORIGINAL token
             originalChain = initialChain;
-            originalToken = abi.encode(_transferedToken);
+            originalToken = _transferedToken;
             if (_transferedToken == address(0)) {
                 // Native
                 require(_amount == msg.value, "amount < msg.value!");
@@ -205,7 +202,7 @@ contract BridgeERC20 is UUPSUpgradeable {
             originalToken,
             _targetChain,
             _amount,
-            abi.encode(msg.sender),
+            msg.sender,
             _recipient,
             tokenName,
             tokenSymbol,
@@ -222,15 +219,17 @@ contract BridgeERC20 is UUPSUpgradeable {
     function tranferFromOtherChain(
         uint256 _externalNonce,
         uint256 _originalChain,
-        bytes calldata _originalToken,
+        address _originalToken,
         uint256 _initialChain,
         uint256 _targetChain,
         uint256 _amount,
-        bytes calldata _sender,
-        bytes calldata _recipient,
+        address _sender,
+        address _recipient,
         TokenInfo calldata _tokenInfo
     ) external {
-        addressBook.requireTransferValidator(msg.sender);
+        IAddressBook _addressBook = addressBook;
+
+        _addressBook.requireTransferValidator(msg.sender);
 
         require(
             !registeredNonces[_initialChain][_externalNonce],
@@ -239,35 +238,31 @@ contract BridgeERC20 is UUPSUpgradeable {
 
         registeredNonces[_initialChain][_externalNonce] = true;
 
-        uint256 _currentChain = currentChain;
+        uint256 _currentChain = _addressBook.chainId();
 
         require(_initialChain != _currentChain, "BridgeERC20: initialChain == currentChain");
 
         if (_currentChain == _targetChain) {
             // This is TARGET chain
-            address recipientAddress = abi.decode(_recipient, (address));
-
-            if (currentChain == _originalChain) {
+            if (_currentChain == _originalChain) {
                 // This is ORIGINAL chain
-                address originalTokenAddress = abi.decode(_originalToken, (address));
-
-                if (originalTokenAddress == address(0)) {
+                if (_originalToken == address(0)) {
                     // Native
-                    (bool success, ) = payable(recipientAddress).call{
+                    (bool success, ) = payable(_recipient).call{
                         value: _amount,
                         gas: nativeTransferGasLimit
                     }("");
                     require(success, "failed transfer native tokens!");
                 } else {
                     // ERC20
-                    IERC20Metadata(originalTokenAddress).safeTransfer(recipientAddress, _amount);
+                    IERC20Metadata(_originalToken).safeTransfer(_recipient, _amount);
                 }
             } else {
                 // This is SECONDARY chain
                 address issuedTokenAddress = getIssuedTokenAddress(_originalChain, _originalToken);
                 if (!isIssuedTokenPublished(issuedTokenAddress))
                     publishNewToken(_originalChain, _originalToken, _tokenInfo);
-                IssuedERC20(issuedTokenAddress).mint(recipientAddress, _amount);
+                IssuedERC20(issuedTokenAddress).mint(_recipient, _amount);
             }
 
             emit TransferFromOtherChain(
@@ -297,7 +292,6 @@ contract BridgeERC20 is UUPSUpgradeable {
                 IssuedERC20(issuedTokenAddress).mint(address(this), _amount);
             }
 
-            bytes memory sender = _sender; // TODO: fix Error HH600
             emit TransferToOtherChain(
                 getTransferId(_externalNonce, _initialChain),
                 _externalNonce,
@@ -306,7 +300,7 @@ contract BridgeERC20 is UUPSUpgradeable {
                 _originalToken,
                 _targetChain,
                 _amount,
-                sender,
+                _sender,
                 _recipient,
                 _tokenInfo.name,
                 _tokenInfo.symbol,
@@ -321,7 +315,7 @@ contract BridgeERC20 is UUPSUpgradeable {
 
     function getIssuedTokenAddress(
         uint256 _originalChain,
-        bytes calldata _originalToken
+        address _originalToken
     ) public view returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(_originalChain, _originalToken));
         return
@@ -343,7 +337,7 @@ contract BridgeERC20 is UUPSUpgradeable {
 
     function publishNewToken(
         uint256 _originalChain,
-        bytes calldata _originalToken,
+        address _originalToken,
         TokenInfo calldata _tokenInfo
     ) internal returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(_originalChain, _originalToken));
@@ -371,15 +365,14 @@ contract BridgeERC20 is UUPSUpgradeable {
 
     function balances(
         uint256 _originalChain,
-        bytes calldata _originalToken,
+        address _originalToken,
         address _account
     ) external view returns (uint256) {
-        if (currentChain == _originalChain) {
-            address originalTokenAddress = abi.decode(_originalToken, (address));
-            if (originalTokenAddress == address(0)) {
+        if (addressBook.chainId() == _originalChain) {
+            if (_originalToken == address(0)) {
                 return _account.balance;
             } else {
-                return IERC20Metadata(abi.decode(_originalToken, (address))).balanceOf(_account);
+                return IERC20Metadata(_originalToken).balanceOf(_account);
             }
         }
 
