@@ -7,13 +7,13 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 
 contract IssuedERC20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     uint256 public originalChain;
-    bytes public originalToken;
+    address originalToken;
     uint8 internal originalTokenDecimals;
     string public originalTokenName;
     string public originalTokenSymbol;
 
     function initialize(
-        bytes memory _originalToken,
+        address _originalToken,
         string memory _originalTokenName,
         string memory _originalTokenSymbol,
         uint8 _originalTokenDecimals
@@ -31,7 +31,7 @@ contract IssuedERC20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         originalTokenDecimals = _originalTokenDecimals;
     }
 
-    function getOriginalTokenInfo() external view returns (uint256, bytes memory, string memory, string memory, uint8) {
+    function getOriginalTokenInfo() external view returns (uint256, address, string memory, string memory, uint8) {
         return (originalChain, originalToken, originalTokenName, originalTokenSymbol, decimals());
     }
 

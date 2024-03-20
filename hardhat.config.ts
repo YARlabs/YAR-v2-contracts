@@ -1,5 +1,6 @@
-import { HardhatUserConfig } from 'hardhat/config'
+import { HardhatUserConfig, task } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
+import '@openzeppelin/hardhat-upgrades'
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-deploy'
 import 'hardhat-gas-reporter'
@@ -7,6 +8,23 @@ import 'hardhat-tracer'
 import 'hardhat-abi-exporter'
 import '@nomicfoundation/hardhat-chai-matchers'
 import 'hardhat-contract-sizer'
+
+task('deploy_bridge', "Prints an account's balance")
+  .addFlag('isproxy', '')
+  .addOptionalParam('feetoken', '', '0x0000000000000000000000000000000000000000')
+  .addOptionalParam('name', '', 'Ethereum')
+  .addOptionalParam('symbol', '', 'ETH')
+  .addOptionalParam('decimals', '', '18')
+  .addOptionalParam('gaslimit', '', '35000')
+  .setAction(async (taskArgs, hre) => {
+    process.env.IS_PROXY_CHAIN = taskArgs.isproxy
+    process.env.FEE_TOKEN = taskArgs.feetoken
+    process.env.NATIVE_NAME = taskArgs.name
+    process.env.NATIVE_SYMBOL = taskArgs.symbol
+    process.env.NATIVE_DECIMALS = taskArgs.decimals
+    process.env.NATIVE_TRANSFER_GAS_LIMIT = taskArgs.gaslimit
+    await hre.run('deploy')
+  })
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -52,7 +70,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 100000000,
-  }
+  },
 }
 
 export default config

@@ -2,7 +2,6 @@
 pragma solidity 0.8.18;
 
 import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -13,7 +12,7 @@ import { IssuedERC20 } from "./tokens/IssuedERC20.sol";
 contract AddressBook is UUPSUpgradeable {
     struct Admins {
         address owner;
-        address trasferApprover;
+        address transferApprover;
         address transferValidator;
     }
     Admins public admins;
@@ -37,7 +36,7 @@ contract AddressBook is UUPSUpgradeable {
 
     function requireTrasferApprover(bytes32 _messageHash, bytes calldata _signature) external view {
         require(SignatureChecker.isValidSignatureNow(
-            admins.trasferApprover,
+            admins.transferApprover,
             ECDSA.toEthSignedMessageHash(_messageHash),
             _signature
         ), "only transfer approver!");

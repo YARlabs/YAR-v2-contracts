@@ -115,7 +115,7 @@ contract BridgeERC20 is UUPSUpgradeable {
 
         bytes32 messageHash = keccak256(
                 abi.encodePacked(
-                    _addressBook.chainId(),
+                    block.chainid,
                     address(this),
                     BridgeERC20.tranferToOtherChain.selector,
                     msg.sender,
@@ -143,7 +143,7 @@ contract BridgeERC20 is UUPSUpgradeable {
         }
 
         bool isIssuedToken = issuedTokens[_transferedToken];
-        uint256 initialChain = _addressBook.chainId();
+        uint256 initialChain = block.chainid;
         uint256 _nonce = nonce++;
         uint256 originalChain;
         address originalToken;
@@ -238,7 +238,7 @@ contract BridgeERC20 is UUPSUpgradeable {
 
         registeredNonces[_initialChain][_externalNonce] = true;
 
-        uint256 _currentChain = _addressBook.chainId();
+        uint256 _currentChain = block.chainid;
 
         require(_initialChain != _currentChain, "BridgeERC20: initialChain == currentChain");
 

@@ -25,6 +25,10 @@ export async function tranferToOtherChainERC20({
   targetChain,
   sender,
   recipient,
+  feeToken,
+  fees,
+  signatureExpired,
+  signature,
 }: {
   logId: string
   transferedTokenAddress: string
@@ -35,6 +39,10 @@ export async function tranferToOtherChainERC20({
   targetChain: BridgeERC20
   sender: SignerWithAddress
   recipient: SignerWithAddress
+  feeToken: string
+  fees: BigNumber
+  signatureExpired: BigNumber
+  signature: string
 }): Promise<TransferToOtherChainEventObject> {
   // Token
   const transferedToken = IERC20Metadata__factory.connect(transferedTokenAddress, sender)
@@ -46,6 +54,10 @@ export async function tranferToOtherChainERC20({
     amount, // _amount
     await targetChain.currentChain(), // _targetChainName
     EthersUtils.addressToBytes(recipient.address), // _recipient
+    feeToken, // _feeToken
+    fees, // _fees
+    signatureExpired, // _signatureExpired
+    signature, // _signature
     {
       value: transferedTokenAddress == NATIVE_TOKEN ? amount : 0,
     },
@@ -71,10 +83,10 @@ export async function tranferToOtherChainERC20({
       EthersUtils.addressToBytes(recipient.address), // recipient
       originalToken.address == NATIVE_TOKEN
         ? await originalChain.nativeName()
-        : await originalToken.name(), // name      
+        : await originalToken.name(), // name
       originalToken.address == NATIVE_TOKEN
-      ? await originalChain.nativeSymbol()
-      : await originalToken.symbol(), // symbol
+        ? await originalChain.nativeSymbol()
+        : await originalToken.symbol(), // symbol
       originalToken.address == NATIVE_TOKEN
         ? await originalChain.nativeDecimals()
         : await originalToken.decimals(), // decimals
@@ -214,10 +226,10 @@ export async function proxyTranferFromOtherChainERC20({
       event.recipient, // recipient
       originalToken.address == NATIVE_TOKEN
         ? await originalChain.nativeName()
-        : await originalToken.name(), // name      
+        : await originalToken.name(), // name
       originalToken.address == NATIVE_TOKEN
-      ? await originalChain.nativeSymbol()
-      : await originalToken.symbol(), // symbol
+        ? await originalChain.nativeSymbol()
+        : await originalToken.symbol(), // symbol
       originalToken.address == NATIVE_TOKEN
         ? await originalChain.nativeDecimals()
         : await originalToken.decimals(), // decimals
