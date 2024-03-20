@@ -47,10 +47,10 @@ const config: HardhatUserConfig = {
       forking: {
         url: 'https://mainnet.infura.io/v3/32c869b2294046f4931f3d8b93b2dae0',
       },
-      mining: {
-        auto: false,
-        interval: 5000,
-      },
+      // mining: {
+      //   auto: false,
+      //   interval: 5000,
+      // },
       blockGasLimit: 30000000,
       accounts: {
         count: 10,

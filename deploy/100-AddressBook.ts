@@ -27,7 +27,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
               transferApprover: DEPLOY_CONFIGS.transferApprover,
               transferValidator: TransferValidatorDeployment.address,
             }, // admins
-            process.env.FEE_TOKEN, // feeToken
+            process.env.FEE_TOKEN ?? ethers.constants.AddressZero, // feeToken
           ],
         },
       },

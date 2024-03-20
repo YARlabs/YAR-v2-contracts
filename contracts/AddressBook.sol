@@ -33,8 +33,8 @@ contract AddressBook is UUPSUpgradeable {
     function requireTransferValidator(address _account) public view {
         require(_account == admins.transferValidator, "only transfer validator!");
     }
-
-    function requireTrasferApprover(bytes32 _messageHash, bytes calldata _signature) external view {
+    
+    function requireTransferApprover(bytes32 _messageHash, bytes calldata _signature) external view {
         require(SignatureChecker.isValidSignatureNow(
             admins.transferApprover,
             ECDSA.toEthSignedMessageHash(_messageHash),
@@ -42,7 +42,13 @@ contract AddressBook is UUPSUpgradeable {
         ), "only transfer approver!");
     }
 
+    function setTransferApprover(address _account) public {
+        requireOnlyOwner(msg.sender);
+        admins.transferApprover = _account;
+    }
+
     function setTreasury(address _contract) public {
+        require(treasury == address(0), "treasury already setted!");
         treasury = _contract;
     }
 

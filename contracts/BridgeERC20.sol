@@ -144,7 +144,7 @@ contract BridgeERC20 is UUPSUpgradeable {
 
         bool isIssuedToken = issuedTokens[_transferedToken];
         uint256 initialChain = block.chainid;
-        uint256 _nonce = nonce++;
+        uint256 _nonce = ++nonce;
         uint256 originalChain;
         address originalToken;
         string memory tokenName;

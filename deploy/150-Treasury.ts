@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import { DeployFunction } from 'hardhat-deploy/types'
-
+import DEPLOY_CONFIGS from '../deploy_configs.json'
+import { AddressBook__factory } from '../typechain-types'
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { ethers, deployments } = hre
@@ -11,9 +12,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const AddressBookDeployment = await get('AddressBook')
 
-  
-  const deployment = await deploy('BridgeERC20', {
-    contract: 'BridgeERC20',
+  const deployment = await deploy('Treasury', {
+    contract: 'Treasury',
     from: deployer.address,
     proxy: {
       proxyContract: 'UUPS',
@@ -22,18 +22,19 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           methodName: 'initialize',
           args: [
             AddressBookDeployment.address, // _addressBook
-            process.env.IS_PROXY_CHAIN ?? false, // _isProxyChain,
-            process.env.NATIVE_NAME ?? 'Ethereum', // _nativeName
-            process.env.NATIVE_SYMBOL ?? 'ETH', // _nativeSymbol
-            process.env.NATIVE_DECIMALS ?? 18, // _nativeDecimals
-            process.env.NATIVE_TRANSFER_GAS_LIMIT ?? 35000, // _nativeTransferGasLimit
           ],
         },
       },
     },
   })
+
+  await (
+    await AddressBook__factory.connect(AddressBookDeployment.address, deployer).setTreasury(
+      deployment.address,
+    )
+  ).wait(1)
 }
 
-deploy.tags = ['BridgeERC20']
-deploy.dependencies = ['Treasury']
+deploy.tags = ['Treasury']
+deploy.dependencies = ['AddressBook']
 export default deploy

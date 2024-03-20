@@ -17,6 +17,8 @@ contract Treasury is UUPSUpgradeable {
         addressBook = IAddressBook(_addressBook);
     }
 
+    receive() external payable {}
+
     function withdraw(address _token, uint256 _amount, address _recipient) external {
         addressBook.requireOnlyOwner(msg.sender);
         if (_token == address(0)) {
