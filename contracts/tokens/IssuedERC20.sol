@@ -13,12 +13,12 @@ contract IssuedERC20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     string public originalTokenSymbol;
 
     function initialize(
+        uint256 _originalChain,
         address _originalToken,
         string memory _originalTokenName,
         string memory _originalTokenSymbol,
         uint8 _originalTokenDecimals
     ) external initializer {
-
         ERC20Upgradeable.__ERC20_init(
             string(abi.encodePacked("y", _originalTokenName)),
             string(abi.encodePacked("y", _originalTokenSymbol))
@@ -26,7 +26,7 @@ contract IssuedERC20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         OwnableUpgradeable.__Ownable_init();
         originalTokenName = _originalTokenName;
         originalTokenSymbol = _originalTokenSymbol;
-        originalChain = block.chainid;
+        originalChain = _originalChain;
         originalToken = _originalToken;
         originalTokenDecimals = _originalTokenDecimals;
     }

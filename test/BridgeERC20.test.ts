@@ -69,83 +69,139 @@ describe('test_key_unit BridgeERC20', () => {
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
   })
 
-  it('Regular: trasnferToOtherChain erc20', async () => {
-    const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
-    await ERC20MinterV2.mint(token.address, user.address, 1000)
-    const userBalance = await token.balanceOf(user.address)
-    console.log('aw10')
-    await token.connect(user).approve(bridge.address, userBalance)
+  describe('Proxy chain', () => {
+    beforeEach(async () => {
+      await bridge.connect(impersonatedOwner).setIsProxyChain(true)
+    })
 
-    console.log('aw11')
-    const tragetChain = 199
-    const recipient = user2
-    const feeToken = await addressBook.feeToken()
-    const fees = ethers.utils.parseEther('0.001')
-    const signatureExpired = ethers.constants.MaxInt256
-    const signature = await SignatureUtils.signMessage(
-      mockTransferApprover,
-      ethers.utils.solidityKeccak256(
-        [
-          'uint256',
-          'address',
-          'bytes4',
-          'address',
-          'address',
-          'uint256',
-          'uint256',
-          'address',
-          'address',
-          'uint256',
-          'uint256',
-        ],
-        [
-          ethers.provider.network.chainId,
-          bridge.address,
-          bridge.interface.getSighash('tranferToOtherChain'),
-          user.address,
-          token.address,
-          userBalance,
-          tragetChain,
-          recipient.address,
-          feeToken,
-          fees,
-          signatureExpired,
-        ],
-      ),
-    )
-    console.log('aw1')
-    const nonce = 1
-    await expect(
-      bridge
-        .connect(user)
-        .tranferToOtherChain(
-          token.address,
-          userBalance,
-          tragetChain,
-          recipient.address,
-          feeToken,
-          fees,
-          signatureExpired,
-          signature,
-          {
-            value: fees,
-          },
+    it('tranferToOtherChain original token', async () => {
+      const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
+      await ERC20MinterV2.mint(token.address, user.address, 1000)
+      const userBalance = await token.balanceOf(user.address)
+      await token.connect(user).approve(bridge.address, userBalance)
+
+      const tragetChain = 199
+      const recipient = user2
+      const feeToken = await addressBook.feeToken()
+      const fees = ethers.utils.parseEther('0.001')
+      const signatureExpired = ethers.constants.MaxInt256
+      const signature = await SignatureUtils.signMessage(
+        mockTransferApprover,
+        ethers.utils.solidityKeccak256(
+          [
+            'uint256',
+            'address',
+            'bytes4',
+            'address',
+            'address',
+            'uint256',
+            'uint256',
+            'address',
+            'address',
+            'uint256',
+            'uint256',
+          ],
+          [
+            ethers.provider.network.chainId,
+            bridge.address,
+            bridge.interface.getSighash('tranferToOtherChain'),
+            user.address,
+            token.address,
+            userBalance,
+            tragetChain,
+            recipient.address,
+            feeToken,
+            fees,
+            signatureExpired,
+          ],
         ),
-    )
-      .to.emit(bridge, 'TransferToOtherChain')
-      .withArgs(
-        await bridge.getTransferId(nonce, ethers.provider.network.chainId),
-        nonce,
-        ethers.provider.network.chainId,
-        ethers.provider.network.chainId,
-        token.address,
-        tragetChain,
-        userBalance,
-        user.address,
-        recipient.address,
-        'Tether USD',
-        'USDT',
-        6,
       )
+      let nonce = 1
+      await expect(
+        bridge
+          .connect(user)
+          .tranferToOtherChain(
+            token.address,
+            userBalance,
+            tragetChain,
+            recipient.address,
+            feeToken,
+            fees,
+            signatureExpired,
+            signature,
+            {
+              value: fees,
+            },
+          ),
+      )
+        .to.emit(bridge, 'TransferToOtherChain')
+        .withArgs(
+          await bridge.getTransferId(nonce, ethers.provider.network.chainId),
+          nonce,
+          ethers.provider.network.chainId,
+          ethers.provider.network.chainId,
+          token.address,
+          tragetChain,
+          userBalance,
+          user.address,
+          recipient.address,
+          'Tether USD',
+          'USDT',
+          6,
+        )
+    })
+
+    it('tranferFromOtherChain original -> proxy', async () => {
+      const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
+      await ERC20MinterV2.mint(token.address, user.address, 1000)
+      const userBalance = await token.balanceOf(user.address)
+      await token.connect(user).approve(bridge.address, userBalance)
+
+      const externalNonce = 19
+      const originalChain = 199
+
+      await expect(
+        bridge
+          .connect(transferValidatorImpersonated)
+          .tranferFromOtherChain(
+            externalNonce,
+            originalChain,
+            token.address,
+            originalChain,
+            ethers.provider.network.chainId,
+            userBalance,
+            user.address,
+            user.address,
+            {
+              name: 'Tether USD',
+              symbol: 'USDT',
+              decimals: 6,
+            },
+          ),
+      )
+        .to.emit(bridge, 'TransferFromOtherChain')
+        .withArgs(
+          await bridge.getTransferId(externalNonce, ethers.provider.network.chainId),
+          externalNonce,
+          originalChain,
+          token.address,
+          originalChain,
+          ethers.provider.network.chainId,
+          userBalance,
+          user.address,
+          user2.address,
+        )
+
+      const issuedToken = IERC20Metadata__factory.connect(
+        await bridge.getIssuedTokenAddress(777, token.address),
+        ethers.provider,
+      )
+    })
+  })
+
+  describe('Not proxy chain', () => {
+    beforeEach(async () => {
+      await bridge.connect(impersonatedOwner).setIsProxyChain(false)
+    })
   })
 })

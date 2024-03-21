@@ -67,6 +67,11 @@ contract BridgeERC20 is UUPSUpgradeable {
         return addressBook.chainId();
     }
 
+    function setIsProxyChain(bool _value) external {
+        addressBook.requireOnlyOwner(msg.sender);
+        isProxyChain = _value;
+    }
+
     function initialize(
         address _addressBook,
         bool _isProxyChain,
