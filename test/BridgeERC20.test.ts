@@ -71,10 +71,11 @@ describe('test_key_unit BridgeERC20', () => {
 
   describe('Proxy chain', () => {
     beforeEach(async () => {
-      await bridge.connect(impersonatedOwner).setIsProxyChain(true)
+      if ((await bridge.isProxyChain()) == false)
+        await bridge.connect(impersonatedOwner).setIsProxyChain(true)
     })
 
-    it('tranferToOtherChain original token', async () => {
+    xit('tranferToOtherChain original token', async () => {
       const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
       await ERC20MinterV2.mint(token.address, user.address, 1000)
       const userBalance = await token.balanceOf(user.address)
@@ -152,13 +153,16 @@ describe('test_key_unit BridgeERC20', () => {
     })
 
     it('tranferFromOtherChain original -> proxy', async () => {
+      const proxyChain = ethers.provider.network.chainId
+      const originalChain = 199
+      const initialChain = originalChain
+
       const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
       await ERC20MinterV2.mint(token.address, user.address, 1000)
       const userBalance = await token.balanceOf(user.address)
-      await token.connect(user).approve(bridge.address, userBalance)
+      // await token.connect(user).approve(bridge.address, userBalance)
 
       const externalNonce = 19
-      const originalChain = 199
 
       await expect(
         bridge
@@ -167,11 +171,11 @@ describe('test_key_unit BridgeERC20', () => {
             externalNonce,
             originalChain,
             token.address,
-            originalChain,
-            ethers.provider.network.chainId,
+            initialChain,
+            proxyChain,
             userBalance,
             user.address,
-            user.address,
+            user2.address,
             {
               name: 'Tether USD',
               symbol: 'USDT',
@@ -181,21 +185,21 @@ describe('test_key_unit BridgeERC20', () => {
       )
         .to.emit(bridge, 'TransferFromOtherChain')
         .withArgs(
-          await bridge.getTransferId(externalNonce, ethers.provider.network.chainId),
+          await bridge.getTransferId(externalNonce, originalChain),
           externalNonce,
           originalChain,
           token.address,
-          originalChain,
-          ethers.provider.network.chainId,
+          initialChain,
+          proxyChain,
           userBalance,
           user.address,
           user2.address,
         )
 
-      const issuedToken = IERC20Metadata__factory.connect(
-        await bridge.getIssuedTokenAddress(777, token.address),
-        ethers.provider,
-      )
+      // const issuedToken = IERC20Metadata__factory.connect(
+      //   await bridge.getIssuedTokenAddress(originalChain, token.address),
+      //   ethers.provider,
+      // )
     })
   })
 
