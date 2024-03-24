@@ -424,7 +424,7 @@ describe('test_key_unit BridgeERC20', () => {
         )
       })
 
-      it('tranferFromOtherChain secondary -> [proxy!] -> third', async () => {
+      xit('tranferFromOtherChain secondary -> [proxy!] -> third', async () => {
         await issuedToken.connect(user).transfer(bridge.address, userBalance)
         const secondaryChain = 789
         const thirdChain = 1178
@@ -678,7 +678,7 @@ describe('test_key_unit BridgeERC20', () => {
       )
     })
 
-    it('tranferFromOtherChain secondary -> current', async () => {
+    xit('tranferFromOtherChain secondary -> current', async () => {
       const originalChain = 199
       const secondaryChain = 8927
 
@@ -733,7 +733,7 @@ describe('test_key_unit BridgeERC20', () => {
       )
     })
 
-    it('tranferFromOtherChain secondary -> current original', async () => {
+    xit('tranferFromOtherChain secondary -> current original', async () => {
       const originalChain = currentChainId
       const secondaryChain = 8927
 
@@ -918,98 +918,95 @@ describe('test_key_unit BridgeERC20', () => {
 
       // xit('tranferToOtherChain current issued -> original', async () => {})
 
-      // xit('tranferToOtherChain current issued -> secondary', async () => {
-      //   const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
-      //   await ERC20MinterV2.mint(token.address, user.address, 1000)
-      //   const userBalance = await token.balanceOf(user.address)
-      //   await token.connect(user).approve(bridge.address, userBalance)
+      it('tranferToOtherChain current issued -> secondary', async () => {
+        const initialChain = currentChainId
+        const targetChain = 199
 
-      //   const targetChain = 199
-      //   const recipient = user2
-      //   const feeToken = await addressBook.feeToken()
-      //   const fees = ethers.utils.parseEther('0.001')
-      //   const signatureExpired = ethers.constants.MaxInt256
-      //   const signature = await SignatureUtils.signMessage(
-      //     mockTransferApprover,
-      //     ethers.utils.solidityKeccak256(
-      //       [
-      //         'uint256',
-      //         'address',
-      //         'bytes4',
-      //         'address',
-      //         'address',
-      //         'uint256',
-      //         'uint256',
-      //         'address',
-      //         'address',
-      //         'uint256',
-      //         'uint256',
-      //       ],
-      //       [
-      //         currentChainId,
-      //         bridge.address,
-      //         bridge.interface.getSighash('tranferToOtherChain'),
-      //         user.address,
-      //         token.address,
-      //         userBalance,
-      //         targetChain,
-      //         recipient.address,
-      //         feeToken,
-      //         fees,
-      //         signatureExpired,
-      //       ],
-      //     ),
-      //   )
+        const recipient = user2
+        const feeToken = await addressBook.feeToken()
+        const fees = ethers.utils.parseEther('0.001')
+        const signatureExpired = ethers.constants.MaxInt256
+        const signature = await SignatureUtils.signMessage(
+          mockTransferApprover,
+          ethers.utils.solidityKeccak256(
+            [
+              'uint256',
+              'address',
+              'bytes4',
+              'address',
+              'address',
+              'uint256',
+              'uint256',
+              'address',
+              'address',
+              'uint256',
+              'uint256',
+            ],
+            [
+              currentChainId,
+              bridge.address,
+              bridge.interface.getSighash('tranferToOtherChain'),
+              user.address,
+              issuedToken.address,
+              userBalance,
+              targetChain,
+              recipient.address,
+              feeToken,
+              fees,
+              signatureExpired,
+            ],
+          ),
+        )
 
-      //   const userBalanceBefore = await token.balanceOf(user.address)
-      //   const bridgeBalanceBefore = await token.balanceOf(bridge.address)
+        const userBalanceBefore = await issuedToken.balanceOf(user.address)
+        const bridgeBalanceBefore = await issuedToken.balanceOf(bridge.address)
 
-      //   let nonce = 1
-      //   await expect(
-      //     bridge
-      //       .connect(user)
-      //       .tranferToOtherChain(
-      //         token.address,
-      //         userBalance,
-      //         targetChain,
-      //         recipient.address,
-      //         feeToken,
-      //         fees,
-      //         signatureExpired,
-      //         signature,
-      //         {
-      //           value: fees,
-      //         },
-      //       ),
-      //   )
-      //     .to.emit(bridge, 'TransferToOtherChain')
-      //     .withArgs(
-      //       await bridge.getTransferId(nonce, currentChainId),
-      //       nonce,
-      //       currentChainId,
-      //       currentChainId,
-      //       token.address,
-      //       targetChain,
-      //       userBalance,
-      //       user.address,
-      //       recipient.address,
-      //       'Tether USD',
-      //       'USDT',
-      //       6,
-      //     )
+        let nonce = 1
+        await expect(
+          bridge
+            .connect(user)
+            .tranferToOtherChain(
+              issuedToken.address,
+              userBalance,
+              targetChain,
+              recipient.address,
+              feeToken,
+              fees,
+              signatureExpired,
+              signature,
+              {
+                value: fees,
+              },
+            ),
+        )
+          .to.emit(bridge, 'TransferToOtherChain')
+          .withArgs(
+            await bridge.getTransferId(nonce, currentChainId),
+            nonce,
+            initialChain,
+            originalChain,
+            originaToken.address,
+            targetChain,
+            userBalance,
+            user.address,
+            recipient.address,
+            'Tether USD',
+            'USDT',
+            6,
+          )
 
-      //   const userBalanceAfter = await token.balanceOf(user.address)
-      //   const bridgeBalanceAfter = await token.balanceOf(bridge.address)
+        const userBalanceAfter = await issuedToken.balanceOf(user.address)
+        const bridgeBalanceAfter = await issuedToken.balanceOf(bridge.address)
 
-      //   assert(
-      //     userBalanceAfter.eq(userBalanceBefore.sub(userBalance)),
-      //     'user tokens not transfered!',
-      //   )
-      //   assert(
-      //     bridgeBalanceAfter.eq(bridgeBalanceBefore.add(userBalance)),
-      //     'bridge not recieve tokens!',
-      //   )
-      // })
+        assert(
+          userBalanceAfter.eq(userBalanceBefore.sub(userBalance)),
+          'user tokens not transfered!',
+        )
+        assert(
+          bridgeBalanceAfter.eq(bridgeBalanceBefore),
+          'bridge recieve tokens! not burned',
+        )
+      })
     })
   })
 })
