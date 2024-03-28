@@ -10,6 +10,8 @@ import { ERC1967ProxyCreate2 } from "./utils/ERC1967ProxyCreate2.sol";
 import { IssuedERC20 } from "./tokens/IssuedERC20.sol";
 
 contract AddressBook is UUPSUpgradeable {
+    address public feeToken;
+
     struct Admins {
         address owner;
         address transferApprover;
@@ -19,11 +21,12 @@ contract AddressBook is UUPSUpgradeable {
 
     address public treasury;
 
-    address public feeToken;
+    bool public isGaslessNetwork;
 
-    function initialize(Admins calldata _admins, address _feeToken) public initializer {
+    function initialize(Admins calldata _admins, address _feeToken, bool _isGaslessNetwork) public initializer {
         admins = _admins;
         feeToken = _feeToken;
+        isGaslessNetwork = _isGaslessNetwork;
     }
 
     function requireOnlyOwner(address _account) public view {

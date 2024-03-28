@@ -27,8 +27,8 @@ contract BridgesConfig is UUPSUpgradeable {
     Admins public admins;
 
     struct Fees {
-        uint256 gasFeesMultiplier;
-        uint256 bridgeFeesUSD;
+        uint256 gasMultiplier;
+        uint256 bridgeMultiplier;
     }
     Fees public fees;
 

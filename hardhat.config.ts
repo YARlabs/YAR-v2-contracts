@@ -9,22 +9,6 @@ import 'hardhat-abi-exporter'
 import '@nomicfoundation/hardhat-chai-matchers'
 import 'hardhat-contract-sizer'
 
-task('deploy_bridge', "Prints an account's balance")
-  .addFlag('isproxy', '')
-  .addOptionalParam('feetoken', '', '0x0000000000000000000000000000000000000000')
-  .addOptionalParam('name', '', 'Ethereum')
-  .addOptionalParam('symbol', '', 'ETH')
-  .addOptionalParam('decimals', '', '18')
-  .addOptionalParam('gaslimit', '', '35000')
-  .setAction(async (taskArgs, hre) => {
-    process.env.IS_PROXY_CHAIN = taskArgs.isproxy
-    process.env.FEE_TOKEN = taskArgs.feetoken
-    process.env.NATIVE_NAME = taskArgs.name
-    process.env.NATIVE_SYMBOL = taskArgs.symbol
-    process.env.NATIVE_DECIMALS = taskArgs.decimals
-    process.env.NATIVE_TRANSFER_GAS_LIMIT = taskArgs.gaslimit
-    await hre.run('deploy')
-  })
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -59,9 +43,25 @@ const config: HardhatUserConfig = {
       loggingEnabled: true,
       // loggingEnabled: false,
     },
+    // yarTest: {
+    //   url: 'https://rpc1.testnet.yarchain.org',
+    //   accounts: [pk],
+    // },
+    // polygonTest: {
+    //   url: 'https://rpc.ankr.com/polygon_mumbai',
+    //   accounts: [pk],
+    // },
+    // binanceTest: {
+    //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+    //   accounts: [pk],
+    // },
+    // arbitrumTest: {
+    //   url: 'https://arbitrum-goerli.publicnode.com',
+    //   accounts: [pk],
+    // },
   },
   abiExporter: {
-    path: '../../packages/typechains/src/abi',
+    path: './abi',
   },
   gasReporter: {
     enabled: true,
