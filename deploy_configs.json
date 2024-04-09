@@ -1,8 +1,0 @@
-{
-    "owner": "0x8E016C3BaD9953f53c1f5EC56F98d243047b5B95",
-    "transferApprover": "0x8E016C3BaD9953f53c1f5EC56F98d243047b5B95",
-    "transferValidatorRequiredSigners": 1,
-    "transferValidatorSigners": [
-        "0x8E016C3BaD9953f53c1f5EC56F98d243047b5B95"
-    ]
-}
