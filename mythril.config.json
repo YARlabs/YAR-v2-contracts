@@ -1,0 +1,11 @@
+{
+  "remappings": ["@openzeppelin/=/workdir/node_modules/@openzeppelin/"],
+  "viaIR": true,
+  "optimizer": {
+    "enabled": true,
+    "runs": 200,
+    "details": {
+      "yul": true
+    }
+  }
+}
