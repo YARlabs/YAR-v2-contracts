@@ -11,7 +11,7 @@ yarn install
 ```shell
 yarn start
 ```
-
+ 
 # Dev environment
 ubuntu 22.04
 sudo apt-get update
