@@ -19,6 +19,8 @@ interface YarHub {
         TxStatus status; // Текущий статус
         uint256 lockedFees; // Сколько было заблокировано с депозита отправителя. Устанавливается после execute
         uint256 usedFees; // Сколько комиссий было израсходовано. Устанавливается после commit
+        bytes32 initialTxHash; // Хэш транзакции инициировавшей перевод в initial сети
+        bytes32 targetTxHash; // Хэш транзакции в target сети
     }
 
     // Одноименный ивент функции
@@ -50,7 +52,8 @@ interface YarHub {
     // Статус новой транзакции - WaitForPay
     // lockedFees - 0
     // usedFees - 0
-    function createTransaction(YarLib.YarTX calldata yarTX) external;
+    // initialTxHash = initialTxHash - хэш транзакции в initial сети
+    function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external;
 
     // Вызывается с адреса relayer
     // Если транзакция до этого не была создана будет ошибка "only WaitForPay!"
@@ -65,14 +68,14 @@ interface YarHub {
     // Требуется указать usedFees - то сколько в итоге можем списать со счета юзера
     // Если usedFees превышает заблокированные средства, то ничего не возвращаем
     // Иначе зачисляет разницу на баланс пользователя
-    function completeTransaction(YarLib.YarTX calldata yarTX, uint256 usedFees) external;
+    function completeTransaction(YarLib.YarTX calldata yarTX, bytes32 targetTxHash, uint256 usedFees) external;
 
     // Вызывается с адреса relayer
     // После ошибки транзакции в target сети, устанавливаем статус в TxStatus.Rejected
     // Требуется указать usedFees - то сколько в итоге можем списать со счета юзера
     // Если usedFees превышает заблокированные средства, то ничего не возвращаем
     // Иначе зачисляет разницу на баланс пользователя
-    function rejectTransaction(YarLib.YarTX calldata yarTX, uint256 usedFees) external
+    function rejectTransaction(YarLib.YarTX calldata yarTX, bytes32 targetTxHash, uint256 usedFees) external
 }
 ```
 

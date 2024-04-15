@@ -82,7 +82,7 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
     }
 
     function _approve(YarLib.YarTX calldata yarTX) internal {
-        approvals[data.sender][data.app][keccak256(abi.encode(yarTX))] = true;
+        approvals[yarTX.sender][yarTX.app][keccak256(abi.encode(yarTX))] = true;
     }
 
     function sendFrom(YarLib.YarTX calldata yarTX) external payable {
