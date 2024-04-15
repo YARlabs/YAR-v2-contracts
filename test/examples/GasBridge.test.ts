@@ -1,11 +1,14 @@
 import { assert, expect } from 'chai'
 import { deployments, ethers, network } from 'hardhat'
 import {
-  YarConnector,
-  YarConnector__factory,
+  YarRequest,
+  YarRequest__factory,
+  YarResponse,
+  YarResponse__factory,
 } from '../../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
+import { YarLib } from '../../typechain-types/contracts/YarRequest'
 
 describe('GasBridge', function () {
   let deployer: SignerWithAddress
@@ -13,8 +16,8 @@ describe('GasBridge', function () {
   let relayer: SignerWithAddress
   let user: SignerWithAddress
   let user2: SignerWithAddress
-  let yarConnector: YarConnector
-  let yarConnectorAddress: string
+  let yarRequest: YarRequest
+  let yarResponse: YarResponse
   let chainId: BigNumberish
 
   let initSnapshot: string
@@ -28,11 +31,14 @@ describe('GasBridge', function () {
     user = signers[3]
     user2 = signers[4]
 
-    yarConnector = YarConnector__factory.connect(
-      (await deployments.get('YarConnector')).address,
+    yarRequest = YarRequest__factory.connect(
+      (await deployments.get('YarRequest')).address,
       ethers.provider,
     )
-    yarConnectorAddress = await yarConnector.getAddress()
+    yarResponse = YarResponse__factory.connect(
+      (await deployments.get('YarResponse')).address,
+      ethers.provider,
+    )
 
     chainId = (await ethers.provider.getNetwork()).chainId
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
@@ -45,8 +51,8 @@ describe('GasBridge', function () {
 
   it('User self native token to other user', async () => {
     // ---  Step 1 ---
-    // Create crossCallData object
-    const crossCallData: YarConnector.CrossCallDataStruct = {
+    // Create yarTX object
+    const yarTX: YarLib.YarTXStruct = {
       initialChainId: chainId,
       sender: user.address,
       app: user.address,
@@ -54,29 +60,37 @@ describe('GasBridge', function () {
       target: user2.address,
       value: ethers.parseEther('0.5'),
       data: '0x',
-      feeAmount: 5n,
+      depositToYarAmount: 5n, // TODO: RENAME
     }
 
     // --- Step 2 ---
-    // Send crossCall request
-    const connectorBalanceBefore = await ethers.provider.getBalance(yarConnectorAddress)
+    // Send send request
+    const relayerBalanceBefore = await ethers.provider.getBalance(relayer.address)
 
     await expect(
-      yarConnector.connect(user).crossCall(crossCallData, { value: crossCallData.feeAmount }),
+      yarRequest
+        .connect(user)
+        .send(yarTX, { value: yarTX.depositToYarAmount }),
     )
-      .to.be.emit(yarConnector, 'CrossCall')
-      .withArgs(Object.values(crossCallData))
+      .to.be.emit(yarRequest, 'Send')
+      .withArgs(Object.values(yarTX))
 
-    const connectorBalanceAfter = await ethers.provider.getBalance(yarConnectorAddress)
-    assert(connectorBalanceAfter == connectorBalanceBefore + BigInt(crossCallData.feeAmount), 'connector not received fees')
+    const relayerBalanceAfter = await ethers.provider.getBalance(relayer.address)
+    assert(
+      relayerBalanceAfter == relayerBalanceBefore + BigInt(yarTX.depositToYarAmount),
+      'connector not received fees',
+    )
 
     // --- Step 3 ---
     // Execute crossCala request
-    const targetBalanceBefore = await ethers.provider.getBalance(crossCallData.target)
+    const targetBalanceBefore = await ethers.provider.getBalance(yarTX.target)
 
-    await yarConnector.connect(relayer).onCrossCall(crossCallData, { value: crossCallData.value })
+    await yarResponse.connect(relayer).onCrossCall(yarTX, { value: yarTX.value })
 
-    const targetBalanceAfter = await ethers.provider.getBalance(crossCallData.target)
-    assert(targetBalanceAfter == targetBalanceBefore + BigInt(crossCallData.value), 'target not received value')
+    const targetBalanceAfter = await ethers.provider.getBalance(yarTX.target)
+    assert(
+      targetBalanceAfter == targetBalanceBefore + BigInt(yarTX.value),
+      'target not received value',
+    )
   })
 })

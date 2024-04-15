@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
-import { YarConnector } from "../YarConnector.sol";
+import { YarRequest } from "../YarRequest.sol";
+import { YarResponse } from "../YarResponse.sol";
+import { YarLib } from "../YarLib.sol";
 
 contract ChatAppMock {
     struct Message {
@@ -13,52 +15,41 @@ contract ChatAppMock {
 
     mapping(address => Message[]) public messages;
 
-    address public yarConnector;
+    address public yarRequest;
+    address public yarResponse;
 
-    constructor(address intialYarConnector) {
-        yarConnector = intialYarConnector;
+    constructor(address intialYarRequest, address intialYarResponse) {
+        yarRequest = intialYarRequest;
+        yarResponse = intialYarResponse;
     }
 
     function messagesLength(address account) external view returns (uint256) {
         return messages[account].length;
     }
 
-    function sendMessage(
-        Message calldata message,
-        YarConnector.CrossCallData calldata crossCallData
-    ) external payable {
+    function sendMessage(Message calldata message, YarLib.YarTX calldata yarTX) public payable {
+        require(msg.sender == yarTX.sender || msg.sender == yarRequest, "yarTX.sender!");
         bytes memory targetTx = abi.encodeWithSelector(
             ChatAppMock.receiveMessage.selector,
             message
         );
-        require(keccak256(crossCallData.data) == keccak256(targetTx), "targetTx!");
+        require(keccak256(yarTX.data) == keccak256(targetTx), "targetTx!");
 
-        YarConnector(yarConnector).crossCallFrom{ value: msg.value }(crossCallData);
+        YarRequest(yarRequest).sendFrom{ value: msg.value }(yarTX);
     }
 
     function sendMessagePermit(
         Message calldata message,
-        YarConnector.CrossCallData calldata crossCallData,
+        YarLib.YarTX calldata yarTX,
         uint256 permitSignatureExpired,
         bytes calldata permitSignature
     ) external payable {
-        bytes memory targetTx = abi.encodeWithSelector(
-            ChatAppMock.receiveMessage.selector,
-            message
-        );
-        require(keccak256(crossCallData.data) == keccak256(targetTx), "targetTx!");
-
-        YarConnector(yarConnector).permit(
-            crossCallData,
-            permitSignatureExpired,
-            permitSignature
-        );
-
-        YarConnector(yarConnector).crossCallFrom{ value: msg.value }(crossCallData);
+        YarRequest(yarRequest).permit(yarTX, permitSignatureExpired, permitSignature);
+        sendMessage(message, yarTX);
     }
 
     function receiveMessage(Message calldata message) external {
-        require(msg.sender == yarConnector, "only yarConnector!");
+        require(msg.sender == yarResponse, "only yarResponse!");
         messages[message.to].push(message);
     }
 }

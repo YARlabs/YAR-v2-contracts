@@ -3,11 +3,14 @@ import { deployments, ethers, network } from 'hardhat'
 import {
   QuizGameMock,
   QuizGameMock__factory,
-  YarConnector,
-  YarConnector__factory,
+  YarRequest,
+  YarRequest__factory,
+  YarResponse,
+  YarResponse__factory,
 } from '../../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
+import { YarLib } from '../../typechain-types/contracts/YarRequest'
 
 describe('QuizGame', function () {
   let deployer: SignerWithAddress
@@ -15,8 +18,8 @@ describe('QuizGame', function () {
   let relayer: SignerWithAddress
   let user: SignerWithAddress
   let user2: SignerWithAddress
-  let yarConnector: YarConnector
-  let yarConnectorAddress: string
+  let yarRequest: YarRequest
+  let yarResponse: YarResponse
   let quizGameMock: QuizGameMock
   let chainId: BigNumberish
 
@@ -31,11 +34,14 @@ describe('QuizGame', function () {
     user = signers[3]
     user2 = signers[4]
 
-    yarConnector = YarConnector__factory.connect(
-      (await deployments.get('YarConnector')).address,
+    yarRequest = YarRequest__factory.connect(
+      (await deployments.get('YarRequest')).address,
       ethers.provider,
     )
-    yarConnectorAddress = await yarConnector.getAddress()
+    yarResponse = YarResponse__factory.connect(
+      (await deployments.get('YarResponse')).address,
+      ethers.provider,
+    )
 
     quizGameMock = QuizGameMock__factory.connect(
       (await deployments.get('QuizGameMock')).address,
@@ -53,8 +59,8 @@ describe('QuizGame', function () {
 
   it('Example', async () => {
     // --- Step 1 ---
-    // Create crossCallData object
-    const crossCallData: YarConnector.CrossCallDataStruct = {
+    // Create yarTX object
+    const yarTX: YarLib.YarTXStruct = {
       initialChainId: chainId,
       sender: user.address,
       app: user.address,
@@ -62,34 +68,34 @@ describe('QuizGame', function () {
       target: await quizGameMock.getAddress(),
       value: await quizGameMock.fee(),
       data: quizGameMock.interface.encodeFunctionData('sendAnswer', [user.address, 'true answer']),
-      feeAmount: 5n,
+      depositToYarAmount: 5n,
     }
 
     // --- Step 2 ---
-    // Send crossCall request
-    const connectorBalanceBefore = await ethers.provider.getBalance(yarConnectorAddress)
+    // Send send request
+    const relayerBalanceBefore = await ethers.provider.getBalance(relayer.address)
 
     await expect(
-      yarConnector.connect(user).crossCall(crossCallData, { value: crossCallData.feeAmount }),
+      yarRequest.connect(user).send(yarTX, { value: yarTX.depositToYarAmount }),
     )
-      .to.be.emit(yarConnector, 'CrossCall')
-      .withArgs(Object.values(crossCallData))
+      .to.be.emit(yarRequest, 'Send')
+      .withArgs(Object.values(yarTX))
 
-    const connectorBalanceAfter = await ethers.provider.getBalance(yarConnectorAddress)
+    const relayerBalanceAfter = await ethers.provider.getBalance(relayer.address)
     assert(
-      connectorBalanceAfter == connectorBalanceBefore + BigInt(crossCallData.feeAmount),
+      relayerBalanceAfter == relayerBalanceBefore + BigInt(yarTX.depositToYarAmount),
       'connector not received fees',
     )
 
     // --- Step 3 ---
-    // Execute crossCall request
+    // Execute send request
     const userBalanceBefore = await ethers.provider.getBalance(user.address)
-    const targetBalanceBefore = await ethers.provider.getBalance(crossCallData.target)
+    const targetBalanceBefore = await ethers.provider.getBalance(yarTX.target)
 
-    await yarConnector.connect(relayer).onCrossCall(crossCallData, { value: crossCallData.value })
+    await yarResponse.connect(relayer).onCrossCall(yarTX, { value: yarTX.value })
 
     const userBalanceAfter = await ethers.provider.getBalance(user.address)
-    const targetBalanceAfter = await ethers.provider.getBalance(crossCallData.target)
+    const targetBalanceAfter = await ethers.provider.getBalance(yarTX.target)
 
     assert(
       userBalanceAfter == userBalanceBefore + (await quizGameMock.rewards()),
@@ -97,7 +103,7 @@ describe('QuizGame', function () {
     )
     assert(
       targetBalanceAfter ==
-        targetBalanceBefore + BigInt(crossCallData.value) - (await quizGameMock.rewards()),
+        targetBalanceBefore + BigInt(yarTX.value) - (await quizGameMock.rewards()),
       'quiz game not recived fees!',
     )
   })

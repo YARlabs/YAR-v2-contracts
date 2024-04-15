@@ -3,11 +3,14 @@ import { deployments, ethers, network } from 'hardhat'
 import {
   ChatAppMock,
   ChatAppMock__factory,
-  YarConnector,
-  YarConnector__factory,
+  YarRequest,
+  YarRequest__factory,
+  YarResponse,
+  YarResponse__factory,
 } from '../../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
+import { YarLib } from '../../typechain-types/contracts/YarRequest'
 
 describe('ChatApp', function () {
   let deployer: SignerWithAddress
@@ -15,8 +18,8 @@ describe('ChatApp', function () {
   let relayer: SignerWithAddress
   let user: SignerWithAddress
   let user2: SignerWithAddress
-  let yarConnector: YarConnector
-  let yarConnectorAddress: string
+  let yarRequest: YarRequest
+  let yarResponse: YarResponse
   let chatAppMock: ChatAppMock
   let chainId: BigNumberish
 
@@ -31,11 +34,14 @@ describe('ChatApp', function () {
     user = signers[3]
     user2 = signers[4]
 
-    yarConnector = YarConnector__factory.connect(
-      (await deployments.get('YarConnector')).address,
+    yarRequest = YarRequest__factory.connect(
+      (await deployments.get('YarRequest')).address,
       ethers.provider,
     )
-    yarConnectorAddress = await yarConnector.getAddress()
+    yarResponse = YarResponse__factory.connect(
+      (await deployments.get('YarResponse')).address,
+      ethers.provider,
+    )
 
     chatAppMock = ChatAppMock__factory.connect(
       (await deployments.get('ChatAppMock')).address,
@@ -63,8 +69,8 @@ describe('ChatApp', function () {
     }
 
     // --- Step 2 ---
-    // Create crossCallData object
-    const crossCallData: YarConnector.CrossCallDataStruct = {
+    // Create yarTX object
+    const yarTX: YarLib.YarTXStruct = {
       initialChainId: chainId,
       sender: user.address,
       app: await chatAppMock.getAddress(),
@@ -72,26 +78,26 @@ describe('ChatApp', function () {
       target: await chatAppMock.getAddress(),
       value: 0n,
       data: chatAppMock.interface.encodeFunctionData('receiveMessage', [message]),
-      feeAmount: 5n,
+      depositToYarAmount: 5n,
     }
 
     // --- Step 3 ---
     // Send message
 
-    await yarConnector.connect(user).approveCrossCall(crossCallData)
+    await yarRequest.connect(user).approve(yarTX)
 
     await expect(
       chatAppMock
         .connect(user)
-        .sendMessage(message, crossCallData, { value: crossCallData.feeAmount }),
+        .sendMessage(message, yarTX, { value: yarTX.depositToYarAmount }),
     )
-      .to.emit(yarConnector, 'CrossCall')
-      .withArgs(Object.values(crossCallData))
+      .to.emit(yarRequest, 'Send')
+      .withArgs(Object.values(yarTX))
 
     // --- Step 4 ---
-    // Execute crossCall request
+    // Execute send request
 
-    await yarConnector.connect(relayer).onCrossCall(crossCallData, { value: crossCallData.value })
+    await yarResponse.connect(relayer).onCrossCall(yarTX, { value: yarTX.value })
 
     assert((await chatAppMock.messagesLength(message.to)) > 0, 'message not received')
   })
@@ -107,8 +113,8 @@ describe('ChatApp', function () {
     }
 
     // --- Step 2 ---
-    // Create crossCallData object
-    const crossCallData: YarConnector.CrossCallDataStruct = {
+    // Create yarTX object
+    const yarTX: YarLib.YarTXStruct = {
       initialChainId: chainId,
       sender: user.address,
       app: await chatAppMock.getAddress(),
@@ -116,7 +122,7 @@ describe('ChatApp', function () {
       target: await chatAppMock.getAddress(),
       value: 0n,
       data: chatAppMock.interface.encodeFunctionData('receiveMessage', [message]),
-      feeAmount: 5n,
+      depositToYarAmount: 5n,
     }
 
     // --- Step 3 ---
@@ -126,25 +132,25 @@ describe('ChatApp', function () {
     const signature = await signPermit(
       user,
       chainId,
-      await yarConnector.getAddress(),
+      await yarRequest.getAddress(),
       signatureExpired,
-      crossCallData,
+      yarTX,
     )
 
     await expect(
       chatAppMock
         .connect(user)
-        .sendMessagePermit(message, crossCallData, signatureExpired, signature, {
-          value: crossCallData.feeAmount,
+        .sendMessagePermit(message, yarTX, signatureExpired, signature, {
+          value: yarTX.depositToYarAmount,
         }),
     )
-      .to.emit(yarConnector, 'CrossCall')
-      .withArgs(Object.values(crossCallData))
+      .to.emit(yarRequest, 'Send')
+      .withArgs(Object.values(yarTX))
 
     // --- Step 4 ---
-    // Execute crossCall request
+    // Execute send request
 
-    await yarConnector.connect(relayer).onCrossCall(crossCallData, { value: crossCallData.value })
+    await yarResponse.connect(relayer).onCrossCall(yarTX, { value: yarTX.value })
 
     assert((await chatAppMock.messagesLength(message.to)) > 0, 'message not received')
   })
@@ -160,8 +166,8 @@ describe('ChatApp', function () {
     }
 
     // --- Step 2 ---
-    // Create crossCallData object
-    const crossCallData: YarConnector.CrossCallDataStruct = {
+    // Create yarTX object
+    const yarTX: YarLib.YarTXStruct = {
       initialChainId: chainId,
       sender: user.address,
       app: await chatAppMock.getAddress(),
@@ -169,30 +175,30 @@ describe('ChatApp', function () {
       target: await chatAppMock.getAddress(),
       value: 0n,
       data: chatAppMock.interface.encodeFunctionData('receiveMessage', [message]),
-      feeAmount: 5n,
+      depositToYarAmount: 5n,
     }
 
     // --- Step 3 ---
     // Send message
 
     await expect(
-      yarConnector
+      yarRequest
         .connect(user)
-        .crossCallGateway(
-          chatAppMock.interface.encodeFunctionData('sendMessage', [message, crossCallData]),
-          crossCallData,
+        .approveAndCallApp(
+          chatAppMock.interface.encodeFunctionData('sendMessage', [message, yarTX]),
+          yarTX,
           {
-            value: crossCallData.feeAmount,
+            value: yarTX.depositToYarAmount,
           },
         ),
     )
-      .to.emit(yarConnector, 'CrossCall')
-      .withArgs(Object.values(crossCallData))
+      .to.emit(yarRequest, 'Send')
+      .withArgs(Object.values(yarTX))
 
     // --- Step 4 ---
-    // Execute crossCall request
+    // Execute send request
 
-    await yarConnector.connect(relayer).onCrossCall(crossCallData, { value: crossCallData.value })
+    await yarResponse.connect(relayer).onCrossCall(yarTX, { value: yarTX.value })
 
     assert((await chatAppMock.messagesLength(message.to)) > 0, 'message not received')
   })
@@ -203,10 +209,10 @@ async function signPermit(
   chainId: BigNumberish,
   yarConnector: string,
   signatureExpired: BigNumberish,
-  crossCallData: YarConnector.CrossCallDataStruct,
+  yarTX: YarLib.YarTXStruct,
 ): Promise<string> {
   const domain = {
-    name: 'YarConnector',
+    name: 'YarRequest',
     version: '1',
     chainId: chainId,
     verifyingContract: yarConnector,
@@ -215,9 +221,9 @@ async function signPermit(
     Permit: [
       { name: 'nonce', type: 'uint256' },
       { name: 'signatureExpired', type: 'uint256' },
-      { name: 'crossCallData', type: 'CrossCallData' },
+      { name: 'yarTX', type: 'YarTX' },
     ],
-    CrossCallData: [
+    YarTX: [
       { name: 'initialChainId', type: 'uint256' },
       { name: 'sender', type: 'address' },
       { name: 'app', type: 'address' },
@@ -225,13 +231,13 @@ async function signPermit(
       { name: 'target', type: 'address' },
       { name: 'value', type: 'uint256' },
       { name: 'data', type: 'bytes' },
-      { name: 'feeAmount', type: 'uint256' },
+      { name: 'depositToYarAmount', type: 'uint256' },
     ],
   }
   const permit = {
     nonce: 0,
     signatureExpired,
-    crossCallData: crossCallData,
+    yarTX: yarTX,
   }
   return await signer.signTypedData(domain, types, permit)
 }

@@ -8,20 +8,19 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const signers = await ethers.getSigners()
   const deployer = signers[0]
   const relayer = signers[1]
-  const feeOracle = signers[2]
 
-  const alreadyDeployed = (await getOrNull('YarConnector')) != null
+  const alreadyDeployed = (await getOrNull('YarRequest')) != null
   if (alreadyDeployed) return
 
-  const YarForwarderDeployments = await get('YarForwarder')
+  const YarMetaForwarderDeployments = await get('YarMetaForwarder')
 
-  const deployment = await deploy('YarConnector', {
-    contract: 'YarConnector',
+  const deployment = await deploy('YarRequest', {
+    contract: 'YarRequest',
     from: deployer.address,
-    args: [YarForwarderDeployments.address, relayer.address, feeOracle.address, ethers.ZeroAddress],
+    args: [YarMetaForwarderDeployments.address, relayer.address, ethers.ZeroAddress],
   })
 }
 
-deploy.tags = ['any_chain', 'YarConnector']
-deploy.dependencies = ['YarForwader']
+deploy.tags = ['any_chain', 'YarRequest']
+deploy.dependencies = ['YarMetaForwarder']
 export default deploy

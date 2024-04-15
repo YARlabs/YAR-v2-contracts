@@ -2,83 +2,87 @@
 pragma solidity 0.8.20;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { YarLib } from "./YarLib.sol";
 
 contract YarHub {
     address public relayer;
-    enum TransactionStatus {
-        // WaitFees,
-        Pending,
+
+    enum TxStatus {
+        NotExists,
+        WaitForPay,
+        InProgress,
         Completed,
         Rejected
     }
 
-    struct Transaction {
-        address peer;
-        uint256 initialChainId;
-        uint256 targetChainId;
-        address target;
-        bytes data;
-        TransactionStatus status;
+    struct WrappedYarTX {
+        YarLib.YarTX yarTx;
+        TxStatus status;
+        uint256 lockedFees;
+        uint256 usedFees;
     }
 
-    event AddPendingTransaction(
-        uint256 transactionIndex,
-        address peer,
-        uint256 initialChainId,
-        uint256 targetChainId,
-        address target,
-        bytes data
-    );
+    mapping(bytes32 yarTxHash => WrappedYarTX hubTx) public wrappedYarTXs;
 
-    event UpdateTransactionStatus(uint256 transactionIndex, TransactionStatus status);
-    // event DepositFees(address depositor, uint256 amount);
 
-    Transaction[] public transactions;
+    event CreateTransaction(YarLib.YarTX yarTx); 
 
-    mapping(address account => uint256 amount) public feeBalance;
+    event ExecuteTransaction(YarLib.YarTX yarTx); 
+
+    event CommitTransaction(YarLib.YarTX yarTx, TxStatus status, uint256 usedFees, uint256 feesToReturn); 
+
+    event Deposit(address account, uint256 amount);
 
     constructor(address initialRelayer) {
         relayer = initialRelayer;
     }
 
-    // function depositFees(address depositor, uint256 amount) external {
-    //     require(msg.sender == relayer, "only realayer!");
-    //     feeBalance[depositor] += amount;
-    //     emit DepositFees(depositor, amount);
-    // }
+    mapping(address account => uint256 feeTokenAmount) public deposits;
 
-    function addTransaction(
-        address peer,
-        uint256 initialChainId,
-        uint256 targetChainId,
-        address target,
-        bytes calldata data
-    ) external {
-        require(msg.sender == relayer, "only realayer!");
-        uint256 transactionIndex = transactions.length;
-        transactions.push(
-            Transaction(
-                peer,
-                initialChainId,
-                targetChainId,
-                target,
-                data,
-                TransactionStatus.Pending
-            )
-        );
-        emit AddPendingTransaction(
-            transactionIndex,
-            peer,
-            initialChainId,
-            targetChainId,
-            target,
-            data
-        );
+    function deposit(address account, uint256 feeTokenAmount) external {
+        require(msg.sender == relayer, "only relayer!");
+        deposits[account] += feeTokenAmount;
+        emit Deposit(account, feeTokenAmount);
     }
 
-    function setTransactionStatus(uint256 transactionIndex, TransactionStatus status) external {
-        require(msg.sender == relayer, "only realayer!");
-        transactions[transactionIndex].status = status;
-        emit UpdateTransactionStatus(transactionIndex, status);
+    function createTransaction(YarLib.YarTX calldata yarTX) external {
+        require(msg.sender == relayer, "only relayer!");
+        bytes32 yarTxHash = keccak256(abi.encode(yarTX));
+        wrappedYarTXs[yarTxHash] = WrappedYarTX(yarTX, TxStatus.WaitForPay, 0, 0);
+        emit CreateTransaction(yarTX);
+    }
+
+    function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external {
+        require(msg.sender == relayer, "only relayer!");
+        bytes32 yarTxHash = keccak256(abi.encode(yarTX));
+        require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, "only WaitForPay!");
+        require(deposits[yarTX.sender] >= feeTokensToLock, "feeTokensToLock!");
+        wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;
+        wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;
+
+        emit ExecuteTransaction(yarTX);
+    }
+
+    function completeTransaction(YarLib.YarTX calldata yarTX, uint256 usedFees) external {
+        _commitTransaction(yarTX, TxStatus.Completed, usedFees);
+    }
+
+    function rejectTransaction(YarLib.YarTX calldata yarTX, uint256 usedFees) external {
+        _commitTransaction(yarTX, TxStatus.Rejected, usedFees);
+    }
+
+    function _commitTransaction(YarLib.YarTX calldata yarTX, TxStatus status, uint256 usedFees) internal {
+        require(msg.sender == relayer, "only relayer!");
+        bytes32 yarTxHash = keccak256(abi.encode(yarTX));
+        require(wrappedYarTXs[yarTxHash].status == TxStatus.InProgress, "only on progress can updated!");
+
+        wrappedYarTXs[yarTxHash].status = status;
+        wrappedYarTXs[yarTxHash].usedFees = usedFees;
+
+        uint256 lockedFees = wrappedYarTXs[yarTxHash].lockedFees;
+        uint256 feesToReturn = lockedFees > usedFees ? lockedFees - usedFees : 0;
+        deposits[yarTX.sender] += feesToReturn;
+
+        emit CommitTransaction(yarTX, status, usedFees, feesToReturn);
     }
 }

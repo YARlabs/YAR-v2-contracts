@@ -13,15 +13,16 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const alreadyDeployed = (await getOrNull('ChatAppMock')) != null
   if (alreadyDeployed) return
 
-  const YarConnectorDeployments = await get('YarConnector')
+  const YarRequestDeployments = await get('YarRequest')
+  const YarResponseDeployments = await get('YarResponse')
 
   const deployment = await deploy('ChatAppMock', {
     contract: 'ChatAppMock',
     from: deployer.address,
-    args: [YarConnectorDeployments.address],
+    args: [YarRequestDeployments.address, YarResponseDeployments.address],
   })
 }
 
 deploy.tags = ['mock', 'ChatAppMock']
-deploy.dependencies = ['QuizGameMock', 'YarConnector']
+deploy.dependencies = ['QuizGameMock', 'YarRequest', 'YarResponse']
 export default deploy
