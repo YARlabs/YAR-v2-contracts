@@ -13,13 +13,13 @@ contract YarResponse {
         relayer = intialRelayer;
     }
 
-    function onCrossCall(YarLib.YarTX calldata data) external payable {
+    function deliver(YarLib.YarTX calldata yarTx) external payable {
         require(msg.sender == relayer, "only relayer!");
-        require(data.value == msg.value, "msg.value!");
+        require(yarTx.value == msg.value, "msg.value!");
 
-        trustedYarTx = data;
+        trustedYarTx = yarTx;
 
-        (bool success, bytes memory result) = data.target.call{ value: data.value }(data.data);
+        (bool success, bytes memory result) = yarTx.target.call{ value: yarTx.value }(yarTx.data);
         if (success == false) {
             assembly {
                 revert(add(result, 32), mload(result))

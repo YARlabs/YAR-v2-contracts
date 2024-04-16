@@ -1,3 +1,24 @@
+# YarLib
+
+Вспомогательная библиотека, хранящая общий код.
+используется в YarRequest, YarResponse, YarHub. Может использоваться сторонними приложениями
+
+```solidity
+library YarLib {
+    // Модель со всеми данными кросс-чейн транзакции
+    struct YarTX {
+        uint256 initialChainId; // сеть отправки
+        address sender; // кто платит комиссию в YarHub
+        address app; // Кто отправил запрос в YarRequest
+        uint256 targetChainId; // сеть доставки
+        address target; // Адрес по которому будет передано [value] и выполнена [data]
+        uint256 value; // Сколько нативных токенов отправить на адрес [target]
+        bytes data; // 0x или закодированный вызов функции
+        uint256 depositToYarAmount; // Сколько комиссий было отправленно вместе с транзакцией, может быть 0, если у пользователя уже был депозит
+    }
+}
+```
+
 # YarRequest
 
 Развернут в каждой сети, в том числе и в YarChain
@@ -62,6 +83,25 @@ interface YarRequest {
     // Отправляет кросс-чейн транзакцию
     // Где msg.sender == yarTX.sender == yarTx.app
     function send(YarLib.YarTX calldata yarTX) external payable;
+}
+```
+
+# YarResponse
+
+Развернут в каждой сети, в том числе и в YarChain
+
+```solidity
+interface YarResponse {
+    // Адрес мультисиг кошелька, на который будут переводиться средства в счет оплаты депозита
+    function relayer() external view returns(address);
+
+    // Геттер в котором временно сохраняется текущая исполняемая транзакция
+    // Он устанавливается до вызова target, и очищается после
+    function trustedYarTx() external view returns(YarLib.YarTX);
+
+    // Вызывается только с адреса [relayer]
+    // Доставка транзакции в target сети
+    function deliver(YarLib.YarTX calldata yarTx) external payable;
 }
 ```
 
