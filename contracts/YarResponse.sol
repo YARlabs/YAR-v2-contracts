@@ -7,7 +7,7 @@ contract YarResponse {
 
     address public relayer;
 
-    YarLib.YarTX public trustedCrossCallData;
+    YarLib.YarTX public trustedYarTx;
 
     constructor(address intialRelayer) {
         relayer = intialRelayer;
@@ -17,7 +17,7 @@ contract YarResponse {
         require(msg.sender == relayer, "only relayer!");
         require(data.value == msg.value, "msg.value!");
 
-        trustedCrossCallData = data;
+        trustedYarTx = data;
 
         (bool success, bytes memory result) = data.target.call{ value: data.value }(data.data);
         if (success == false) {
@@ -26,6 +26,6 @@ contract YarResponse {
             }
         }
 
-        delete trustedCrossCallData;
+        delete trustedYarTx;
     }
 }

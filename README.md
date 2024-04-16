@@ -1,3 +1,70 @@
+# YarRequest
+
+Развернут в каждой сети, в том числе и в YarChain
+
+```solidity
+interface YarRequest {
+    // Событие на основании которого ожидающая транзакция добавляется в YarHub
+    event Send(
+        YarLib.YarTX yarTx // Модель кросс-чейн транзакции
+    );
+
+    // Событие на основании которого зачисляется баланс для опалаты коммисий на счет [depositor] в YarHub
+    event Deposit(
+        address depositor, // Кому зачислить
+        address feesToken, // Токен оплаты в initial сети
+        uint256 amount // количество feesToken принятых в качестве оплаты
+    );
+
+    // Адрес мультисиг кошелька, на который будут переводиться средства в счет оплаты депозита
+    function relayer() external view returns(address);
+
+    // Токен принимаемый в качестве оплаты комиссий
+    // Если feeToken == address(0), то это нативный токен текущей сети
+    function feeToken() external view returns(address);
+
+    // Проверяет разрешил ли [sender], отправить транзакцию [yarTxHash] с адреса [app]
+    function approvals(
+        address sender, // Кто оплатит комиссию
+        address app, // Кто инициурет транзакцию
+        bytes32 yarTxHash // Хэш получаемый из YarLib.YarTX
+    ) external view returns(bool);
+
+    // Используется для пополнения депозита в YarHub
+    // Оплата производиться в текущем feeToken
+    function deposit(
+        address account, // На чей счет зачислить
+        uint256 amount // Сколько feeToken было принято в initial сети
+    ) external payable;
+
+    // Эта функция позволяет за одну транзакцию
+    // Выдать approve и вызвать приложение которое
+    // Сможет от имени пользователя совершить кросс-чейн транзакцию 
+    function approveAndCallApp(
+        bytes calldata appData, // Закодированный вызов функции, который будет выполнен по адресу yarTX.app
+        YarLib.YarTX calldata yarTX // Кросс-чейн транзакция на которую будет выдано разрешение, от yarTX.sender к yarTX.app
+    ) external payable;
+
+    // Разрешает приложению [yarTX.app] отправить транзакцию [yarTX], которую оплатит [yarTX.sender] 
+    function approve(YarLib.YarTX calldata yarTX) external;
+
+    // Отправить кроссчейн транзакцию с адреса [yarTx.app], которую оплатит [yarTx.sender]
+    function sendFrom(YarLib.YarTX calldata yarTX) external payable;
+
+    // Вызывает _approve, если
+    // signature соответствует подписи [yarTX.sender]
+    function permit(
+        YarLib.YarTX calldata yarTX,
+        uint256 signatureExpired,
+        bytes calldata signature
+    ) external;
+
+    // Отправляет кросс-чейн транзакцию
+    // Где msg.sender == yarTX.sender == yarTx.app
+    function send(YarLib.YarTX calldata yarTX) external payable;
+}
+```
+
 # YarHub
 
 Развернут только в сети YAR.
@@ -62,7 +129,7 @@ interface YarHub {
     // Если удалось списать депозит, излучает ивент ExecuteTransaction,
     // На основании которого транзакция должна быть доставлена в target сеть
     function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external;
-    
+
     // Вызывается с адреса relayer
     // После совершения успешной транзакции в target сети, устанавливаем статус в TxStatus.Completed
     // Требуется указать usedFees - то сколько в итоге можем списать со счета юзера
@@ -82,7 +149,7 @@ interface YarHub {
 Базовый алгоритм:
 
 YarRequest -> emit Deposit(address depositor, address feesToken, uint256 amount)
-           -> emit Send(YarLib.YarTX yarTx)
+-> emit Send(YarLib.YarTX yarTx)
 
 Relayer's в первую очередь должны обработать депозиты, выполнив перерасчет feesToken и amount, к feeTokenAmount сети Yar
 После чего отправить транзакции:
@@ -95,8 +162,8 @@ YarHub.connect(relayer).createTransaction(yarTx)
 Затем повторно расчитывается требуемо число комиссий, но уже для токенов Yar, и передается в качестве feeTokensToLock
 YarHub.connect(relayer).executeTransaction(yarTx, feeTokensToLock)
 
-Если средств у пользователя было достаточно, сработает событие 
-           -> emit ExecuteTransaction(YarLib.YarTX yarTx)
+Если средств у пользователя было достаточно, сработает событие
+-> emit ExecuteTransaction(YarLib.YarTX yarTx)
 На основании которого транзакцию можно доставлять в target сеть
 Но если средств не достаточно, то транзакция завершится ошибкой "feeTokensToLock!"
 
@@ -106,7 +173,6 @@ YarHub.connect(relayer).executeTransaction(yarTx, feeTokensToLock)
 YarHub.connect(relayer).completeTransaction(yarTx, usedFees)
 или
 YarHub.connect(relayer).rejectTransaction(yarTx, usedFees)
-
 
 # Run UI
 

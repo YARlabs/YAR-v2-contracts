@@ -27,10 +27,9 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
     bytes32 private constant CROSS_CALL_DATA_TYPEHASH =
         keccak256(abi.encodePacked(CROSS_CALL_DATA_TYPE));
 
-    mapping(address sender => mapping(address app => mapping(bytes32 crossCallDataHash => bool approved)))
+    mapping(address sender => mapping(address app => mapping(bytes32 yarTxHash => bool approved)))
         public approvals;
 
-    YarLib.YarTX public trustedCrossCallData;
 
     event Send(YarLib.YarTX yarTx);
 
@@ -45,7 +44,7 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
         feeToken = initailFeeToken;
     }
 
-    function deposit(uint256 amount) public payable {
+    function deposit(address account, uint256 amount) public payable {
         if (feeToken == address(0)) {
             require(msg.value == amount, "amount!");
             (bool success, bytes memory result) = relayer.call{ value: amount }("");
@@ -55,9 +54,9 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
                 }
             }
         } else {
-            IERC20(feeToken).safeTransferFrom(_msgSender(), relayer, amount);
+            IERC20(feeToken).safeTransferFrom(account, relayer, amount);
         }
-        emit Deposit(_msgSender(), feeToken, amount);
+        emit Deposit(account, feeToken, amount);
     }
 
     function approveAndCallApp(
@@ -91,9 +90,9 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
 
         require(app == _msgSender(), "app != _msgSender()");
 
-        bytes32 crossCallDataHash = keccak256(abi.encode(yarTX));
-        require(approvals[sender][app][crossCallDataHash], "not approved!");
-        delete approvals[sender][app][crossCallDataHash];
+        bytes32 yarTxHash = keccak256(abi.encode(yarTX));
+        require(approvals[sender][app][yarTxHash], "not approved!");
+        delete approvals[sender][app][yarTxHash];
 
         _send(yarTX);
     }
@@ -150,7 +149,7 @@ contract YarRequest is EIP712, Nonces, ERC2771Context, ReentrancyGuard {
         require(yarTX.targetChainId != block.chainid, "targetChainId!");
 
         if (yarTX.depositToYarAmount > 0) {
-            deposit(yarTX.depositToYarAmount);
+            deposit(yarTX.sender, yarTX.depositToYarAmount);
         }
         emit Send(yarTX);
     }
