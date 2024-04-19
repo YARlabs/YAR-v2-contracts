@@ -40,22 +40,10 @@ contract YarHub {
 
     event Deposit(address account, uint256 amount);
 
-    mapping(address account => mapping(uint256 chainId => mapping(address app => uint256 amount)))
+    event Approve(address account, uint256 intiailChainId, address spender, uint256 amount);
+
+    mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
         public allowance;
-
-    function approveDepositFromOtherChain(uint256 intiailChainId, address spender, uint256 amount) external {
-        require(msg.sender == yarResponse, "only yarResponse!");
-        YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
-        _approveDeposit(trustedYarTx.sender, intiailChainId, spender, amount);
-    }
-
-    function approveDeposit(uint256 intiailChainId, address app, uint256 amount) external {
-        _approveDeposit(msg.sender, intiailChainId, app, amount);
-    }
-
-    function _approveDeposit(address account, uint256 intiailChainId, address app, uint256 amount) internal {
-        allowance[account][intiailChainId][app] = amount;
-    }
 
     address public yarResponse;
 
@@ -70,6 +58,17 @@ contract YarHub {
         require(msg.sender == relayer, "only relayer!");
         deposits[account] += feeTokenAmount;
         emit Deposit(account, feeTokenAmount);
+    }
+
+    function approve(
+        address account,
+        uint256 intiailChainId,
+        address spender,
+        uint256 amount
+    ) external {
+        require(msg.sender == relayer, "only relayer!");
+        allowance[account][intiailChainId][spender] = amount;
+        emit Approve(account, intiailChainId, spender, amount);
     }
 
     function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external {
@@ -91,7 +90,10 @@ contract YarHub {
         bytes32 yarTxHash = keccak256(abi.encode(yarTX));
         require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, "only WaitForPay!");
         require(deposits[yarTX.payer] >= feeTokensToLock, "feeTokensToLock!");
-        require(allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock, "deposit allowance!");
+        require(
+            allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock,
+            "deposit allowance!"
+        );
         deposits[yarTX.payer] -= feeTokensToLock;
         allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] -= feeTokensToLock;
         wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;

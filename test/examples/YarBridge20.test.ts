@@ -118,11 +118,32 @@ describe('YarBridge20', function () {
     // [4] STEP №4
     // Что бы приложение могло указать пользователя в качестве плательщика комиссии
     // Пользователь должен разрешить приложению списывать баланс
-    const approveAmount = ethers.MaxUint256 // сумма которую разрешаем списывать
-    await yarHub
-      .connect(user)
-      .approveDeposit(chainId, await yarBridge20.getAddress(), ethers.MaxUint256)
 
+    const approveAmount = ethers.MaxUint256 // сумма которую разрешаем списывать
+
+    // Запрос на разрешение отправляется из intial сети в yarRequest
+    const txApprove = yarRequest
+      .connect(user)
+      .approve(await yarBridge20.getAddress(), ethers.MaxUint256)
+
+    // Только для тестов
+    // Проверяем получение ивента Approve
+    await expect(txApprove)
+      .to.emit(yarRequest, 'Approve')
+      .withArgs(user.address, chainId, await yarBridge20.getAddress(), approveAmount)
+
+    // После получения ивента Approve
+    // Relayers вызывает транзакцию approve в yarHub
+    const txApproveYarHub = yarHub
+      .connect(relayer)
+      .approve(user.address, chainId, await yarBridge20.getAddress(), approveAmount)
+
+    // Только для тестов
+    // Проверяем получение ивента Approve в yarHub
+    await expect(txApproveYarHub)
+      .to.emit(yarHub, 'Approve')
+      .withArgs(user.address, chainId, await yarBridge20.getAddress(), approveAmount)
+    
     // Только для тестов
     // Проверяем средства разрешены к списанию
     assert(

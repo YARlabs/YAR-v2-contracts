@@ -36,6 +36,8 @@ contract YarRequest
 
     event Deposit(address depositor, address feesToken, uint256 amount);
 
+    event Approve(address account, uint256 initialChainId, address spender, uint256 amount);
+
     constructor(
         // address intialYarForwarder,
         address intialRelayer,
@@ -60,6 +62,10 @@ contract YarRequest
             IERC20(feeToken).safeTransferFrom(msg.sender, relayer, amount);
         }
         emit Deposit(msg.sender, feeToken, amount);
+    }
+
+    function approve(address spender, uint256 amount) public payable {
+        emit Approve(msg.sender, block.chainid, spender, amount);
     }
 
     // function approveAndCallApp(
