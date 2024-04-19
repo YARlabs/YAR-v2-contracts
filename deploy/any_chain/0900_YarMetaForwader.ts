@@ -5,6 +5,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { ethers, deployments } = hre
   const { deploy, get, getOrNull } = deployments
 
+  return
+
   const alreadyDeployed = (await getOrNull('YarMetaForwarder')) != null
   if (alreadyDeployed) return
 

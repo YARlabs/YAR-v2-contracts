@@ -12,7 +12,7 @@ import {Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.
  * https://eips.ethereum.org/EIPS/eip-1967[EIP1967], so that it doesn't conflict with the storage layout of the
  * implementation behind the proxy.
  */
-contract ERC1967ProxyInitializable is Proxy, Initializable {
+contract ERC1967ProxyInitializable is Proxy {
     /**
      * @dev Initializes the upgradeable proxy with an initial implementation specified by `implementation`.
      *
@@ -23,7 +23,12 @@ contract ERC1967ProxyInitializable is Proxy, Initializable {
      *
      * - If `data` is empty, `msg.value` must be zero.
      */
-    function initialize(address implementation, bytes memory _data) public initializer {
+
+    bool alreadyInit;
+
+    function init(address implementation, bytes memory _data) public {
+        require(alreadyInit == false, "alreadyInit!");
+        alreadyInit = true;
         ERC1967Utils.upgradeToAndCall(implementation, _data);
     }
 

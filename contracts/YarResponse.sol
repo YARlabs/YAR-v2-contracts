@@ -4,10 +4,13 @@ pragma solidity 0.8.20;
 import { YarLib } from "./YarLib.sol";
 
 contract YarResponse {
-
     address public relayer;
 
-    YarLib.YarTX public trustedYarTx;
+    YarLib.YarTX internal _trustedYarTx;
+
+    function trustedYarTx() external view returns (YarLib.YarTX memory) {
+        return _trustedYarTx;
+    }
 
     constructor(address intialRelayer) {
         relayer = intialRelayer;
@@ -17,7 +20,7 @@ contract YarResponse {
         require(msg.sender == relayer, "only relayer!");
         require(yarTx.value == msg.value, "msg.value!");
 
-        trustedYarTx = yarTx;
+        _trustedYarTx = yarTx;
 
         (bool success, bytes memory result) = yarTx.target.call{ value: yarTx.value }(yarTx.data);
         if (success == false) {
@@ -26,6 +29,6 @@ contract YarResponse {
             }
         }
 
-        delete trustedYarTx;
+        delete _trustedYarTx;
     }
 }

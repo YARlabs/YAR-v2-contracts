@@ -5,27 +5,27 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { ethers, deployments } = hre
   const { deploy, get, getOrNull } = deployments
 
-  return
-
   const signers = await ethers.getSigners()
   const deployer = signers[0]
   const relayer = signers[1]
-  const feeOracle = signers[2]
 
-  const alreadyDeployed = (await getOrNull('QuizGameMock')) != null
+  
+  const YarRequestDeployments = await get('YarRequest')
+  const YarResponseDeployments = await get('YarResponse')
+
+  const alreadyDeployed = (await getOrNull('YarBridge20Mock')) != null
   if (alreadyDeployed) return
 
-
-  const deployment = await deploy('QuizGameMock', {
-    contract: 'QuizGameMock',
+  await deploy('YarBridge20Mock', {
+    contract: 'YarBridge20Mock',
     from: deployer.address,
     args: [
-      ethers.solidityPackedKeccak256(['string'], ['true answer']),
-      ethers.parseEther('1')
+      YarRequestDeployments.address,
+      YarResponseDeployments.address
     ],
-    value: ethers.parseEther('1').toString()
   })
 }
 
-deploy.tags = ['mock', 'QuizGameMock']
+deploy.tags = ['any_chain', 'YarBridge20Mock']
+deploy.dependencies = ['YarResponse']
 export default deploy

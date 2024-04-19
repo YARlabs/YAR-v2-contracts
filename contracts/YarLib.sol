@@ -5,11 +5,10 @@ library YarLib {
     struct YarTX {
         uint256 initialChainId;
         address sender;
-        address app;
+        address payer;
         uint256 targetChainId;
         address target;
         uint256 value;
         bytes data;
-        uint256 depositToYarAmount;
     }
 }

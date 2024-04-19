@@ -5,6 +5,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { ethers, deployments } = hre
   const { deploy, get, getOrNull } = deployments
 
+  return
+
   const signers = await ethers.getSigners()
   const deployer = signers[0]
   const relayer = signers[1]
@@ -24,5 +26,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 }
 
 deploy.tags = ['mock', 'ChatAppMock']
-deploy.dependencies = ['QuizGameMock', 'YarRequest', 'YarResponse']
+// deploy.dependencies = ['QuizGameMock', 'YarRequest', 'YarResponse']
 export default deploy
