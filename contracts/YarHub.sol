@@ -45,11 +45,9 @@ contract YarHub {
     mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
         public allowance;
 
-    address public yarResponse;
 
-    constructor(address initialRelayer, address intiailYarResponse) {
+    constructor(address initialRelayer) {
         relayer = initialRelayer;
-        yarResponse = intiailYarResponse;
     }
 
     mapping(address account => uint256 feeTokenAmount) public deposits;

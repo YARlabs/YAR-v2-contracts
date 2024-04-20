@@ -35,6 +35,11 @@ contract YarBridge20 {
         peers[newChainId] = newPeer;
     }
 
+    function getPeer(uint256 _chainId) public view returns(address) {
+        address peer = peers[_chainId];
+        return peer == address(0) ? address(this) : peer;
+    }
+
     constructor(
         string memory initialNativeName,
         string memory initialNativeSymbol,
@@ -49,7 +54,7 @@ contract YarBridge20 {
         yarResponse = intialYarResponse;
         issuedTokenImplementation = address(new IssuedEIP20());
         chainId = block.chainid;
-        owner = msg.sender;
+        owner = tx.origin;
     }
 
     function deployFrom(
@@ -97,7 +102,7 @@ contract YarBridge20 {
                 address(this),
                 msg.sender,
                 targetChainId,
-                peers[targetChainId],
+                getPeer(targetChainId),
                 0,
                 abi.encodeWithSelector(
                     YarBridge20.deployFrom.selector,
@@ -119,7 +124,7 @@ contract YarBridge20 {
     ) external {
         require(msg.sender == yarResponse, "only yarResponse!");
         YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
-        require(peers[trustedYarTx.initialChainId] == trustedYarTx.sender, "not peer!");
+        require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
         if (originalChainId == chainId) {
             if (originalToken == address(0)) {
                 (bool success, bytes memory result) = recipient.call{ value: amount }("");
@@ -173,7 +178,7 @@ contract YarBridge20 {
             address(this),
             msg.sender,
             targetChainId,
-            peers[targetChainId],
+            getPeer(targetChainId),
             0,
             targetTx
         );

@@ -9,19 +9,16 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployer = signers[0]
   const relayer = signers[1]
 
-  
-  const YarResponseDeployments = await get('YarResponse')
 
   const deployment = await deploy('YarHub', {
     contract: 'YarHub',
+    deterministicDeployment: ethers.encodeBytes32String('YarHub'),
     from: deployer.address,
     args: [
-      relayer.address,
-      YarResponseDeployments.address
+      relayer.address
     ]
   })
 }
 
 deploy.tags = ['only_yar_chain','YarHub']
-deploy.dependencies = ['YarResponse']
 export default deploy

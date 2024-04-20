@@ -14,6 +14,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('YarResponse', {
     contract: 'YarResponse',
+    deterministicDeployment: ethers.encodeBytes32String('YarResponse'),
     from: deployer.address,
     args: [relayer.address],
   })
