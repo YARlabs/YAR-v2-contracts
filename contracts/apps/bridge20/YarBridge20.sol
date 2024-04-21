@@ -8,7 +8,7 @@ import { YarLib } from "../../YarLib.sol";
 import { YarRequest } from "../../YarRequest.sol";
 import { YarResponse } from "../../YarResponse.sol";
 import { ERC1967ProxyInitializable } from "./ERC1967ProxyInitializable.sol";
-import { IssuedEIP20 } from "./IssuedEIP20.sol";
+import { BridgedEIP20 } from "./BridgedEIP20.sol";
 import "hardhat/console.sol";
 contract YarBridge20 {
     using SafeERC20 for IERC20Metadata;
@@ -18,9 +18,9 @@ contract YarBridge20 {
     address public yarRequest;
     address public yarResponse;
 
-    address public issuedTokenImplementation;
+    address public bridgedTokenImplementation;
 
-    mapping(address issuedToken => bool exists) public isIssuedToken;
+    mapping(address bridgedToken => bool exists) public isBridgedToken;
 
     uint256 public chainId;
 
@@ -52,7 +52,7 @@ contract YarBridge20 {
         nativeDecimals = initialNativeDecimals;
         yarRequest = intialYarRequest;
         yarResponse = intialYarResponse;
-        issuedTokenImplementation = address(new IssuedEIP20());
+        bridgedTokenImplementation = address(new BridgedEIP20());
         chainId = block.chainid;
         owner = tx.origin;
     }
@@ -66,10 +66,10 @@ contract YarBridge20 {
     ) external {
         require(msg.sender == yarResponse, "only yarRequest!");
 
-        address issuedToken = getIssuedTokenAddress(originalChainId, originalToken);
-        require(isIssuedToken[issuedToken] == false, "already exists!");
+        address bridgedToken = getBridgedTokenAddress(originalChainId, originalToken);
+        require(isBridgedToken[bridgedToken] == false, "already exists!");
 
-        _deployIssuedToken(originalChainId, originalToken, name, symbol, decimals);
+        _deployBridgedToken(originalChainId, originalToken, name, symbol, decimals);
     }
 
     function deployTo(address token, uint256 targetChainId) external payable {
@@ -88,9 +88,9 @@ contract YarBridge20 {
 
         uint256 originalChain;
         address originalToken;
-        if (isIssuedToken[token]) {
-            originalChain = IssuedEIP20(token).originalChain();
-            originalToken = IssuedEIP20(token).originalToken();
+        if (isBridgedToken[token]) {
+            originalChain = BridgedEIP20(token).originalChain();
+            originalToken = BridgedEIP20(token).originalToken();
         } else {
             originalChain = chainId;
             originalToken = token;
@@ -137,9 +137,9 @@ contract YarBridge20 {
                 IERC20Metadata(originalToken).safeTransfer(recipient, amount);
             }
         } else {
-            address issuedToken = getIssuedTokenAddress(originalChainId, originalToken);
-            require(isIssuedToken[issuedToken], "before deploy issued token!");
-            IssuedEIP20(issuedToken).mint(recipient, amount);
+            address bridgedToken = getBridgedTokenAddress(originalChainId, originalToken);
+            require(isBridgedToken[bridgedToken], "before deploy bridged token!");
+            BridgedEIP20(bridgedToken).mint(recipient, amount);
         }
     }
 
@@ -160,10 +160,10 @@ contract YarBridge20 {
             IERC20Metadata(token).safeTransferFrom(msg.sender, address(this), transferAmount);
         }
 
-        bool _isIssuedToken = isIssuedToken[token];
+        bool _isBridgedToken = isBridgedToken[token];
 
-        uint256 originalChainId = _isIssuedToken ? IssuedEIP20(token).originalChain() : chainId;
-        address originalToken = _isIssuedToken ? IssuedEIP20(token).originalToken() : token;
+        uint256 originalChainId = _isBridgedToken ? BridgedEIP20(token).originalChain() : chainId;
+        address originalToken = _isBridgedToken ? BridgedEIP20(token).originalToken() : token;
 
         bytes memory targetTx = abi.encodeWithSelector(
             YarBridge20.transferFrom.selector,
@@ -186,7 +186,7 @@ contract YarBridge20 {
         YarRequest(yarRequest).send(yarTX);
     }
 
-    function getIssuedTokenAddress(
+    function getBridgedTokenAddress(
         uint256 originalChainId,
         address originalToken
     ) public view returns (address) {
@@ -210,7 +210,7 @@ contract YarBridge20 {
             );
     }
 
-    function _deployIssuedToken(
+    function _deployBridgedToken(
         uint256 originalChainId,
         address originalToken,
         string calldata name,
@@ -218,11 +218,11 @@ contract YarBridge20 {
         uint8 decimals
     ) internal returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(originalChainId, originalToken));
-        ERC1967ProxyInitializable issuedToken = new ERC1967ProxyInitializable{ salt: salt }();
-        issuedToken.init(
-            issuedTokenImplementation,
+        ERC1967ProxyInitializable bridgedToken = new ERC1967ProxyInitializable{ salt: salt }();
+        bridgedToken.init(
+            bridgedTokenImplementation,
             abi.encodeWithSelector(
-                IssuedEIP20.initialize.selector,
+                BridgedEIP20.initialize.selector,
                 originalChainId,
                 originalToken,
                 name,
@@ -231,8 +231,8 @@ contract YarBridge20 {
             )
         );
 
-        address issuedTokenAddress = address(issuedToken);
-        isIssuedToken[issuedTokenAddress] = true;
-        return issuedTokenAddress;
+        address bridgedTokenAddress = address(bridgedToken);
+        isBridgedToken[bridgedTokenAddress] = true;
+        return bridgedTokenAddress;
     }
 }

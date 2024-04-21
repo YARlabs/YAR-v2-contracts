@@ -5,7 +5,7 @@ import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC2
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract IssuedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
+contract BridgedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     uint256 public originalChain;
     address public originalToken;
     uint8 internal originalTokenDecimals;

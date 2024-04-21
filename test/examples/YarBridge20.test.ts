@@ -182,7 +182,7 @@ describe('YarBridge20', function () {
       ]),
     }
 
-    // Юзер вызывает транзакцию, которая создаст запрос в YarRequest, поссле чего в target сети будет развернут issued token
+    // Юзер вызывает транзакцию, которая создаст запрос в YarRequest, поссле чего в target сети будет развернут bridged token
     const txDeployTo = yarBridge20.connect(user).deployTo(token, targetChainId)
     await expect(txDeployTo).to.emit(yarRequest, 'Send').withArgs(Object.values(yarTxDeployTo))
 
@@ -233,8 +233,8 @@ describe('YarBridge20', function () {
 
     // Только для тестов
     // Проверяем что новый yTOKEN был развернут в target сети
-    const issuedToken = await yarBridge20Mock.getIssuedTokenAddress(chainId, token)
-    assert(await yarBridge20Mock.isIssuedToken(issuedToken), 'issued token not created!')
+    const bridgedToken = await yarBridge20Mock.getBridgedTokenAddress(chainId, token)
+    assert(await yarBridge20Mock.isBridgedToken(bridgedToken), 'bridged token not created!')
 
     // ---------------------------
 
@@ -342,7 +342,7 @@ describe('YarBridge20', function () {
     // Только для тестов
     // Проверяем что получатель получил yTOKEN в количестве amount
     assert(
-      (await IERC20Metadata__factory.connect(issuedToken, ethers.provider).balanceOf(
+      (await IERC20Metadata__factory.connect(bridgedToken, ethers.provider).balanceOf(
         recipient.address,
       )) == amount,
       'recipient not recived yTOKENS',

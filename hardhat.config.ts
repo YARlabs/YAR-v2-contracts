@@ -30,7 +30,7 @@ const config: HardhatUserConfig = {
       blockGasLimit: 30000000,
       accounts: {
         count: 10,
-        accountsBalance: '100000000000000000000000000000'
+        accountsBalance: '100000000000000000000000000000',
       },
       loggingEnabled: true,
       // loggingEnabled: false,
@@ -38,30 +38,22 @@ const config: HardhatUserConfig = {
     yarTestnet: {
       chainId: 10226688,
       url: 'https://rpc1.testnet.yarchain.org',
-      accounts: [
-        process.env.YAR_DEPLOYER!,
-        process.env.RELAYER!,
-        process.env.ORACLE!,
-      ]
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
     },
-    avalancheTestnet: {
-      chainId: 43113,
-      url: 'https://rpc.ankr.com/avalanche_fuji',
-      accounts: [
-        process.env.AVALANCHE_DEPLOYER!,
-        process.env.RELAYER!,
-        process.env.ORACLE!,
-      ]
+    bscTestnet: {
+      chainId: 93,
+      url: 'https://rpc.ankr.com/bsc_testnet_chapel',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
     },
     polygonTestnet: {
       chainId: 80001,
       url: 'https://rpc.ankr.com/polygon_mumbai',
-      accounts: [
-        process.env.POLYGON_DEPLOYER!,
-        process.env.RELAYER!,
-        process.env.ORACLE!,]
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
     },
   },
+  deterministicDeployment: {
+
+  }
 }
 
 export default config
