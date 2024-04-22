@@ -27,6 +27,10 @@ const config: HardhatUserConfig = {
       //   auto: false,
       //   interval: 5000,
       // },
+      forking: {
+        url: 'https://rpc.ankr.com/eth',
+        blockNumber: 19712863
+      },
       blockGasLimit: 30000000,
       accounts: {
         count: 10,
@@ -38,22 +42,19 @@ const config: HardhatUserConfig = {
     yarTestnet: {
       chainId: 10226688,
       url: 'https://rpc1.testnet.yarchain.org',
-      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     },
     bscTestnet: {
-      chainId: 93,
+      chainId: 97,
       url: 'https://rpc.ankr.com/bsc_testnet_chapel',
-      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     },
     polygonTestnet: {
-      chainId: 80001,
-      url: 'https://rpc.ankr.com/polygon_mumbai',
-      accounts: [process.env.DEPLOYER!, process.env.RELAYER!, process.env.ORACLE!],
+      chainId: 80002,
+      url: 'https://rpc.ankr.com/polygon_amoy',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     },
   },
-  deterministicDeployment: {
-
-  }
 }
 
 export default config

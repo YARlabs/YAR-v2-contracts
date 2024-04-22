@@ -27,5 +27,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 }
 
 deploy.tags = ['mock', 'YarBridge20Mock']
-deploy.dependencies = ['YarBridge20Mock']
+deploy.dependencies = ['YarBridge20']
 export default deploy

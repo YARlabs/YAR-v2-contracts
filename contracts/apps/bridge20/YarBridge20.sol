@@ -41,7 +41,6 @@ contract YarBridge20 {
     }
 
     constructor(
-        address initialOwner,
         string memory initialNativeName,
         string memory initialNativeSymbol,
         uint8 initialNativeDecimals,
@@ -55,7 +54,7 @@ contract YarBridge20 {
         yarResponse = intialYarResponse;
         bridgedTokenImplementation = address(new BridgedEIP20());
         chainId = block.chainid;
-        owner = initialOwner;
+        owner = msg.sender;
     }
 
     function deployFrom(

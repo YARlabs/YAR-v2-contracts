@@ -30,21 +30,21 @@ const scaffoldConfig = {
       },
     }),
     defineChain({
-      id: 43113,
-      name: 'AvalancheTestnet',
+      id: 97,
+      name: 'BscTestnet',
       nativeCurrency: {
         decimals: 18,
-        name: 'AVAX',
-        symbol: 'AVAX',
+        name: 'BNB',
+        symbol: 'BNB',
       },
       network: '',
       rpcUrls: {
-        default: {http: ['https://rpc.ankr.com/avalanche_fuji']},
-        public: {http: ['https://rpc.ankr.com/avalanche_fuji']},
+        default: {http: ['https://rpc.ankr.com/bsc_testnet_chapel']},
+        public: {http: ['https://rpc.ankr.com/bsc_testnet_chapel']},
       },
     }),
     defineChain({
-      id: 80001,
+      id: 80002,
       name: 'PolygonTestnet',
       nativeCurrency: {
         decimals: 18,
@@ -53,8 +53,8 @@ const scaffoldConfig = {
       },
       network: '',
       rpcUrls: {
-        default: {http: ['https://rpc.ankr.com/polygon_mumbai']},
-        public: {http: ['https://rpc.ankr.com/polygon_mumbai']},
+        default: {http: ['https://rpc.ankr.com/polygon_amoy']},
+        public: {http: ['https://rpc.ankr.com/polygon_amoy']},
       },
     }),
     
