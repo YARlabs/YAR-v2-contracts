@@ -21,4 +21,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 }
 
 deploy.tags = ['only_yar_chain','YarHub']
+deploy.dependencies = ['YarBridge20']
 export default deploy

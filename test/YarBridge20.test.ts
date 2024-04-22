@@ -12,10 +12,10 @@ import {
   YarRequest__factory,
   YarResponse,
   YarResponse__factory,
-} from '../../typechain-types'
+} from '../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
-import { YarLib } from '../../typechain-types/contracts/YarRequest'
+import { YarLib } from '../typechain-types/contracts/YarRequest'
 
 describe('YarBridge20', function () {
   let deployer: SignerWithAddress
