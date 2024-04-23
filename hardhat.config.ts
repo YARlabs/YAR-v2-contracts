@@ -4,6 +4,7 @@ import '@nomicfoundation/hardhat-toolbox'
 import '@nomicfoundation/hardhat-foundry'
 import 'hardhat-deploy'
 import 'hardhat-tracer'
+import 'hardhat-abi-exporter'
 
 const config: HardhatUserConfig = {
   solidity: {
