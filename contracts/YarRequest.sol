@@ -64,7 +64,7 @@ contract YarRequest
         emit Deposit(msg.sender, feeToken, amount);
     }
 
-    function approve(address spender, uint256 amount) public payable {
+    function approve(address spender, uint256 amount) public {
         emit Approve(msg.sender, block.chainid, spender, amount);
     }
 
@@ -168,7 +168,7 @@ contract YarRequest
     //     emit Send(yarTX);
     // }
 
-    function send(YarLib.YarTX memory yarTX) external payable {
+    function send(YarLib.YarTX memory yarTX) external returns(YarLib.YarTX memory){
         require(yarTX.sender == msg.sender, "sender!");
         require(yarTX.initialChainId == block.chainid, "initialChainId!");
         require(yarTX.targetChainId != block.chainid, "targetChainId!");
@@ -177,5 +177,7 @@ contract YarRequest
         //     deposit(yarTX.sender, yarTX.depositToYarAmount);
         // }
         emit Send(yarTX);
+
+        return yarTX;
     }
 }

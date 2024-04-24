@@ -45,7 +45,6 @@ contract YarHub {
     mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
         public allowance;
 
-
     constructor(address initialRelayer) {
         relayer = initialRelayer;
     }
@@ -56,6 +55,17 @@ contract YarHub {
         require(msg.sender == relayer, "only relayer!");
         deposits[account] += feeTokenAmount;
         emit Deposit(account, feeTokenAmount);
+    }
+
+    function withdraw(uint256 amount) external {
+        require(deposits[msg.sender] >= amount, "amount!");
+        deposits[msg.sender] -= amount;
+        (bool success, bytes memory result) = msg.sender.call{ value: amount }("");
+        if (success == false) {
+            assembly {
+                revert(add(result, 32), mload(result))
+            }
+        }
     }
 
     function approve(
@@ -88,12 +98,14 @@ contract YarHub {
         bytes32 yarTxHash = keccak256(abi.encode(yarTX));
         require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, "only WaitForPay!");
         require(deposits[yarTX.payer] >= feeTokensToLock, "feeTokensToLock!");
-        require(
-            allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock,
-            "deposit allowance!"
-        );
+        if (yarTX.payer != yarTX.sender) {
+            require(
+                allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock,
+                "deposit allowance!"
+            );
+            allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] -= feeTokensToLock;
+        }
         deposits[yarTX.payer] -= feeTokensToLock;
-        allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] -= feeTokensToLock;
         wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;
         wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;
 

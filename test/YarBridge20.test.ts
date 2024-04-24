@@ -598,7 +598,7 @@ describe('YarBridge20', function () {
     await token.connect(user).approve(await yarBridge20.getAddress(), amount);
     const txTransferTo = yarBridge20
       .connect(user)
-      .transferTo(await token.getAddress(), amount, targetChainId, recipient.address, { value: amount })
+      .transferTo(await token.getAddress(), amount, targetChainId, recipient.address)
 
     // Только для тестов
     // Проверяем что был получен ивент Send
@@ -632,7 +632,7 @@ describe('YarBridge20', function () {
     // Который если выполниться успешно, инициирует доставку в target сеть
     const txExecuteTransactionTransfer = yarHub
       .connect(relayer)
-      .executeTransaction(yarTxTransferTo, feeTokensToLockDeployTo)
+      .executeTransaction(yarTxTransferTo, feeTokensToLockTransferTo)
 
     // Только для тестов
     // Проверяем ивент ExecuteTransaction

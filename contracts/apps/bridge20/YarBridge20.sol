@@ -9,7 +9,7 @@ import { YarRequest } from "../../YarRequest.sol";
 import { YarResponse } from "../../YarResponse.sol";
 import { ERC1967ProxyInitializable } from "./ERC1967ProxyInitializable.sol";
 import { BridgedEIP20 } from "./BridgedEIP20.sol";
-import "hardhat/console.sol";
+
 contract YarBridge20 {
     using SafeERC20 for IERC20Metadata;
 
@@ -35,7 +35,7 @@ contract YarBridge20 {
         peers[newChainId] = newPeer;
     }
 
-    function getPeer(uint256 _chainId) public view returns(address) {
+    function getPeer(uint256 _chainId) public view returns (address) {
         address peer = peers[_chainId];
         return peer == address(0) ? address(this) : peer;
     }
@@ -72,7 +72,7 @@ contract YarBridge20 {
         _deployBridgedToken(originalChainId, originalToken, name, symbol, decimals);
     }
 
-    function deployTo(address token, uint256 targetChainId) external payable {
+    function deployTo(address token, uint256 targetChainId) external returns (YarLib.YarTX memory) {
         string memory name;
         string memory symbol;
         uint8 decimals;
@@ -96,24 +96,26 @@ contract YarBridge20 {
             originalToken = token;
         }
 
-        YarRequest(yarRequest).send(
-            YarLib.YarTX(
-                chainId,
-                address(this),
-                msg.sender,
-                targetChainId,
-                getPeer(targetChainId),
-                0,
-                abi.encodeWithSelector(
-                    YarBridge20.deployFrom.selector,
-                    originalChain,
-                    originalToken,
-                    name,
-                    symbol,
-                    decimals
-                )
+        YarLib.YarTX memory yarTx = YarLib.YarTX(
+            chainId,
+            address(this),
+            msg.sender,
+            targetChainId,
+            getPeer(targetChainId),
+            0,
+            abi.encodeWithSelector(
+                YarBridge20.deployFrom.selector,
+                originalChain,
+                originalToken,
+                name,
+                symbol,
+                decimals
             )
         );
+
+        YarRequest(yarRequest).send(yarTx);
+
+        return yarTx;
     }
 
     function transferFrom(
@@ -143,20 +145,18 @@ contract YarBridge20 {
         }
     }
 
-    function reverseRejectedTransfer() external {}
-
     function transferTo(
         address token,
         uint256 amount,
         uint256 targetChainId,
         address recipient
-    ) external payable {
+    ) external payable returns (YarLib.YarTX memory) {
         uint256 transferAmount = amount;
-        address feeToken = YarRequest(yarRequest).feeToken();
 
         if (token == address(0)) {
             require(msg.value == transferAmount, "transferAmount!");
         } else {
+            require(msg.value == 0, "msg.value != 0");
             IERC20Metadata(token).safeTransferFrom(msg.sender, address(this), transferAmount);
         }
 
@@ -184,6 +184,8 @@ contract YarBridge20 {
         );
 
         YarRequest(yarRequest).send(yarTX);
+
+        return yarTX;
     }
 
     function getBridgedTokenAddress(
