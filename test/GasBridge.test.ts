@@ -61,7 +61,35 @@ describe('GasBridge', function () {
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
   })
 
-  it('Example', async () => {
+  it('Example', async () => { 
+    // ---------------------------
+
+    const targetChainId = 111 // сеть доставки
+    const recipient = user2 // получатель
+    const amount = ethers.parseEther('1') // сумма нативных токенов которую получит recipeint
+
+    const yarTxSend: YarLib.YarTXStruct = {
+      initialChainId: chainId, // сеть отпарвки
+      sender: user.address, // Пользователь инициирубщий перевод
+      payer: user.address, // Пользователь который платит комиссию (и за value)
+      targetChainId, // сеть доставки
+      target: recipient.address, // кто получит
+      value: amount, // сколько нативных токенов доставить
+      data: '0x', // пустая, потому что мы не вызываем смарт контракт, а сразу переводим на адрес
+    }
+
+    // ---------------------------
+
+    // [0] STEP №0
+    // Предварительно рассчитываем сколько комиссий взять за транзакции
+    // В идеале если пользователи будут просто пополнять свой депозит, что бы не пришлось каждый раз это считать
+
+    // Вызываем deployTo как view функцию посредством eth_call
+    const estematedYarTxSend = await yarRequest.connect(user).send.staticCall(yarTxSend)
+      
+    // [!] Получив модели YarTx из шага [0] мы их отправляем в сервис определяющий стоимость
+    // Далее в тесте они не используются, здесь они изображены для примера как получить эти модели предварительно
+
     // ---------------------------
 
     // [1] STEP №1
@@ -105,22 +133,6 @@ describe('GasBridge', function () {
 
     // [4] STEP №4
     // Юзер отправляет запрос, на выполнение кросс-чейн транзакции которая доставит нативный токен в другой сети
-
-    const targetChainId = 111 // сеть доставки
-    const recipient = user2 // получатель
-    const amount = ethers.parseEther('1') // сумма нативных токенов которую получит recipeint
-
-    const yarTxSend: YarLib.YarTXStruct = {
-      initialChainId: chainId, // сеть отпарвки
-      sender: user.address, // Пользователь инициирубщий перевод
-      payer: user.address, // Пользователь который платит комиссию (и за value)
-      targetChainId, // сеть доставки
-      target: recipient.address, // кто получит
-      value: amount, // сколько нативных токенов доставить
-      data: '0x', // пустая, потому что мы не вызываем смарт контракт, а сразу переводим на адрес
-    }
-
-    // Отправки
     const txSend = yarRequest.connect(user).send(yarTxSend)
 
     // Только для тестов

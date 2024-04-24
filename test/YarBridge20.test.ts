@@ -78,6 +78,32 @@ describe('YarBridge20', function () {
   it('Example: native tarnsfer', async () => {
     // ---------------------------
 
+    const token = ethers.ZeroAddress // Отправляем чем бридж нативный токен
+    const targetChainId = 111 // fake chain id
+    const amount = ethers.parseEther('1') // сколько перевести
+    const recipient = user2 // Получатель
+
+    // ---------------------------
+
+    // [0] STEP №0
+    // Предварительно рассчитываем сколько комиссий взять за транзакции
+    // В идеале если пользователи будут просто пополнять свой депозит, что бы не пришлось каждый раз это считать
+
+    // Вызываем deployTo как view функцию посредством eth_call (в ethers это deployTo.staticCall)
+    const estematedYarTxDeployTo = await yarBridge20
+      .connect(user)
+      .deployTo.staticCall(token, targetChainId)
+      
+    // Вызываем transferTo как view функцию посредством eth_call (в ethers это transferTo.staticCall)
+    const estematedYarTxTrasferTo = await yarBridge20
+      .connect(user)
+      .transferTo.staticCall(token, amount, targetChainId, recipient.address, { value: amount })
+
+    // [!] Получив модели YarTx из шага [0] мы их отправляем в сервис определяющий стоимость
+    // Далее в тесте они не используются, здесь они изображены для примера как получить эти модели предварительно
+
+    // ---------------------------
+
     // [1] STEP №1
     // Пользователь вносит депозит
 
@@ -145,7 +171,7 @@ describe('YarBridge20', function () {
     await expect(txApproveYarHub)
       .to.emit(yarHub, 'Approve')
       .withArgs(user.address, chainId, await yarBridge20.getAddress(), approveAmount)
-    
+
     // Только для тестов
     // Проверяем средства разрешены к списанию
     assert(
@@ -162,9 +188,6 @@ describe('YarBridge20', function () {
     // Для этого надо доставить транзакцию deployFrom в target сеть,
     // Посредством отправки транзакции deployTo из initial сети
     // * если токен уже был развернут в target сети, этот шаг можно пропустить
-
-    const token = ethers.ZeroAddress // Отправляем чем бридж нативный токен
-    const targetChainId = 111 // fake chain id
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
@@ -268,8 +291,6 @@ describe('YarBridge20', function () {
 
     // [12] STEP №12
     // Пользователь делает кроссчейн перевод токенов через мост
-    const amount = ethers.parseEther('1') // сколько перевести
-    const recipient = user2 // Получатель
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
@@ -378,8 +399,37 @@ describe('YarBridge20', function () {
     // ---------------------------
   })
 
-  
   it('Example: eip20 tarnsfer', async () => {
+    // ---------------------------
+
+    const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
+    const targetChainId = 111 // fake chain id
+    const amount = ethers.parseUnits('1', 6) // сколько перевести
+    const recipient = user2 // Получатель
+
+    // ---------------------------
+
+    // [0] STEP №0
+    // Предварительно рассчитываем сколько комиссий взять за транзакции
+    // В идеале если пользователи будут просто пополнять свой депозит, что бы не пришлось каждый раз это считать
+
+    // Вызываем deployTo как view функцию посредством eth_call (в ethers это deployTo.staticCall)
+    const estematedYarTxDeployTo = await yarBridge20
+      .connect(user)
+      .deployTo.staticCall(token, targetChainId)
+      
+    // Вызываем transferTo как view функцию посредством eth_call (в ethers это transferTo.staticCall)
+    // Но предварительно, что бы мы могли сэмулировать транзакцию, пользователь должен разрешить переводить токены
+    // Иначе эмуляция завершится ошибкой, так как не сможет перевести токены с баланса пользователя
+    await ERC20Minter.mint(await token.getAddress(), user.address, 1000000)
+    await token.connect(user).approve(await yarBridge20.getAddress(), amount)
+    const estematedYarTxTrasferTo = await yarBridge20
+      .connect(user)
+      .transferTo.staticCall(token, amount, targetChainId, recipient.address)
+
+    // [!] Получив модели YarTx из шага [0] мы их отправляем в сервис определяющий стоимость
+    // Далее в тесте они не используются, здесь они изображены для примера как получить эти модели предварительно
+
     // ---------------------------
 
     // [1] STEP №1
@@ -449,7 +499,7 @@ describe('YarBridge20', function () {
     await expect(txApproveYarHub)
       .to.emit(yarHub, 'Approve')
       .withArgs(user.address, chainId, await yarBridge20.getAddress(), approveAmount)
-    
+
     // Только для тестов
     // Проверяем средства разрешены к списанию
     assert(
@@ -466,9 +516,6 @@ describe('YarBridge20', function () {
     // Для этого надо доставить транзакцию deployFrom в target сеть,
     // Посредством отправки транзакции deployTo из initial сети
     // * если токен уже был развернут в target сети, этот шаг можно пропустить
-
-    const token = IERC20Metadata__factory.connect(USDT, ethers.provider)
-    const targetChainId = 111 // fake chain id
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
@@ -539,7 +586,10 @@ describe('YarBridge20', function () {
 
     // Только для тестов
     // Проверяем что новый yTOKEN был развернут в target сети
-    const bridgedToken = await yarBridge20Mock.getBridgedTokenAddress(chainId, await token.getAddress())
+    const bridgedToken = await yarBridge20Mock.getBridgedTokenAddress(
+      chainId,
+      await token.getAddress(),
+    )
     assert(await yarBridge20Mock.isBridgedToken(bridgedToken), 'bridged token not created!')
 
     // ---------------------------
@@ -572,8 +622,6 @@ describe('YarBridge20', function () {
 
     // [12] STEP №12
     // Пользователь делает кроссчейн перевод токенов через мост
-    const amount = ethers.parseUnits('1', 6) // сколько перевести
-    const recipient = user2 // Получатель
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
@@ -594,8 +642,6 @@ describe('YarBridge20', function () {
 
     // Отправка юзером токенов в мост
     // Токены остаются на балансе yarBridge20
-    await ERC20Minter.mint(await token.getAddress(), user.address, 1000000)
-    await token.connect(user).approve(await yarBridge20.getAddress(), amount);
     const txTransferTo = yarBridge20
       .connect(user)
       .transferTo(await token.getAddress(), amount, targetChainId, recipient.address)
