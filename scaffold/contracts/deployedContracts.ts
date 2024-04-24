@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   97: {
     YarBridge20: {
-      address: "0x6f19cc3840F07a594A7d081Fb2299CfF19F6B717",
+      address: "0x201a75a28BAAd9d1917cdCB4a10f12D27Bb96A08",
       abi: [
         {
           inputs: [
@@ -151,8 +151,51 @@ const deployedContracts = {
             },
           ],
           name: "deployTo",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -289,13 +332,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "reverseRejectedTransfer",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "uint256",
@@ -365,7 +401,50 @@ const deployedContracts = {
             },
           ],
           name: "transferTo",
-          outputs: [],
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
           stateMutability: "payable",
           type: "function",
         },
@@ -399,7 +478,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     YarRequest: {
-      address: "0x4C7217058078904a182648E18058B3362266b8e6",
+      address: "0x262B9071CFDb531092df1c32d855eAaDD4C7D923",
       abi: [
         {
           inputs: [
@@ -605,7 +684,7 @@ const deployedContracts = {
           ],
           name: "approve",
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -693,15 +772,58 @@ const deployedContracts = {
             },
           ],
           name: "send",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
       ],
       inheritedFunctions: {},
     },
     YarResponse: {
-      address: "0x97b718d479D984a232305f0C62ED52832049149e",
+      address: "0x9b72eDa2475f1471374b0cF96c1fc2590a4E2169",
       abi: [
         {
           inputs: [
@@ -833,7 +955,7 @@ const deployedContracts = {
   },
   80002: {
     YarBridge20: {
-      address: "0x6f19cc3840F07a594A7d081Fb2299CfF19F6B717",
+      address: "0x201a75a28BAAd9d1917cdCB4a10f12D27Bb96A08",
       abi: [
         {
           inputs: [
@@ -977,8 +1099,51 @@ const deployedContracts = {
             },
           ],
           name: "deployTo",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1115,13 +1280,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "reverseRejectedTransfer",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "uint256",
@@ -1191,7 +1349,50 @@ const deployedContracts = {
             },
           ],
           name: "transferTo",
-          outputs: [],
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
           stateMutability: "payable",
           type: "function",
         },
@@ -1225,7 +1426,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     YarRequest: {
-      address: "0x4C7217058078904a182648E18058B3362266b8e6",
+      address: "0x262B9071CFDb531092df1c32d855eAaDD4C7D923",
       abi: [
         {
           inputs: [
@@ -1431,7 +1632,7 @@ const deployedContracts = {
           ],
           name: "approve",
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1519,15 +1720,58 @@ const deployedContracts = {
             },
           ],
           name: "send",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
       ],
       inheritedFunctions: {},
     },
     YarResponse: {
-      address: "0x97b718d479D984a232305f0C62ED52832049149e",
+      address: "0x9b72eDa2475f1471374b0cF96c1fc2590a4E2169",
       abi: [
         {
           inputs: [
@@ -1659,7 +1903,7 @@ const deployedContracts = {
   },
   10226688: {
     YarBridge20: {
-      address: "0x3f1c478062B4e970C8AaD72db9F8c19f5fb68901",
+      address: "0x201a75a28BAAd9d1917cdCB4a10f12D27Bb96A08",
       abi: [
         {
           inputs: [
@@ -1803,8 +2047,51 @@ const deployedContracts = {
             },
           ],
           name: "deployTo",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1941,13 +2228,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "reverseRejectedTransfer",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "uint256",
@@ -2017,7 +2297,50 @@ const deployedContracts = {
             },
           ],
           name: "transferTo",
-          outputs: [],
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
           stateMutability: "payable",
           type: "function",
         },
@@ -2051,7 +2374,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     YarHub: {
-      address: "0x884b70C382344f9a20Ac2fC46c706c0aF3f2Bed7",
+      address: "0xE9088D1C5197a126eE3a11911a98C8D554773Afa",
       abi: [
         {
           inputs: [
@@ -2622,6 +2945,19 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "withdraw",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "bytes32",
               name: "yarTxHash",
               type: "bytes32",
@@ -2704,7 +3040,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     YarRequest: {
-      address: "0xd625473243Ea4bA27e158E7E1518965a6c37944d",
+      address: "0x262B9071CFDb531092df1c32d855eAaDD4C7D923",
       abi: [
         {
           inputs: [
@@ -2910,7 +3246,7 @@ const deployedContracts = {
           ],
           name: "approve",
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -2998,15 +3334,58 @@ const deployedContracts = {
             },
           ],
           name: "send",
-          outputs: [],
-          stateMutability: "payable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "initialChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "sender",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "payer",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "targetChainId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "target",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "value",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "data",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct YarLib.YarTX",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
       ],
       inheritedFunctions: {},
     },
     YarResponse: {
-      address: "0x5301D8a2A5852965D1b1FC4279E7baE6d4Ca772A",
+      address: "0x9b72eDa2475f1471374b0cF96c1fc2590a4E2169",
       abi: [
         {
           inputs: [
