@@ -27,12 +27,13 @@ contract YarHub {
 
     mapping(bytes32 yarTxHash => WrappedYarTX hubTx) public wrappedYarTXs;
 
-    event CreateTransaction(YarLib.YarTX yarTx);
+    event CreateTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);
 
-    event ExecuteTransaction(YarLib.YarTX yarTx);
+    event ExecuteTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);
 
     event CommitTransaction(
         YarLib.YarTX yarTx,
+        bytes32 yarTxHash,
         TxStatus status,
         uint256 usedFees,
         uint256 feesToReturn
@@ -50,6 +51,10 @@ contract YarHub {
     }
 
     mapping(address account => uint256 feeTokenAmount) public deposits;
+
+    function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32) {
+        return keccak256(abi.encode(yarTX));
+    }
 
     function deposit(address account, uint256 feeTokenAmount) external {
         require(msg.sender == relayer, "only relayer!");
@@ -81,7 +86,7 @@ contract YarHub {
 
     function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external {
         require(msg.sender == relayer, "only relayer!");
-        bytes32 yarTxHash = keccak256(abi.encode(yarTX));
+        bytes32 yarTxHash = getYarTxHash(yarTX);
         wrappedYarTXs[yarTxHash] = WrappedYarTX(
             yarTX,
             TxStatus.WaitForPay,
@@ -90,7 +95,7 @@ contract YarHub {
             initialTxHash,
             bytes32(0)
         );
-        emit CreateTransaction(yarTX);
+        emit CreateTransaction(yarTX, getYarTxHash(yarTX));
     }
 
     function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external {
@@ -109,7 +114,7 @@ contract YarHub {
         wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;
         wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;
 
-        emit ExecuteTransaction(yarTX);
+        emit ExecuteTransaction(yarTX, getYarTxHash(yarTX));
     }
 
     function completeTransaction(
@@ -149,6 +154,6 @@ contract YarHub {
         uint256 feesToReturn = lockedFees > usedFees ? lockedFees - usedFees : 0;
         deposits[yarTX.payer] += feesToReturn;
 
-        emit CommitTransaction(yarTX, status, usedFees, feesToReturn);
+        emit CommitTransaction(yarTX, getYarTxHash(yarTX), status, usedFees, feesToReturn);
     }
 }

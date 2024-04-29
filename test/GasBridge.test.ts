@@ -98,8 +98,6 @@ describe('GasBridge', function () {
     // сумма токенов в initial сети, которая будет сконвертирована в депозит в Yar
     const depositToYar = ethers.parseEther('1')
 
-    ethers.provider.getLogs
-
     // Юзер вносит депозит
     const txDeposit = yarRequest.connect(user).deposit(depositToYar, { value: depositToYar })
 
@@ -154,7 +152,8 @@ describe('GasBridge', function () {
     // Для сети Relayers он не важен и может не использоваться (или может, пожеланию)
     await expect(txCreateTransactionTrasfer)
       .to.emit(yarHub, 'CreateTransaction')
-      .withArgs(Object.values(yarTxSend))
+      .withArgs(Object.values(yarTxSend),
+      await yarHub.getYarTxHash(yarTxSend))
 
     // ---------------------------
 
@@ -176,7 +175,8 @@ describe('GasBridge', function () {
     // Это тригер для сети Relayers, что бы доставить транзакцию в target сеть
     await expect(txExecuteTransactionTransfer)
       .to.emit(yarHub, 'ExecuteTransaction')
-      .withArgs(Object.values(yarTxSend))
+      .withArgs(Object.values(yarTxSend),
+      await yarHub.getYarTxHash(yarTxSend))
 
     // ---------------------------
 
@@ -215,6 +215,7 @@ describe('GasBridge', function () {
       .to.emit(yarHub, 'CommitTransaction')
       .withArgs(
         Object.values(yarTxSend),
+        await yarHub.getYarTxHash(yarTxSend),
         3, // completed status
         usedFees,
         feeTokensToLock - usedFees,

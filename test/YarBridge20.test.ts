@@ -93,7 +93,7 @@ describe('YarBridge20', function () {
     const estematedYarTxDeployTo = await yarBridge20
       .connect(user)
       .deployTo.staticCall(token, targetChainId)
-      
+
     // Вызываем transferTo как view функцию посредством eth_call (в ethers это transferTo.staticCall)
     const estematedYarTxTrasferTo = await yarBridge20
       .connect(user)
@@ -224,7 +224,7 @@ describe('YarBridge20', function () {
     // Для сети Relayers он не важен и может не использоваться (или может, пожеланию)
     await expect(txCreateTransactionDeploy)
       .to.emit(yarHub, 'CreateTransaction')
-      .withArgs(Object.values(yarTxDeployTo))
+      .withArgs(Object.values(yarTxDeployTo), await yarHub.getYarTxHash(yarTxDeployTo))
 
     // ---------------------------
 
@@ -246,7 +246,7 @@ describe('YarBridge20', function () {
     // Это тригер для сети Relayers, что бы доставить транзакцию в target сеть
     await expect(txExecuteTransactionDeploy)
       .to.emit(yarHub, 'ExecuteTransaction')
-      .withArgs(Object.values(yarTxDeployTo))
+      .withArgs(Object.values(yarTxDeployTo), await yarHub.getYarTxHash(yarTxDeployTo))
 
     // ---------------------------
 
@@ -282,6 +282,7 @@ describe('YarBridge20', function () {
       .to.emit(yarHub, 'CommitTransaction')
       .withArgs(
         Object.values(yarTxDeployTo),
+        await yarHub.getYarTxHash(yarTxDeployTo),
         3, // completed status
         usedFeesDeploy,
         feeTokensToLockDeployTo - usedFeesDeploy,
@@ -332,7 +333,7 @@ describe('YarBridge20', function () {
     // Для сети Relayers он не важен и может не использоваться (или может, пожеланию)
     await expect(txCreateTransactionTrasfer)
       .to.emit(yarHub, 'CreateTransaction')
-      .withArgs(Object.values(yarTxTransferTo))
+      .withArgs(Object.values(yarTxTransferTo), await yarHub.getYarTxHash(yarTxTransferTo))
 
     // ---------------------------
 
@@ -354,7 +355,7 @@ describe('YarBridge20', function () {
     // Это тригер для сети Relayers, что бы доставить транзакцию в target сеть
     await expect(txExecuteTransactionTransfer)
       .to.emit(yarHub, 'ExecuteTransaction')
-      .withArgs(Object.values(yarTxTransferTo))
+      .withArgs(Object.values(yarTxTransferTo), await yarHub.getYarTxHash(yarTxTransferTo))
 
     // ---------------------------
 
@@ -392,6 +393,7 @@ describe('YarBridge20', function () {
       .to.emit(yarHub, 'CommitTransaction')
       .withArgs(
         Object.values(yarTxTransferTo),
+        await yarHub.getYarTxHash(yarTxTransferTo),
         3, // completed status
         usedFeesTransfer,
         feeTokensToLockTransferTo - usedFeesTransfer,
@@ -417,7 +419,7 @@ describe('YarBridge20', function () {
     const estematedYarTxDeployTo = await yarBridge20
       .connect(user)
       .deployTo.staticCall(token, targetChainId)
-      
+
     // Вызываем transferTo как view функцию посредством eth_call (в ethers это transferTo.staticCall)
     // Но предварительно, что бы мы могли сэмулировать транзакцию, пользователь должен разрешить переводить токены
     // Иначе эмуляция завершится ошибкой, так как не сможет перевести токены с баланса пользователя
@@ -552,7 +554,7 @@ describe('YarBridge20', function () {
     // Для сети Relayers он не важен и может не использоваться (или может, пожеланию)
     await expect(txCreateTransactionDeploy)
       .to.emit(yarHub, 'CreateTransaction')
-      .withArgs(Object.values(yarTxDeployTo))
+      .withArgs(Object.values(yarTxDeployTo), await yarHub.getYarTxHash(yarTxDeployTo))
 
     // ---------------------------
 
@@ -574,7 +576,7 @@ describe('YarBridge20', function () {
     // Это тригер для сети Relayers, что бы доставить транзакцию в target сеть
     await expect(txExecuteTransactionDeploy)
       .to.emit(yarHub, 'ExecuteTransaction')
-      .withArgs(Object.values(yarTxDeployTo))
+      .withArgs(Object.values(yarTxDeployTo), await yarHub.getYarTxHash(yarTxDeployTo))
 
     // ---------------------------
 
@@ -613,6 +615,7 @@ describe('YarBridge20', function () {
       .to.emit(yarHub, 'CommitTransaction')
       .withArgs(
         Object.values(yarTxDeployTo),
+        await yarHub.getYarTxHash(yarTxDeployTo),
         3, // completed status
         usedFeesDeploy,
         feeTokensToLockDeployTo - usedFeesDeploy,
@@ -663,7 +666,7 @@ describe('YarBridge20', function () {
     // Для сети Relayers он не важен и может не использоваться (или может, пожеланию)
     await expect(txCreateTransactionTrasfer)
       .to.emit(yarHub, 'CreateTransaction')
-      .withArgs(Object.values(yarTxTransferTo))
+      .withArgs(Object.values(yarTxTransferTo), await yarHub.getYarTxHash(yarTxTransferTo))
 
     // ---------------------------
 
@@ -685,7 +688,7 @@ describe('YarBridge20', function () {
     // Это тригер для сети Relayers, что бы доставить транзакцию в target сеть
     await expect(txExecuteTransactionTransfer)
       .to.emit(yarHub, 'ExecuteTransaction')
-      .withArgs(Object.values(yarTxTransferTo))
+      .withArgs(Object.values(yarTxTransferTo), await yarHub.getYarTxHash(yarTxTransferTo))
 
     // ---------------------------
 
@@ -723,6 +726,7 @@ describe('YarBridge20', function () {
       .to.emit(yarHub, 'CommitTransaction')
       .withArgs(
         Object.values(yarTxTransferTo),
+        await yarHub.getYarTxHash(yarTxTransferTo),
         3, // completed status
         usedFeesTransfer,
         feeTokensToLockTransferTo - usedFeesTransfer,

@@ -89,6 +89,12 @@
       },
       {
         "indexed": false,
+        "internalType": "bytes32",
+        "name": "yarTxHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
         "internalType": "enum YarHub.TxStatus",
         "name": "status",
         "type": "uint8"
@@ -154,6 +160,12 @@
         "internalType": "struct YarLib.YarTX",
         "name": "yarTx",
         "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "yarTxHash",
+        "type": "bytes32"
       }
     ],
     "name": "CreateTransaction",
@@ -223,6 +235,12 @@
         "internalType": "struct YarLib.YarTX",
         "name": "yarTx",
         "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "yarTxHash",
+        "type": "bytes32"
       }
     ],
     "name": "ExecuteTransaction",
@@ -490,6 +508,62 @@
     "name": "executeTransaction",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "initialChainId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "payer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "targetChainId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct YarLib.YarTX",
+        "name": "yarTX",
+        "type": "tuple"
+      }
+    ],
+    "name": "getYarTxHash",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
