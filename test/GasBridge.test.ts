@@ -98,6 +98,8 @@ describe('GasBridge', function () {
     // сумма токенов в initial сети, которая будет сконвертирована в депозит в Yar
     const depositToYar = ethers.parseEther('1')
 
+    ethers.provider.getLogs
+
     // Юзер вносит депозит
     const txDeposit = yarRequest.connect(user).deposit(depositToYar, { value: depositToYar })
 

@@ -49,6 +49,9 @@
         },
         "YarResponse": {
           "address": "0x9b72eDa2475f1471374b0cF96c1fc2590a4E2169"
+        },
+        "Multicall3": {
+          "address": "0xc8dA05D15D278792ff0c26bC4436F1F801A06c63"
         }
       }
     }
