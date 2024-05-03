@@ -57,6 +57,12 @@ contract YarBridge20 {
         owner = msg.sender;
     }
 
+    function needDeploy(uint256 originalChainId, address originalToken) external view returns(bool) {
+        if(originalChainId == chainId) return false; // no deploy for original chain
+        bool alreadyDeployed = isBridgedToken[getBridgedTokenAddress(originalChainId, originalToken)];
+        return alreadyDeployed == false; // deploy if not exists deployment
+    }
+
     function deployFrom(
         uint256 originalChainId,
         address originalToken,
@@ -110,7 +116,8 @@ contract YarBridge20 {
                 name,
                 symbol,
                 decimals
-            )
+            ),
+            0
         );
 
         YarRequest(yarRequest).send(yarTx);
@@ -180,7 +187,8 @@ contract YarBridge20 {
             targetChainId,
             getPeer(targetChainId),
             0,
-            targetTx
+            targetTx,
+            0
         );
 
         YarRequest(yarRequest).send(yarTX);

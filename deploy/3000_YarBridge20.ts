@@ -19,8 +19,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     contract: 'YarBridge20',
     from: deployer.address,
     args: [
-      'Ethereum',
-      'ETH',
+      'Yar',
+      'YAR',
       18,
       YarRequestDeployments.address,
       YarResponseDeployments.address

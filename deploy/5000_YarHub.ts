@@ -14,7 +14,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     contract: 'YarHub',
     from: deployer.address,
     args: [
-      relayer.address
+      relayer.address,
+      300, // 3%
     ]
   })
 }

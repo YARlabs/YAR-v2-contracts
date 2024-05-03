@@ -1,5 +1,5 @@
 {
-  "address": "0x88F668aB482d58e1814901Ffc7AE35e260305F18",
+  "address": "0x9dE943C5d487800F21d29c9201522fe911B3c7B0",
   "abi": [
     {
       "inputs": [
@@ -7,6 +7,11 @@
           "internalType": "address",
           "name": "initialRelayer",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "initialFeesRatio",
+          "type": "uint256"
         }
       ],
       "stateMutability": "nonpayable",
@@ -82,6 +87,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "indexed": false,
@@ -156,6 +166,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "indexed": false,
@@ -190,6 +205,19 @@
         }
       ],
       "name": "Deposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "EarnedFees",
       "type": "event"
     },
     {
@@ -231,6 +259,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "indexed": false,
@@ -343,6 +376,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "internalType": "struct YarLib.YarTX",
@@ -403,6 +441,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "internalType": "struct YarLib.YarTX",
@@ -458,58 +501,16 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "initialChainId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "sender",
-              "type": "address"
-            },
-            {
-              "internalType": "address",
-              "name": "payer",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "targetChainId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "target",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "value",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes",
-              "name": "data",
-              "type": "bytes"
-            }
-          ],
-          "internalType": "struct YarLib.YarTX",
-          "name": "yarTX",
-          "type": "tuple"
-        },
+      "inputs": [],
+      "name": "earnedFees",
+      "outputs": [
         {
           "internalType": "uint256",
-          "name": "feeTokensToLock",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "executeTransaction",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -550,6 +551,97 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct YarLib.YarTX",
+          "name": "yarTX",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "feeTokensToLock",
+          "type": "uint256"
+        }
+      ],
+      "name": "executeTransaction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feesBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feesRatio",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "initialChainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "targetChainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "internalType": "struct YarLib.YarTX",
@@ -606,6 +698,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "internalType": "struct YarLib.YarTX",
@@ -645,11 +742,50 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "newFeesRation",
+          "type": "uint256"
+        }
+      ],
+      "name": "setFeesRatio",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalLockedFees",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
         }
       ],
       "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawFees",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -700,6 +836,11 @@
               "internalType": "bytes",
               "name": "data",
               "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_nonce",
+              "type": "uint256"
             }
           ],
           "internalType": "struct YarLib.YarTX",
@@ -736,30 +877,31 @@
       "type": "function"
     }
   ],
-  "transactionHash": "0x642d88ebdfcdceca77efbc36e3f63daea2d0aad79b94be5b9f70d6ed1a9a0ab1",
+  "transactionHash": "0x96291b15a15dd84a2acb16602a7fe976e50d123ba236ea82d70d00d28e1f9d33",
   "receipt": {
     "to": null,
-    "from": "0x638eCb938f1FD74ba0A6b91e80B6b46D30b8eEA6",
-    "contractAddress": "0x88F668aB482d58e1814901Ffc7AE35e260305F18",
+    "from": "0x9Bb39660600aD0c57615Ea7C8c43e834c2E4D292",
+    "contractAddress": "0x9dE943C5d487800F21d29c9201522fe911B3c7B0",
     "transactionIndex": 0,
-    "gasUsed": "1134098",
+    "gasUsed": "1361846",
     "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0x3c6587028ceed5f9bb365ea60588b80aa12a9345f900dd0c468fb81d94bf8336",
-    "transactionHash": "0x642d88ebdfcdceca77efbc36e3f63daea2d0aad79b94be5b9f70d6ed1a9a0ab1",
+    "blockHash": "0xc870e03115535a9990375c337aff232d9cd60df4c7a9045bab1fd4ed86b5fd23",
+    "transactionHash": "0x96291b15a15dd84a2acb16602a7fe976e50d123ba236ea82d70d00d28e1f9d33",
     "logs": [],
-    "blockNumber": 4241915,
-    "cumulativeGasUsed": "1134098",
+    "blockNumber": 4305478,
+    "cumulativeGasUsed": "1361846",
     "status": 1,
     "byzantium": true
   },
   "args": [
-    "0x340afFe21AB391FE1C2C5AEBBB84BF5cF236205f"
+    "0x340afFe21AB391FE1C2C5AEBBB84BF5cF236205f",
+    300
   ],
   "numDeployments": 1,
-  "solcInputHash": "f3e4b21b8717fdb49d82699a5d23a069",
-  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialRelayer\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"intiailChainId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Approve\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"enum YarHub.TxStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"feesToReturn\",\"type\":\"uint256\"}],\"name\":\"CommitTransaction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"CreateTransaction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"ExecuteTransaction\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"intiailChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"}],\"name\":\"completeTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"initialTxHash\",\"type\":\"bytes32\"}],\"name\":\"createTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"feeTokenAmount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"deposits\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"feeTokenAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"feeTokensToLock\",\"type\":\"uint256\"}],\"name\":\"executeTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"}],\"name\":\"getYarTxHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"}],\"name\":\"rejectTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"relayer\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"wrappedYarTXs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"internalType\":\"enum YarHub.TxStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lockedFees\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"initialTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/YarHub.sol\":\"YarHub\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xc6a8ff0ea489379b61faa647490411b80102578440ab9d84e9a957cc12164e70\",\"license\":\"MIT\"},\"contracts/YarHub.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nimport { IERC20 } from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport { YarLib } from \\\"./YarLib.sol\\\";\\nimport { YarResponse } from \\\"./YarResponse.sol\\\";\\n\\ncontract YarHub {\\n    address public relayer;\\n\\n    enum TxStatus {\\n        NotExists,\\n        WaitForPay,\\n        InProgress,\\n        Completed,\\n        Rejected\\n    }\\n\\n    struct WrappedYarTX {\\n        YarLib.YarTX yarTx;\\n        TxStatus status;\\n        uint256 lockedFees;\\n        uint256 usedFees;\\n        bytes32 initialTxHash;\\n        bytes32 targetTxHash;\\n    }\\n\\n    mapping(bytes32 yarTxHash => WrappedYarTX hubTx) public wrappedYarTXs;\\n\\n    event CreateTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);\\n\\n    event ExecuteTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);\\n\\n    event CommitTransaction(\\n        YarLib.YarTX yarTx,\\n        bytes32 yarTxHash,\\n        TxStatus status,\\n        uint256 usedFees,\\n        uint256 feesToReturn\\n    );\\n\\n    event Deposit(address account, uint256 amount);\\n\\n    event Approve(address account, uint256 intiailChainId, address spender, uint256 amount);\\n\\n    mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))\\n        public allowance;\\n\\n    constructor(address initialRelayer) {\\n        relayer = initialRelayer;\\n    }\\n\\n    mapping(address account => uint256 feeTokenAmount) public deposits;\\n\\n    function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32) {\\n        return keccak256(abi.encode(yarTX));\\n    }\\n\\n    function deposit(address account, uint256 feeTokenAmount) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        deposits[account] += feeTokenAmount;\\n        emit Deposit(account, feeTokenAmount);\\n    }\\n\\n    function withdraw(uint256 amount) external {\\n        require(deposits[msg.sender] >= amount, \\\"amount!\\\");\\n        deposits[msg.sender] -= amount;\\n        (bool success, bytes memory result) = msg.sender.call{ value: amount }(\\\"\\\");\\n        if (success == false) {\\n            assembly {\\n                revert(add(result, 32), mload(result))\\n            }\\n        }\\n    }\\n\\n    function approve(\\n        address account,\\n        uint256 intiailChainId,\\n        address spender,\\n        uint256 amount\\n    ) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        allowance[account][intiailChainId][spender] = amount;\\n        emit Approve(account, intiailChainId, spender, amount);\\n    }\\n\\n    function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = getYarTxHash(yarTX);\\n        wrappedYarTXs[yarTxHash] = WrappedYarTX(\\n            yarTX,\\n            TxStatus.WaitForPay,\\n            0,\\n            0,\\n            initialTxHash,\\n            bytes32(0)\\n        );\\n        emit CreateTransaction(yarTX, getYarTxHash(yarTX));\\n    }\\n\\n    function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = keccak256(abi.encode(yarTX));\\n        require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, \\\"only WaitForPay!\\\");\\n        require(deposits[yarTX.payer] >= feeTokensToLock, \\\"feeTokensToLock!\\\");\\n        if (yarTX.payer != yarTX.sender) {\\n            require(\\n                allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock,\\n                \\\"deposit allowance!\\\"\\n            );\\n            allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] -= feeTokensToLock;\\n        }\\n        deposits[yarTX.payer] -= feeTokensToLock;\\n        wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;\\n        wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;\\n\\n        emit ExecuteTransaction(yarTX, getYarTxHash(yarTX));\\n    }\\n\\n    function completeTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        uint256 usedFees\\n    ) external {\\n        _commitTransaction(yarTX, targetTxHash, TxStatus.Completed, usedFees);\\n    }\\n\\n    function rejectTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        uint256 usedFees\\n    ) external {\\n        _commitTransaction(yarTX, targetTxHash, TxStatus.Rejected, usedFees);\\n    }\\n\\n    function _commitTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        TxStatus status,\\n        uint256 usedFees\\n    ) internal {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = keccak256(abi.encode(yarTX));\\n        require(\\n            wrappedYarTXs[yarTxHash].status == TxStatus.InProgress,\\n            \\\"only on progress can updated!\\\"\\n        );\\n\\n        wrappedYarTXs[yarTxHash].status = status;\\n        wrappedYarTXs[yarTxHash].usedFees = usedFees;\\n        wrappedYarTXs[yarTxHash].targetTxHash = targetTxHash;\\n\\n        uint256 lockedFees = wrappedYarTXs[yarTxHash].lockedFees;\\n        uint256 feesToReturn = lockedFees > usedFees ? lockedFees - usedFees : 0;\\n        deposits[yarTX.payer] += feesToReturn;\\n\\n        emit CommitTransaction(yarTX, getYarTxHash(yarTX), status, usedFees, feesToReturn);\\n    }\\n}\\n\",\"keccak256\":\"0x17704ad112cc11131663f16c9903b29425af97648ac96e831d90dccd78cada5a\",\"license\":\"UNLICENSED\"},\"contracts/YarLib.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nlibrary YarLib {\\n    struct YarTX {\\n        uint256 initialChainId;\\n        address sender;\\n        address payer;\\n        uint256 targetChainId;\\n        address target;\\n        uint256 value;\\n        bytes data;\\n    }\\n}\\n\",\"keccak256\":\"0x2c48526e1e501dfd1203490b31fbe68074728ac2ffdadde1b187f02b98ff3e26\",\"license\":\"UNLICENSED\"},\"contracts/YarResponse.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nimport { YarLib } from \\\"./YarLib.sol\\\";\\n\\ncontract YarResponse {\\n    address public relayer;\\n\\n    YarLib.YarTX internal _trustedYarTx;\\n\\n    function trustedYarTx() external view returns (YarLib.YarTX memory) {\\n        return _trustedYarTx;\\n    }\\n\\n    constructor(address intialRelayer) {\\n        relayer = intialRelayer;\\n    }\\n\\n    function deliver(YarLib.YarTX calldata yarTx) external payable {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        require(yarTx.value == msg.value, \\\"msg.value!\\\");\\n\\n        _trustedYarTx = yarTx;\\n\\n        (bool success, bytes memory result) = yarTx.target.call{ value: yarTx.value }(yarTx.data);\\n        if (success == false) {\\n            assembly {\\n                revert(add(result, 32), mload(result))\\n            }\\n        }\\n\\n        delete _trustedYarTx;\\n    }\\n}\\n\",\"keccak256\":\"0xc5781ca75b8096b94ed55748f91a9a084dcdc09e68e90104ef314e61c16e82be\",\"license\":\"UNLICENSED\"}},\"version\":1}",
-  "bytecode": "0x60803461007457601f6113b438819003918201601f19168301916001600160401b038311848410176100795780849260209460405283398101031261007457516001600160a01b0381169081900361007457600080546001600160a01b03191691909117905560405161132490816100908239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080604052600436101561001257600080fd5b60003560e01c806309a36a99146100d757806329b7fc68146100d25780632d249440146100cd5780632e1a7d4d146100c857806347582759146100c357806347e7ef24146100be5780635ed64789146100b95780637eb2e835146100b45780638406c079146100af578063eab192d9146100aa578063f034ac50146100a55763fc7e286d146100a057600080fd5b610d29565b610ce6565b610ae6565b610abd565b610a01565b6108f9565b61086a565b6106ce565b6105fe565b610537565b61017d565b6100ff565b6001600160a01b038116036100ed57565b600080fd5b35906100fd826100dc565b565b346100ed5760603660031901126100ed576020610166600435610121816100dc565b6044359061012e826100dc565b60018060a01b0316600052600283526040600020602435600052835260406000209060018060a01b0316600052602052604060002090565b54604051908152f35b908160e09103126100ed5790565b346100ed576040806003193601126100ed5767ffffffffffffffff6004358181116100ed576101b090369060040161016f565b916000926101c860018060a01b038554163314610e63565b6101d181610e40565b9282516101dd8161032c565b60e0833603126102d8576101ef61042f565b9183358352610200602085016100f2565b60208401526102108585016100f2565b858401526060840135606084015261022a608085016100f2565b608084015260a084013560a084015260c08401359081116102d4577fd5eb87aa082afb468f4848a99e1dd822c8fd6b087c0c7dd1683154f1bc337359956102b79361027b6102b29336908801610f1b565b60c0820152835260016020840152878684015287606084015260243560808401528760a08401526000526001602052604060002090565b61109d565b6102ce6102c382610e40565b92519283928361115f565b0390a180f35b8680fd5b8580fd5b90600182811c9216801561030c575b60208310146102f657565b634e487b7160e01b600052602260045260246000fd5b91607f16916102eb565b634e487b7160e01b600052604160045260246000fd5b60c0810190811067ffffffffffffffff82111761034857604052565b610316565b60e0810190811067ffffffffffffffff82111761034857604052565b90601f8019910116810190811067ffffffffffffffff82111761034857604052565b906040519182600082549261039f846102dc565b90818452600194858116908160001461040c57506001146103c9575b50506100fd92500383610369565b9093915060005260209081600020936000915b8183106103f45750506100fd935082010138806103bb565b855488840185015294850194879450918301916103dc565b9150506100fd94506020925060ff191682840152151560051b82010138806103bb565b604051906100fd8261034d565b919082519283825260005b848110610468575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201610447565b6005111561048657565b634e487b7160e01b600052602160045260246000fd5b9060058210156104865752565b9261052461051960c060a097949a9998959a8188528051828901526001808a1b038060208301511660e08a0152806040830151166101008a015260608201516101208a015260808201511661014089015288810151610160890152015160e06101808801526101a087019061043c565b98602086019061049c565b6040840152606083015260808201520152565b346100ed5760203660031901126100ed57600435600052600160205260406000206040516105648161034d565b8154815260018201546001600160a01b0316602082015260028201546001600160a01b031660408201526003820154606082015260048201546001600160a01b03166080820152600582015460a08201526105c16006830161038b565b60c08201526105fa6105d7600784015460ff1690565b926008810154906009810154600b600a83015492015492604051968796876104a9565b0390f35b346100ed5760203660031901126100ed5760043560009033825260036020528060408320541061066957336000908152600360205260409020829182918291829161064a828254610ec2565b9055335af1610657610eeb565b9015610661575080f35b602081519101fd5b60405162461bcd60e51b8152602060048201526007602482015266616d6f756e742160c81b6044820152606490fd5b60606003198201126100ed576004359067ffffffffffffffff82116100ed576106c39160040161016f565b906024359060443590565b346100ed577fd584e5e858892fe34d45ea2e5323b41f76fbd5698d419760dd3d35f404a10f7960086107f861085e61070536610698565b6000549095929491906107339061072c906001600160a01b03165b6001600160a01b031690565b3314610e63565b6040516020810190610757816107498985610e2f565b03601f198101835282610369565b5190209061079060026107816007610779866000526001602052604060002090565b015460ff1690565b61078a8161047c565b14611244565b6107b760076107a9846000526001602052604060002090565b01805460ff19166003179055565b8660096107ce846000526001602052604060002090565b0155600b6107e6836000526001602052604060002090565b01556000526001602052604060002090565b015483600091818111600014610863576108129250610ec2565b61083b610821604085016111ba565b6001600160a01b0316600090815260036020526040902090565b610846828254610eb5565b905561085183610e40565b9360405194859485611290565b0390a1005b5050610812565b346100ed5760403660031901126100ed57600435610887816100dc565b600054602435916001600160a01b03916108a49083163314610e63565b168060005260036020526040600020908154928084018094116108f4577fe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c936040935582519182526020820152a1005b610e9f565b346100ed577fd584e5e858892fe34d45ea2e5323b41f76fbd5698d419760dd3d35f404a10f7960086109ae61085e61093036610698565b60005490959294919061094f9061072c906001600160a01b0316610720565b6040516020810190610965816107498985610e2f565b5190209061098760026107816007610779866000526001602052604060002090565b6107b760076109a0846000526001602052604060002090565b01805460ff19166004179055565b0154836000918181116000146109fa576109c89250610ec2565b6109d7610821604085016111ba565b6109e2828254610eb5565b90556109ed83610e40565b93604051948594856112bf565b50506109c8565b346100ed5760803660031901126100ed57600435610a1e816100dc565b7fbdbc3a9424c1eba6e7ab27814f2dc9b66df2138a9912c0a89085e9967c105d716080602435604435610a50816100dc565b6064359060018060a01b039081600097610a6e828a54163314610e63565b169384885260026020526040882081895260205283610aa28360408b209060018060a01b0316600052602052604060002090565b5560405194855260208501521660408301526060820152a180f35b346100ed5760003660031901126100ed576000546040516001600160a01b039091168152602090f35b346100ed5760403660031901126100ed5760043567ffffffffffffffff81116100ed57610b387fc64c15b11484b860440156df40aac3464f466d7633fa03a3c6b942e92c2c225f91369060040161016f565b610c246007610c16602435610b5a61072c61072060005460018060a01b031690565b6040516020810190610b70816107498985610e2f565b51902090610ba06001610b9186610779866000526001602052604060002090565b610b9a8161047c565b1461117b565b610bf361082160408801610bc284610bba610821846111ba565b5410156111c4565b610bcb816111ba565b60208a0190610bdc610720836111ba565b6001600160a01b0390911603610c3d575b506111ba565b610bfe828254610ec2565b905560086107e6836000526001602052604060002090565b01805460ff19166002179055565b610c2d81610e40565b9061085e6040519283928361115f565b610cd390610c94610ccd8c610cb289610caa610c8b610c78610c5e8b6111ba565b6001600160a01b0316600090815260026020526040902090565b9435809590600052602052604060002090565b610c94886111ba565b60018060a01b0316600052602052604060002090565b541015611203565b610cbe610c5e876111ba565b90600052602052604060002090565b916111ba565b610cde858254610ec2565b905538610bed565b346100ed5760203660031901126100ed5760043567ffffffffffffffff81116100ed57610d21610d1c602092369060040161016f565b610e40565b604051908152f35b346100ed5760203660031901126100ed57600435610d46816100dc565b60018060a01b031660005260036020526020604060002054604051908152f35b908060209392818452848401376000828201840152601f01601f1916010190565b803582526020810135610d99816100dc565b6001600160a01b039081166020840152806040830135610db8816100dc565b166040840152606082013560608401526080820135610dd6816100dc565b16608083015260a081013560a083015260c0810135601e19823603018112156100ed57016020813591019067ffffffffffffffff81116100ed5780360382136100ed5760e0838160c0610e2c9601520191610d66565b90565b906020610e2c928181520190610d87565b604051610e5d816107496020820194602086526040830190610d87565b51902090565b15610e6a57565b60405162461bcd60e51b815260206004820152600d60248201526c6f6e6c792072656c617965722160981b6044820152606490fd5b634e487b7160e01b600052601160045260246000fd5b919082018092116108f457565b919082039182116108f457565b67ffffffffffffffff811161034857601f01601f191660200190565b3d15610f16573d90610efc82610ecf565b91610f0a6040519384610369565b82523d6000602084013e565b606090565b81601f820112156100ed57803590610f3282610ecf565b92610f406040519485610369565b828452602083830101116100ed57816000926020809301838601378301015290565b90601f8111610f7057505050565b600091825260208220906020601f850160051c83019410610fac575b601f0160051c01915b828110610fa157505050565b818155600101610f95565b9092508290610f8c565b919091825167ffffffffffffffff811161034857610fde81610fd884546102dc565b84610f62565b602080601f831160011461101a57508192939460009261100f575b50508160011b916000199060031b1c1916179055565b015190503880610ff9565b90601f1983169561103085600052602060002090565b926000905b88821061106d57505083600195969710611054575b505050811b019055565b015160001960f88460031b161c1916905538808061104a565b80600185968294968601518155019501930190611035565b9060058110156104865760ff80198354169116179055565b81518051825560208101516001830180546001600160a01b03199081166001600160a01b03938416179091556040830151600285018054831691841691909117905560608301516003850155608083015160048501805491909316911617905560a080820151600584015560c0909101519192600b926111209060068601610fb6565b61113a60208201516111318161047c565b60078601611085565b60408101516008850155606081015160098501556080810151600a8501550151910155565b929190611176602091604086526040860190610d87565b930152565b1561118257565b60405162461bcd60e51b815260206004820152601060248201526f6f6e6c792057616974466f725061792160801b6044820152606490fd5b35610e2c816100dc565b156111cb57565b60405162461bcd60e51b815260206004820152601060248201526f666565546f6b656e73546f4c6f636b2160801b6044820152606490fd5b1561120a57565b60405162461bcd60e51b81526020600482015260126024820152716465706f73697420616c6c6f77616e63652160701b6044820152606490fd5b1561124b57565b60405162461bcd60e51b815260206004820152601d60248201527f6f6e6c79206f6e2070726f67726573732063616e2075706461746564210000006044820152606490fd5b90926112a960809396959460a0845260a0840190610d87565b9560208301526003604083015260608201520152565b90926112d860809396959460a0845260a0840190610d87565b956020830152600460408301526060820152015256fea264697066735822122097bca87d9038b93b2ba3a54161695204930ad057960b2dbfbd8f61ab1b2a4ab564736f6c63430008140033",
-  "deployedBytecode": "0x6080604052600436101561001257600080fd5b60003560e01c806309a36a99146100d757806329b7fc68146100d25780632d249440146100cd5780632e1a7d4d146100c857806347582759146100c357806347e7ef24146100be5780635ed64789146100b95780637eb2e835146100b45780638406c079146100af578063eab192d9146100aa578063f034ac50146100a55763fc7e286d146100a057600080fd5b610d29565b610ce6565b610ae6565b610abd565b610a01565b6108f9565b61086a565b6106ce565b6105fe565b610537565b61017d565b6100ff565b6001600160a01b038116036100ed57565b600080fd5b35906100fd826100dc565b565b346100ed5760603660031901126100ed576020610166600435610121816100dc565b6044359061012e826100dc565b60018060a01b0316600052600283526040600020602435600052835260406000209060018060a01b0316600052602052604060002090565b54604051908152f35b908160e09103126100ed5790565b346100ed576040806003193601126100ed5767ffffffffffffffff6004358181116100ed576101b090369060040161016f565b916000926101c860018060a01b038554163314610e63565b6101d181610e40565b9282516101dd8161032c565b60e0833603126102d8576101ef61042f565b9183358352610200602085016100f2565b60208401526102108585016100f2565b858401526060840135606084015261022a608085016100f2565b608084015260a084013560a084015260c08401359081116102d4577fd5eb87aa082afb468f4848a99e1dd822c8fd6b087c0c7dd1683154f1bc337359956102b79361027b6102b29336908801610f1b565b60c0820152835260016020840152878684015287606084015260243560808401528760a08401526000526001602052604060002090565b61109d565b6102ce6102c382610e40565b92519283928361115f565b0390a180f35b8680fd5b8580fd5b90600182811c9216801561030c575b60208310146102f657565b634e487b7160e01b600052602260045260246000fd5b91607f16916102eb565b634e487b7160e01b600052604160045260246000fd5b60c0810190811067ffffffffffffffff82111761034857604052565b610316565b60e0810190811067ffffffffffffffff82111761034857604052565b90601f8019910116810190811067ffffffffffffffff82111761034857604052565b906040519182600082549261039f846102dc565b90818452600194858116908160001461040c57506001146103c9575b50506100fd92500383610369565b9093915060005260209081600020936000915b8183106103f45750506100fd935082010138806103bb565b855488840185015294850194879450918301916103dc565b9150506100fd94506020925060ff191682840152151560051b82010138806103bb565b604051906100fd8261034d565b919082519283825260005b848110610468575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201610447565b6005111561048657565b634e487b7160e01b600052602160045260246000fd5b9060058210156104865752565b9261052461051960c060a097949a9998959a8188528051828901526001808a1b038060208301511660e08a0152806040830151166101008a015260608201516101208a015260808201511661014089015288810151610160890152015160e06101808801526101a087019061043c565b98602086019061049c565b6040840152606083015260808201520152565b346100ed5760203660031901126100ed57600435600052600160205260406000206040516105648161034d565b8154815260018201546001600160a01b0316602082015260028201546001600160a01b031660408201526003820154606082015260048201546001600160a01b03166080820152600582015460a08201526105c16006830161038b565b60c08201526105fa6105d7600784015460ff1690565b926008810154906009810154600b600a83015492015492604051968796876104a9565b0390f35b346100ed5760203660031901126100ed5760043560009033825260036020528060408320541061066957336000908152600360205260409020829182918291829161064a828254610ec2565b9055335af1610657610eeb565b9015610661575080f35b602081519101fd5b60405162461bcd60e51b8152602060048201526007602482015266616d6f756e742160c81b6044820152606490fd5b60606003198201126100ed576004359067ffffffffffffffff82116100ed576106c39160040161016f565b906024359060443590565b346100ed577fd584e5e858892fe34d45ea2e5323b41f76fbd5698d419760dd3d35f404a10f7960086107f861085e61070536610698565b6000549095929491906107339061072c906001600160a01b03165b6001600160a01b031690565b3314610e63565b6040516020810190610757816107498985610e2f565b03601f198101835282610369565b5190209061079060026107816007610779866000526001602052604060002090565b015460ff1690565b61078a8161047c565b14611244565b6107b760076107a9846000526001602052604060002090565b01805460ff19166003179055565b8660096107ce846000526001602052604060002090565b0155600b6107e6836000526001602052604060002090565b01556000526001602052604060002090565b015483600091818111600014610863576108129250610ec2565b61083b610821604085016111ba565b6001600160a01b0316600090815260036020526040902090565b610846828254610eb5565b905561085183610e40565b9360405194859485611290565b0390a1005b5050610812565b346100ed5760403660031901126100ed57600435610887816100dc565b600054602435916001600160a01b03916108a49083163314610e63565b168060005260036020526040600020908154928084018094116108f4577fe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c936040935582519182526020820152a1005b610e9f565b346100ed577fd584e5e858892fe34d45ea2e5323b41f76fbd5698d419760dd3d35f404a10f7960086109ae61085e61093036610698565b60005490959294919061094f9061072c906001600160a01b0316610720565b6040516020810190610965816107498985610e2f565b5190209061098760026107816007610779866000526001602052604060002090565b6107b760076109a0846000526001602052604060002090565b01805460ff19166004179055565b0154836000918181116000146109fa576109c89250610ec2565b6109d7610821604085016111ba565b6109e2828254610eb5565b90556109ed83610e40565b93604051948594856112bf565b50506109c8565b346100ed5760803660031901126100ed57600435610a1e816100dc565b7fbdbc3a9424c1eba6e7ab27814f2dc9b66df2138a9912c0a89085e9967c105d716080602435604435610a50816100dc565b6064359060018060a01b039081600097610a6e828a54163314610e63565b169384885260026020526040882081895260205283610aa28360408b209060018060a01b0316600052602052604060002090565b5560405194855260208501521660408301526060820152a180f35b346100ed5760003660031901126100ed576000546040516001600160a01b039091168152602090f35b346100ed5760403660031901126100ed5760043567ffffffffffffffff81116100ed57610b387fc64c15b11484b860440156df40aac3464f466d7633fa03a3c6b942e92c2c225f91369060040161016f565b610c246007610c16602435610b5a61072c61072060005460018060a01b031690565b6040516020810190610b70816107498985610e2f565b51902090610ba06001610b9186610779866000526001602052604060002090565b610b9a8161047c565b1461117b565b610bf361082160408801610bc284610bba610821846111ba565b5410156111c4565b610bcb816111ba565b60208a0190610bdc610720836111ba565b6001600160a01b0390911603610c3d575b506111ba565b610bfe828254610ec2565b905560086107e6836000526001602052604060002090565b01805460ff19166002179055565b610c2d81610e40565b9061085e6040519283928361115f565b610cd390610c94610ccd8c610cb289610caa610c8b610c78610c5e8b6111ba565b6001600160a01b0316600090815260026020526040902090565b9435809590600052602052604060002090565b610c94886111ba565b60018060a01b0316600052602052604060002090565b541015611203565b610cbe610c5e876111ba565b90600052602052604060002090565b916111ba565b610cde858254610ec2565b905538610bed565b346100ed5760203660031901126100ed5760043567ffffffffffffffff81116100ed57610d21610d1c602092369060040161016f565b610e40565b604051908152f35b346100ed5760203660031901126100ed57600435610d46816100dc565b60018060a01b031660005260036020526020604060002054604051908152f35b908060209392818452848401376000828201840152601f01601f1916010190565b803582526020810135610d99816100dc565b6001600160a01b039081166020840152806040830135610db8816100dc565b166040840152606082013560608401526080820135610dd6816100dc565b16608083015260a081013560a083015260c0810135601e19823603018112156100ed57016020813591019067ffffffffffffffff81116100ed5780360382136100ed5760e0838160c0610e2c9601520191610d66565b90565b906020610e2c928181520190610d87565b604051610e5d816107496020820194602086526040830190610d87565b51902090565b15610e6a57565b60405162461bcd60e51b815260206004820152600d60248201526c6f6e6c792072656c617965722160981b6044820152606490fd5b634e487b7160e01b600052601160045260246000fd5b919082018092116108f457565b919082039182116108f457565b67ffffffffffffffff811161034857601f01601f191660200190565b3d15610f16573d90610efc82610ecf565b91610f0a6040519384610369565b82523d6000602084013e565b606090565b81601f820112156100ed57803590610f3282610ecf565b92610f406040519485610369565b828452602083830101116100ed57816000926020809301838601378301015290565b90601f8111610f7057505050565b600091825260208220906020601f850160051c83019410610fac575b601f0160051c01915b828110610fa157505050565b818155600101610f95565b9092508290610f8c565b919091825167ffffffffffffffff811161034857610fde81610fd884546102dc565b84610f62565b602080601f831160011461101a57508192939460009261100f575b50508160011b916000199060031b1c1916179055565b015190503880610ff9565b90601f1983169561103085600052602060002090565b926000905b88821061106d57505083600195969710611054575b505050811b019055565b015160001960f88460031b161c1916905538808061104a565b80600185968294968601518155019501930190611035565b9060058110156104865760ff80198354169116179055565b81518051825560208101516001830180546001600160a01b03199081166001600160a01b03938416179091556040830151600285018054831691841691909117905560608301516003850155608083015160048501805491909316911617905560a080820151600584015560c0909101519192600b926111209060068601610fb6565b61113a60208201516111318161047c565b60078601611085565b60408101516008850155606081015160098501556080810151600a8501550151910155565b929190611176602091604086526040860190610d87565b930152565b1561118257565b60405162461bcd60e51b815260206004820152601060248201526f6f6e6c792057616974466f725061792160801b6044820152606490fd5b35610e2c816100dc565b156111cb57565b60405162461bcd60e51b815260206004820152601060248201526f666565546f6b656e73546f4c6f636b2160801b6044820152606490fd5b1561120a57565b60405162461bcd60e51b81526020600482015260126024820152716465706f73697420616c6c6f77616e63652160701b6044820152606490fd5b1561124b57565b60405162461bcd60e51b815260206004820152601d60248201527f6f6e6c79206f6e2070726f67726573732063616e2075706461746564210000006044820152606490fd5b90926112a960809396959460a0845260a0840190610d87565b9560208301526003604083015260608201520152565b90926112d860809396959460a0845260a0840190610d87565b956020830152600460408301526060820152015256fea264697066735822122097bca87d9038b93b2ba3a54161695204930ad057960b2dbfbd8f61ab1b2a4ab564736f6c63430008140033",
+  "solcInputHash": "8a1391ea3cf94922bff7821c18e1cb66",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialRelayer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"initialFeesRatio\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"intiailChainId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Approve\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"enum YarHub.TxStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"feesToReturn\",\"type\":\"uint256\"}],\"name\":\"CommitTransaction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"CreateTransaction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"EarnedFees\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"ExecuteTransaction\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"intiailChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"}],\"name\":\"completeTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"initialTxHash\",\"type\":\"bytes32\"}],\"name\":\"createTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"feeTokenAmount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"deposits\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"feeTokenAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"earnedFees\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"feeTokensToLock\",\"type\":\"uint256\"}],\"name\":\"executeTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"feesBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"feesRatio\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"}],\"name\":\"getYarTxHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTX\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"}],\"name\":\"rejectTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"relayer\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newFeesRation\",\"type\":\"uint256\"}],\"name\":\"setFeesRatio\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalLockedFees\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawFees\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"yarTxHash\",\"type\":\"bytes32\"}],\"name\":\"wrappedYarTXs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"initialChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"payer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"targetChainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_nonce\",\"type\":\"uint256\"}],\"internalType\":\"struct YarLib.YarTX\",\"name\":\"yarTx\",\"type\":\"tuple\"},{\"internalType\":\"enum YarHub.TxStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lockedFees\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"usedFees\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"initialTxHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"targetTxHash\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/YarHub.sol\":\"YarHub\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xc6a8ff0ea489379b61faa647490411b80102578440ab9d84e9a957cc12164e70\",\"license\":\"MIT\"},\"contracts/YarHub.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nimport { IERC20 } from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport { YarLib } from \\\"./YarLib.sol\\\";\\nimport { YarResponse } from \\\"./YarResponse.sol\\\";\\n\\ncontract YarHub {\\n    address public relayer;\\n\\n    uint256 public feesRatio;\\n\\n    uint256 public totalLockedFees;\\n    uint256 public feesBalance;\\n    uint256 public earnedFees;\\n\\n    enum TxStatus {\\n        NotExists,\\n        WaitForPay,\\n        InProgress,\\n        Completed,\\n        Rejected\\n    }\\n\\n    struct WrappedYarTX {\\n        YarLib.YarTX yarTx;\\n        TxStatus status;\\n        uint256 lockedFees;\\n        uint256 usedFees;\\n        bytes32 initialTxHash;\\n        bytes32 targetTxHash;\\n    }\\n\\n    mapping(bytes32 yarTxHash => WrappedYarTX hubTx) public wrappedYarTXs;\\n\\n    event CreateTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);\\n\\n    event ExecuteTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);\\n\\n    event CommitTransaction(\\n        YarLib.YarTX yarTx,\\n        bytes32 yarTxHash,\\n        TxStatus status,\\n        uint256 usedFees,\\n        uint256 feesToReturn\\n    );\\n\\n    event Deposit(address account, uint256 amount);\\n\\n    event Approve(address account, uint256 intiailChainId, address spender, uint256 amount);\\n\\n    event EarnedFees(uint256 amount);\\n\\n    mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))\\n        public allowance;\\n\\n    constructor(address initialRelayer, uint256 initialFeesRatio) {\\n        relayer = initialRelayer;\\n        require(initialFeesRatio <= 10000, \\\"initialFeesRatio > 100%\\\");\\n        feesRatio = initialFeesRatio;\\n    }\\n\\n    mapping(address account => uint256 feeTokenAmount) public deposits;\\n\\n    function setFeesRatio(uint256 newFeesRation) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        require(newFeesRation <= 10000, \\\"newFeesRation > 100%\\\");\\n        feesRatio = newFeesRation;\\n    }\\n\\n    function withdrawFees(uint256 amount) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        require(amount <= feesBalance, \\\"feesBalance!\\\");\\n        feesBalance -= amount;\\n        (bool success, bytes memory result) = msg.sender.call{ value: amount }(\\\"\\\");\\n        if (success == false) {\\n            assembly {\\n                revert(add(result, 32), mload(result))\\n            }\\n        }\\n    }\\n\\n    function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32) {\\n        return keccak256(abi.encode(yarTX));\\n    }\\n\\n    function deposit(address account, uint256 feeTokenAmount) public {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        deposits[account] += feeTokenAmount;\\n        emit Deposit(account, feeTokenAmount);\\n    }\\n\\n    function withdraw(uint256 amount) external {\\n        require(deposits[msg.sender] >= amount, \\\"amount!\\\");\\n        deposits[msg.sender] -= amount;\\n        (bool success, bytes memory result) = msg.sender.call{ value: amount }(\\\"\\\");\\n        if (success == false) {\\n            assembly {\\n                revert(add(result, 32), mload(result))\\n            }\\n        }\\n    }\\n\\n    function approve(\\n        address account,\\n        uint256 intiailChainId,\\n        address spender,\\n        uint256 amount\\n    ) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        allowance[account][intiailChainId][spender] = amount;\\n        emit Approve(account, intiailChainId, spender, amount);\\n    }\\n\\n    function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = getYarTxHash(yarTX);\\n        wrappedYarTXs[yarTxHash] = WrappedYarTX(\\n            yarTX,\\n            TxStatus.WaitForPay,\\n            0,\\n            0,\\n            initialTxHash,\\n            bytes32(0)\\n        );\\n        emit CreateTransaction(yarTX, getYarTxHash(yarTX));\\n    }\\n\\n    function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = keccak256(abi.encode(yarTX));\\n        require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, \\\"only WaitForPay!\\\");\\n\\n        require(deposits[yarTX.payer] >= feeTokensToLock, \\\"feeTokensToLock!\\\");\\n        if (yarTX.payer != yarTX.sender) {\\n            require(\\n                allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] >= feeTokensToLock,\\n                \\\"deposit allowance!\\\"\\n            );\\n            allowance[yarTX.payer][yarTX.initialChainId][yarTX.sender] -= feeTokensToLock;\\n        }\\n        deposits[yarTX.payer] -= feeTokensToLock;\\n        wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;\\n        wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;\\n\\n        totalLockedFees += feeTokensToLock;\\n\\n        emit ExecuteTransaction(yarTX, getYarTxHash(yarTX));\\n    }\\n\\n    function completeTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        uint256 usedFees\\n    ) external {\\n        _commitTransaction(yarTX, targetTxHash, TxStatus.Completed, usedFees);\\n    }\\n\\n    function rejectTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        uint256 usedFees\\n    ) external {\\n        _commitTransaction(yarTX, targetTxHash, TxStatus.Rejected, usedFees);\\n    }\\n\\n    function _commitTransaction(\\n        YarLib.YarTX calldata yarTX,\\n        bytes32 targetTxHash,\\n        TxStatus status,\\n        uint256 usedFees\\n    ) internal {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        bytes32 yarTxHash = keccak256(abi.encode(yarTX));\\n        require(\\n            wrappedYarTXs[yarTxHash].status == TxStatus.InProgress,\\n            \\\"only on progress can updated!\\\"\\n        );\\n\\n        wrappedYarTXs[yarTxHash].status = status;\\n        wrappedYarTXs[yarTxHash].usedFees = usedFees;\\n        wrappedYarTXs[yarTxHash].targetTxHash = targetTxHash;\\n\\n        feesBalance += usedFees;\\n\\n        uint256 txEarnedFees = (((1e18 * usedFees) / (10000 + feesRatio)) * feesRatio) / 1e18;\\n        earnedFees += txEarnedFees;\\n\\n        uint256 lockedFees = wrappedYarTXs[yarTxHash].lockedFees;\\n        uint256 feesToReturn = lockedFees > usedFees ? lockedFees - usedFees : 0;\\n        deposits[yarTX.payer] += feesToReturn;\\n\\n        totalLockedFees -= lockedFees;\\n\\n        emit EarnedFees(txEarnedFees);\\n        emit CommitTransaction(yarTX, getYarTxHash(yarTX), status, usedFees, feesToReturn);\\n    }\\n}\\n\",\"keccak256\":\"0xa07b6d45783d829eb288cdb3dbaa32f9f3a3d27736869d3c304f07cc33e21a64\",\"license\":\"UNLICENSED\"},\"contracts/YarLib.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nlibrary YarLib {\\n    struct YarTX {\\n        uint256 initialChainId;\\n        address sender;\\n        address payer;\\n        uint256 targetChainId;\\n        address target;\\n        uint256 value;\\n        bytes data;\\n        uint256 _nonce;\\n    }\\n}\\n\",\"keccak256\":\"0xf0ea5f3cda5934fe7a5779f3b20e0432adee9f89edd90f40483b2fb4ef64cdb5\",\"license\":\"UNLICENSED\"},\"contracts/YarResponse.sol\":{\"content\":\"// SPDX-License-Identifier: UNLICENSED\\npragma solidity 0.8.20;\\n\\nimport { YarLib } from \\\"./YarLib.sol\\\";\\n\\ncontract YarResponse {\\n    address public relayer;\\n\\n    YarLib.YarTX internal _trustedYarTx;\\n\\n    function trustedYarTx() external view returns (YarLib.YarTX memory) {\\n        return _trustedYarTx;\\n    }\\n\\n    constructor(address intialRelayer) {\\n        relayer = intialRelayer;\\n    }\\n\\n    function deliver(YarLib.YarTX calldata yarTx) external payable {\\n        require(msg.sender == relayer, \\\"only relayer!\\\");\\n        require(yarTx.value == msg.value, \\\"msg.value!\\\");\\n\\n        _trustedYarTx = yarTx;\\n\\n        (bool success, bytes memory result) = yarTx.target.call{ value: yarTx.value }(yarTx.data);\\n        if (success == false) {\\n            assembly {\\n                revert(add(result, 32), mload(result))\\n            }\\n        }\\n\\n        delete _trustedYarTx;\\n    }\\n}\\n\",\"keccak256\":\"0xc5781ca75b8096b94ed55748f91a9a084dcdc09e68e90104ef314e61c16e82be\",\"license\":\"UNLICENSED\"}},\"version\":1}",
+  "bytecode": "0x6080346100ca57601f6117c238819003918201601f19168301916001600160401b038311848410176100cf5780849260409485528339810103126100ca5780516001600160a01b03811691908290036100ca5760200151600080546001600160a01b0319169092179091556127108111610085576001556040516116dc90816100e68239f35b60405162461bcd60e51b815260206004820152601760248201527f696e697469616c46656573526174696f203e20313030250000000000000000006044820152606490fd5b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080604052600436101561001257600080fd5b60003560e01c806309a36a991461013757806315714666146101325780631d9c4b1e1461012d5780632d249440146101285780632e1a7d4d1461012357806347e7ef241461011e57806355a30586146101195780635e318e0714610114578063637b888f1461010f5780637518c9651461010a5780637eb2e835146101055780638406c0791461010057806389045e05146100fb578063b1b3ffd9146100f6578063cb41a958146100f1578063de035386146100ec578063f34d2b5f146100e75763fc7e286d146100e257600080fd5b610fb3565b610e74565b610c52565b610b6c565b610b4e565b610b30565b610b07565b610a4b565b610a2d565b6109ea565b610964565b610719565b610645565b6105ab565b6104ce565b610242565b6101cf565b61015f565b6001600160a01b0381160361014d57565b600080fd5b359061015d8261013c565b565b3461014d57606036600319011261014d5760206101c66004356101818161013c565b6044359061018e8261013c565b60018060a01b0316600052600683526040600020602435600052835260406000209060018060a01b0316600052602052604060002090565b54604051908152f35b3461014d57602036600319011261014d576004356101f860018060a01b03600054163314610ff0565b612710811161020657600155005b60405162461bcd60e51b81526020600482015260146024820152736e657746656573526174696f6e203e203130302560601b6044820152606490fd5b3461014d57600036600319011261014d576020600254604051908152f35b90600182811c92168015610290575b602083101461027a57565b634e487b7160e01b600052602260045260246000fd5b91607f169161026f565b634e487b7160e01b600052604160045260246000fd5b60c0810190811067ffffffffffffffff8211176102cc57604052565b61029a565b90601f8019910116810190811067ffffffffffffffff8211176102cc57604052565b906040519182600082549261030784610260565b9081845260019485811690816000146103745750600114610331575b505061015d925003836102d1565b9093915060005260209081600020936000915b81831061035c57505061015d93508201013880610323565b85548884018501529485019487945091830191610344565b91505061015d94506020925060ff191682840152151560051b8201013880610323565b60405190610100820182811067ffffffffffffffff8211176102cc57604052565b919082519283825260005b8481106103e4575050826000602080949584010152601f8019910116010190565b6020818301810151848301820152016103c3565b6005111561040257565b634e487b7160e01b600052602160045260246000fd5b9060058210156104025752565b926104bb60a09592989796939860c08652805160c087015260e06104a76001808a1b0380602085015116838a015260408401511661010090818a015260608401516101208a015261048660808501516101408b019060018060a01b03169052565b898401516101608a015260c0840151906101808a01526101c08901906103b8565b9101516101a0870152986020860190610418565b6040840152606083015260808201520152565b3461014d57602036600319011261014d57600435600052600560205260406000206104f7610397565b8154815260018201546001600160a01b0316602082015260028201546001600160a01b0316604082015260038201546060820152600482015461054e906001600160a01b03165b6001600160a01b03166080830152565b600582015460a0820152610564600683016102f3565b60c0820152600782015460e08201526105a7610584600884015460ff1690565b92600981015490600a810154600c600b8301549201549260405196879687610425565b0390f35b3461014d57602036600319011261014d576004356000903382526007602052806040832054106106165733600090815260076020526040902082918291829182916105f7828254611042565b9055335af161060461106b565b901561060e575080f35b602081519101fd5b60405162461bcd60e51b8152602060048201526007602482015266616d6f756e742160c81b6044820152606490fd5b3461014d57604036600319011261014d576004356106628161013c565b600054602435916001600160a01b039161067f9083163314610ff0565b168060005260076020526040600020908154928084018094116106cf577fe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c936040935582519182526020820152a1005b61102c565b908161010091031261014d5790565b606060031982011261014d576004359067ffffffffffffffff821161014d5761070e916004016106d4565b906024359060443590565b3461014d577f082f5d97f343df015336c8cfbbb2d71f9af127aba9fff5d572f41fc76b96b93e61095261074b366106e3565b6000549093919061077790610770906001600160a01b03165b6001600160a01b031690565b3314610ff0565b604051602081019061079b8161078d8785611177565b03601f1981018352826102d1565b519020906107d460026107c560086107bd866000526005602052604060002090565b015460ff1690565b6107ce816103f8565b146115b1565b6107fb60086107ed846000526005602052604060002090565b01805460ff19166004179055565b84600a610812846000526005602052604060002090565b0155600c61082a836000526005602052604060002090565b015561084061083b856003546111be565b600355565b7f89974c0e08a4018a1435e3f74b23ddf44a2d9a7546b22b57716a7fa71f3ce62d61093960096108c66108a16108936108788a6115fd565b61088e60015491610888836111ae565b90611628565b611615565b670de0b6b3a7640000900490565b946108b66108b1876004546111be565b600455565b6000526005602052604060002090565b01549260008785111561095757506109296109246108e48987611042565b955b61090f6108f560408b01611527565b6001600160a01b0316600090815260076020526040902090565b61091a8882546111be565b9055600254611042565b600255565b6040519081529081906020820190565b0390a16109458361118b565b9360405194859485611648565b0390a1005b61092461092991956108e6565b3461014d57602036600319011261014d5760043560009061098f60018060a01b038354163314610ff0565b6003548082116109b6578280836109ab61083b83968496611042565b335af161060461106b565b60405162461bcd60e51b815260206004820152600c60248201526b6665657342616c616e63652160a01b6044820152606490fd5b3461014d57602036600319011261014d5760043567ffffffffffffffff811161014d57610a25610a2060209236906004016106d4565b61118b565b604051908152f35b3461014d57600036600319011261014d576020600354604051908152f35b3461014d57608036600319011261014d57600435610a688161013c565b7fbdbc3a9424c1eba6e7ab27814f2dc9b66df2138a9912c0a89085e9967c105d716080602435604435610a9a8161013c565b6064359060018060a01b039081600097610ab8828a54163314610ff0565b169384885260066020526040882081895260205283610aec8360408b209060018060a01b0316600052602052604060002090565b5560405194855260208501521660408301526060820152a180f35b3461014d57600036600319011261014d576000546040516001600160a01b039091168152602090f35b3461014d57600036600319011261014d576020600154604051908152f35b3461014d57600036600319011261014d576020600454604051908152f35b3461014d57604036600319011261014d5760043567ffffffffffffffff811161014d57610b9d9036906004016106d4565b7f9cd244566ef9a4d7cc13cf6f8e93d2deb524f34a7dd20c1e7a5d981caf22f535600091610bd560018060a01b038454163314610ff0565b610c33610be18261118b565b610c2e60405191610bf1836102b0565b610bfb3686611212565b83526001602084015286604084015286606084015260243560808401528660a08401526000526005602052604060002090565b6113de565b610c3c8161118b565b90610c4c604051928392836114cc565b0390a180f35b3461014d57604036600319011261014d5760043567ffffffffffffffff811161014d57610ca47f1701820f9b279d4e88913cdaa67614b15714ea412a6e7697430ee06fbd24ab699136906004016106d4565b610db2610924602435610cc461077061076460005460018060a01b031690565b610daa6008610d9c6040516020810190610ce28161078d8b85611177565b519020610d116001610d02856107bd856000526005602052604060002090565b610d0b816103f8565b146114e8565b610d666108f560408a01610d3388610d2b6108f584611527565b541015611531565b8a610d3d82611527565b6020820190610d4e61076483611527565b6001600160a01b0390911603610dcb575b5050611527565b610d71868254611042565b9055846009610d8a836000526005602052604060002090565b01556000526005602052604060002090565b01805460ff19166002179055565b6002546111be565b610dbb8161118b565b90610952604051928392836114cc565b610e21610e5a610e6093610e3f8d610e37610e18610e05610deb8b611527565b6001600160a01b0316600090815260066020526040902090565b9435809590600052602052604060002090565b610e2188611527565b60018060a01b0316600052602052604060002090565b541015611570565b610e4b610deb87611527565b90600052602052604060002090565b91611527565b610e6b898254611042565b90558a38610d5f565b3461014d577f082f5d97f343df015336c8cfbbb2d71f9af127aba9fff5d572f41fc76b96b93e610952610ea6366106e3565b60005490939190610ec390610770906001600160a01b0316610764565b6040516020810190610ed98161078d8785611177565b51902090610efb60026107c560086107bd866000526005602052604060002090565b610f226008610f14846000526005602052604060002090565b01805460ff19166003179055565b84600a610f39846000526005602052604060002090565b0155600c610f51836000526005602052604060002090565b0155610f6261083b856003546111be565b7f89974c0e08a4018a1435e3f74b23ddf44a2d9a7546b22b57716a7fa71f3ce62d610f9a60096108c66108a16108936108788a6115fd565b0390a1610fa68361118b565b9360405194859485611677565b3461014d57602036600319011261014d57600435610fd08161013c565b60018060a01b031660005260076020526020604060002054604051908152f35b15610ff757565b60405162461bcd60e51b815260206004820152600d60248201526c6f6e6c792072656c617965722160981b6044820152606490fd5b634e487b7160e01b600052601160045260246000fd5b919082039182116106cf57565b67ffffffffffffffff81116102cc57601f01601f191660200190565b3d15611096573d9061107c8261104f565b9161108a60405193846102d1565b82523d6000602084013e565b606090565b9035601e198236030181121561014d57016020813591019167ffffffffffffffff821161014d57813603831361014d57565b908060209392818452848401376000828201840152601f01601f1916010190565b908135815260208201356111018161013c565b6001600160a01b039081166020830152604083013561111f8161013c565b16604082015260608201356060820152611140608083013561053e8161013c565b60a082013560a082015260e08061116e61115d60c086018661109b565b6101008060c08801528601916110cd565b93013591015290565b9060206111889281815201906110ee565b90565b6040516111a88161078d60208201946020865260408301906110ee565b51902090565b906127109182018092116106cf57565b919082018092116106cf57565b81601f8201121561014d578035906111e28261104f565b926111f060405194856102d1565b8284526020838301011161014d57816000926020809301838601378301015290565b91906101008382031261014d57611227610397565b928035845261123860208201610152565b602085015261124960408201610152565b60408501526060810135606085015261126460808201610152565b608085015260a081013560a085015260c081013567ffffffffffffffff811161014d5760e0926112959183016111cb565b60c0850152013560e0830152565b90601f81116112b157505050565b600091825260208220906020601f850160051c830194106112ed575b601f0160051c01915b8281106112e257505050565b8181556001016112d6565b90925082906112cd565b919091825167ffffffffffffffff81116102cc5761131f816113198454610260565b846112a3565b602080601f831160011461135b575081929394600092611350575b50508160011b916000199060031b1c1916179055565b01519050388061133a565b90601f1983169561137185600052602060002090565b926000905b8882106113ae57505083600195969710611395575b505050811b019055565b015160001960f88460031b161c1916905538808061138b565b80600185968294968601518155019501930190611376565b9060058110156104025760ff80198354169116179055565b81518051825560208101516001830180546001600160a01b0319166001600160a01b039092169190911790559091600c9160a0919060e09060408101516002870180546001600160a01b0319166001600160a01b039092169190911790556060810151600387015560808101516004870180546001600160a01b0319166001600160a01b0390921691909117905583810151600587015561148660c0820151600688016112f7565b015160078501556114a7602082015161149e816103f8565b600886016113c6565b604081015160098501556060810151600a8501556080810151600b8501550151910155565b9291906114e36020916040865260408601906110ee565b930152565b156114ef57565b60405162461bcd60e51b815260206004820152601060248201526f6f6e6c792057616974466f725061792160801b6044820152606490fd5b356111888161013c565b1561153857565b60405162461bcd60e51b815260206004820152601060248201526f666565546f6b656e73546f4c6f636b2160801b6044820152606490fd5b1561157757565b60405162461bcd60e51b81526020600482015260126024820152716465706f73697420616c6c6f77616e63652160701b6044820152606490fd5b156115b857565b60405162461bcd60e51b815260206004820152601d60248201527f6f6e6c79206f6e2070726f67726573732063616e2075706461746564210000006044820152606490fd5b90670de0b6b3a764000091808302928304036106cf57565b818102929181159184041417156106cf57565b8115611632570490565b634e487b7160e01b600052601260045260246000fd5b909261166160809396959460a0845260a08401906110ee565b9560208301526004604083015260608201520152565b909261169060809396959460a0845260a08401906110ee565b956020830152600360408301526060820152015256fea26469706673582212203703c59ca17c26dc3fe06d7528f6c66e61260032efb8cd7a583240726345679964736f6c63430008140033",
+  "deployedBytecode": "0x6080604052600436101561001257600080fd5b60003560e01c806309a36a991461013757806315714666146101325780631d9c4b1e1461012d5780632d249440146101285780632e1a7d4d1461012357806347e7ef241461011e57806355a30586146101195780635e318e0714610114578063637b888f1461010f5780637518c9651461010a5780637eb2e835146101055780638406c0791461010057806389045e05146100fb578063b1b3ffd9146100f6578063cb41a958146100f1578063de035386146100ec578063f34d2b5f146100e75763fc7e286d146100e257600080fd5b610fb3565b610e74565b610c52565b610b6c565b610b4e565b610b30565b610b07565b610a4b565b610a2d565b6109ea565b610964565b610719565b610645565b6105ab565b6104ce565b610242565b6101cf565b61015f565b6001600160a01b0381160361014d57565b600080fd5b359061015d8261013c565b565b3461014d57606036600319011261014d5760206101c66004356101818161013c565b6044359061018e8261013c565b60018060a01b0316600052600683526040600020602435600052835260406000209060018060a01b0316600052602052604060002090565b54604051908152f35b3461014d57602036600319011261014d576004356101f860018060a01b03600054163314610ff0565b612710811161020657600155005b60405162461bcd60e51b81526020600482015260146024820152736e657746656573526174696f6e203e203130302560601b6044820152606490fd5b3461014d57600036600319011261014d576020600254604051908152f35b90600182811c92168015610290575b602083101461027a57565b634e487b7160e01b600052602260045260246000fd5b91607f169161026f565b634e487b7160e01b600052604160045260246000fd5b60c0810190811067ffffffffffffffff8211176102cc57604052565b61029a565b90601f8019910116810190811067ffffffffffffffff8211176102cc57604052565b906040519182600082549261030784610260565b9081845260019485811690816000146103745750600114610331575b505061015d925003836102d1565b9093915060005260209081600020936000915b81831061035c57505061015d93508201013880610323565b85548884018501529485019487945091830191610344565b91505061015d94506020925060ff191682840152151560051b8201013880610323565b60405190610100820182811067ffffffffffffffff8211176102cc57604052565b919082519283825260005b8481106103e4575050826000602080949584010152601f8019910116010190565b6020818301810151848301820152016103c3565b6005111561040257565b634e487b7160e01b600052602160045260246000fd5b9060058210156104025752565b926104bb60a09592989796939860c08652805160c087015260e06104a76001808a1b0380602085015116838a015260408401511661010090818a015260608401516101208a015261048660808501516101408b019060018060a01b03169052565b898401516101608a015260c0840151906101808a01526101c08901906103b8565b9101516101a0870152986020860190610418565b6040840152606083015260808201520152565b3461014d57602036600319011261014d57600435600052600560205260406000206104f7610397565b8154815260018201546001600160a01b0316602082015260028201546001600160a01b0316604082015260038201546060820152600482015461054e906001600160a01b03165b6001600160a01b03166080830152565b600582015460a0820152610564600683016102f3565b60c0820152600782015460e08201526105a7610584600884015460ff1690565b92600981015490600a810154600c600b8301549201549260405196879687610425565b0390f35b3461014d57602036600319011261014d576004356000903382526007602052806040832054106106165733600090815260076020526040902082918291829182916105f7828254611042565b9055335af161060461106b565b901561060e575080f35b602081519101fd5b60405162461bcd60e51b8152602060048201526007602482015266616d6f756e742160c81b6044820152606490fd5b3461014d57604036600319011261014d576004356106628161013c565b600054602435916001600160a01b039161067f9083163314610ff0565b168060005260076020526040600020908154928084018094116106cf577fe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c936040935582519182526020820152a1005b61102c565b908161010091031261014d5790565b606060031982011261014d576004359067ffffffffffffffff821161014d5761070e916004016106d4565b906024359060443590565b3461014d577f082f5d97f343df015336c8cfbbb2d71f9af127aba9fff5d572f41fc76b96b93e61095261074b366106e3565b6000549093919061077790610770906001600160a01b03165b6001600160a01b031690565b3314610ff0565b604051602081019061079b8161078d8785611177565b03601f1981018352826102d1565b519020906107d460026107c560086107bd866000526005602052604060002090565b015460ff1690565b6107ce816103f8565b146115b1565b6107fb60086107ed846000526005602052604060002090565b01805460ff19166004179055565b84600a610812846000526005602052604060002090565b0155600c61082a836000526005602052604060002090565b015561084061083b856003546111be565b600355565b7f89974c0e08a4018a1435e3f74b23ddf44a2d9a7546b22b57716a7fa71f3ce62d61093960096108c66108a16108936108788a6115fd565b61088e60015491610888836111ae565b90611628565b611615565b670de0b6b3a7640000900490565b946108b66108b1876004546111be565b600455565b6000526005602052604060002090565b01549260008785111561095757506109296109246108e48987611042565b955b61090f6108f560408b01611527565b6001600160a01b0316600090815260076020526040902090565b61091a8882546111be565b9055600254611042565b600255565b6040519081529081906020820190565b0390a16109458361118b565b9360405194859485611648565b0390a1005b61092461092991956108e6565b3461014d57602036600319011261014d5760043560009061098f60018060a01b038354163314610ff0565b6003548082116109b6578280836109ab61083b83968496611042565b335af161060461106b565b60405162461bcd60e51b815260206004820152600c60248201526b6665657342616c616e63652160a01b6044820152606490fd5b3461014d57602036600319011261014d5760043567ffffffffffffffff811161014d57610a25610a2060209236906004016106d4565b61118b565b604051908152f35b3461014d57600036600319011261014d576020600354604051908152f35b3461014d57608036600319011261014d57600435610a688161013c565b7fbdbc3a9424c1eba6e7ab27814f2dc9b66df2138a9912c0a89085e9967c105d716080602435604435610a9a8161013c565b6064359060018060a01b039081600097610ab8828a54163314610ff0565b169384885260066020526040882081895260205283610aec8360408b209060018060a01b0316600052602052604060002090565b5560405194855260208501521660408301526060820152a180f35b3461014d57600036600319011261014d576000546040516001600160a01b039091168152602090f35b3461014d57600036600319011261014d576020600154604051908152f35b3461014d57600036600319011261014d576020600454604051908152f35b3461014d57604036600319011261014d5760043567ffffffffffffffff811161014d57610b9d9036906004016106d4565b7f9cd244566ef9a4d7cc13cf6f8e93d2deb524f34a7dd20c1e7a5d981caf22f535600091610bd560018060a01b038454163314610ff0565b610c33610be18261118b565b610c2e60405191610bf1836102b0565b610bfb3686611212565b83526001602084015286604084015286606084015260243560808401528660a08401526000526005602052604060002090565b6113de565b610c3c8161118b565b90610c4c604051928392836114cc565b0390a180f35b3461014d57604036600319011261014d5760043567ffffffffffffffff811161014d57610ca47f1701820f9b279d4e88913cdaa67614b15714ea412a6e7697430ee06fbd24ab699136906004016106d4565b610db2610924602435610cc461077061076460005460018060a01b031690565b610daa6008610d9c6040516020810190610ce28161078d8b85611177565b519020610d116001610d02856107bd856000526005602052604060002090565b610d0b816103f8565b146114e8565b610d666108f560408a01610d3388610d2b6108f584611527565b541015611531565b8a610d3d82611527565b6020820190610d4e61076483611527565b6001600160a01b0390911603610dcb575b5050611527565b610d71868254611042565b9055846009610d8a836000526005602052604060002090565b01556000526005602052604060002090565b01805460ff19166002179055565b6002546111be565b610dbb8161118b565b90610952604051928392836114cc565b610e21610e5a610e6093610e3f8d610e37610e18610e05610deb8b611527565b6001600160a01b0316600090815260066020526040902090565b9435809590600052602052604060002090565b610e2188611527565b60018060a01b0316600052602052604060002090565b541015611570565b610e4b610deb87611527565b90600052602052604060002090565b91611527565b610e6b898254611042565b90558a38610d5f565b3461014d577f082f5d97f343df015336c8cfbbb2d71f9af127aba9fff5d572f41fc76b96b93e610952610ea6366106e3565b60005490939190610ec390610770906001600160a01b0316610764565b6040516020810190610ed98161078d8785611177565b51902090610efb60026107c560086107bd866000526005602052604060002090565b610f226008610f14846000526005602052604060002090565b01805460ff19166003179055565b84600a610f39846000526005602052604060002090565b0155600c610f51836000526005602052604060002090565b0155610f6261083b856003546111be565b7f89974c0e08a4018a1435e3f74b23ddf44a2d9a7546b22b57716a7fa71f3ce62d610f9a60096108c66108a16108936108788a6115fd565b0390a1610fa68361118b565b9360405194859485611677565b3461014d57602036600319011261014d57600435610fd08161013c565b60018060a01b031660005260076020526020604060002054604051908152f35b15610ff757565b60405162461bcd60e51b815260206004820152600d60248201526c6f6e6c792072656c617965722160981b6044820152606490fd5b634e487b7160e01b600052601160045260246000fd5b919082039182116106cf57565b67ffffffffffffffff81116102cc57601f01601f191660200190565b3d15611096573d9061107c8261104f565b9161108a60405193846102d1565b82523d6000602084013e565b606090565b9035601e198236030181121561014d57016020813591019167ffffffffffffffff821161014d57813603831361014d57565b908060209392818452848401376000828201840152601f01601f1916010190565b908135815260208201356111018161013c565b6001600160a01b039081166020830152604083013561111f8161013c565b16604082015260608201356060820152611140608083013561053e8161013c565b60a082013560a082015260e08061116e61115d60c086018661109b565b6101008060c08801528601916110cd565b93013591015290565b9060206111889281815201906110ee565b90565b6040516111a88161078d60208201946020865260408301906110ee565b51902090565b906127109182018092116106cf57565b919082018092116106cf57565b81601f8201121561014d578035906111e28261104f565b926111f060405194856102d1565b8284526020838301011161014d57816000926020809301838601378301015290565b91906101008382031261014d57611227610397565b928035845261123860208201610152565b602085015261124960408201610152565b60408501526060810135606085015261126460808201610152565b608085015260a081013560a085015260c081013567ffffffffffffffff811161014d5760e0926112959183016111cb565b60c0850152013560e0830152565b90601f81116112b157505050565b600091825260208220906020601f850160051c830194106112ed575b601f0160051c01915b8281106112e257505050565b8181556001016112d6565b90925082906112cd565b919091825167ffffffffffffffff81116102cc5761131f816113198454610260565b846112a3565b602080601f831160011461135b575081929394600092611350575b50508160011b916000199060031b1c1916179055565b01519050388061133a565b90601f1983169561137185600052602060002090565b926000905b8882106113ae57505083600195969710611395575b505050811b019055565b015160001960f88460031b161c1916905538808061138b565b80600185968294968601518155019501930190611376565b9060058110156104025760ff80198354169116179055565b81518051825560208101516001830180546001600160a01b0319166001600160a01b039092169190911790559091600c9160a0919060e09060408101516002870180546001600160a01b0319166001600160a01b039092169190911790556060810151600387015560808101516004870180546001600160a01b0319166001600160a01b0390921691909117905583810151600587015561148660c0820151600688016112f7565b015160078501556114a7602082015161149e816103f8565b600886016113c6565b604081015160098501556060810151600a8501556080810151600b8501550151910155565b9291906114e36020916040865260408601906110ee565b930152565b156114ef57565b60405162461bcd60e51b815260206004820152601060248201526f6f6e6c792057616974466f725061792160801b6044820152606490fd5b356111888161013c565b1561153857565b60405162461bcd60e51b815260206004820152601060248201526f666565546f6b656e73546f4c6f636b2160801b6044820152606490fd5b1561157757565b60405162461bcd60e51b81526020600482015260126024820152716465706f73697420616c6c6f77616e63652160701b6044820152606490fd5b156115b857565b60405162461bcd60e51b815260206004820152601d60248201527f6f6e6c79206f6e2070726f67726573732063616e2075706461746564210000006044820152606490fd5b90670de0b6b3a764000091808302928304036106cf57565b818102929181159184041417156106cf57565b8115611632570490565b634e487b7160e01b600052601260045260246000fd5b909261166160809396959460a0845260a08401906110ee565b9560208301526004604083015260608201520152565b909261169060809396959460a0845260a08401906110ee565b956020830152600360408301526060820152015256fea26469706673582212203703c59ca17c26dc3fe06d7528f6c66e61260032efb8cd7a583240726345679964736f6c63430008140033",
   "devdoc": {
     "kind": "dev",
     "methods": {},
@@ -781,27 +923,59 @@
         "type": "t_address"
       },
       {
-        "astId": 113,
+        "astId": 89,
+        "contract": "contracts/YarHub.sol:YarHub",
+        "label": "feesRatio",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 91,
+        "contract": "contracts/YarHub.sol:YarHub",
+        "label": "totalLockedFees",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 93,
+        "contract": "contracts/YarHub.sol:YarHub",
+        "label": "feesBalance",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 95,
+        "contract": "contracts/YarHub.sol:YarHub",
+        "label": "earnedFees",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 121,
         "contract": "contracts/YarHub.sol:YarHub",
         "label": "wrappedYarTXs",
         "offset": 0,
-        "slot": "1",
-        "type": "t_mapping(t_bytes32,t_struct(WrappedYarTX)108_storage)"
+        "slot": "5",
+        "type": "t_mapping(t_bytes32,t_struct(WrappedYarTX)116_storage)"
       },
       {
-        "astId": 165,
+        "astId": 177,
         "contract": "contracts/YarHub.sol:YarHub",
         "label": "allowance",
         "offset": 0,
-        "slot": "2",
+        "slot": "6",
         "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_address,t_uint256)))"
       },
       {
-        "astId": 179,
+        "astId": 204,
         "contract": "contracts/YarHub.sol:YarHub",
         "label": "deposits",
         "offset": 0,
-        "slot": "3",
+        "slot": "7",
         "type": "t_mapping(t_address,t_uint256)"
       }
     ],
@@ -821,7 +995,7 @@
         "label": "bytes",
         "numberOfBytes": "32"
       },
-      "t_enum(TxStatus)93": {
+      "t_enum(TxStatus)101": {
         "encoding": "inplace",
         "label": "enum YarHub.TxStatus",
         "numberOfBytes": "1"
@@ -840,12 +1014,12 @@
         "numberOfBytes": "32",
         "value": "t_uint256"
       },
-      "t_mapping(t_bytes32,t_struct(WrappedYarTX)108_storage)": {
+      "t_mapping(t_bytes32,t_struct(WrappedYarTX)116_storage)": {
         "encoding": "mapping",
         "key": "t_bytes32",
         "label": "mapping(bytes32 => struct YarHub.WrappedYarTX)",
         "numberOfBytes": "32",
-        "value": "t_struct(WrappedYarTX)108_storage"
+        "value": "t_struct(WrappedYarTX)116_storage"
       },
       "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
         "encoding": "mapping",
@@ -854,67 +1028,67 @@
         "numberOfBytes": "32",
         "value": "t_mapping(t_address,t_uint256)"
       },
-      "t_struct(WrappedYarTX)108_storage": {
+      "t_struct(WrappedYarTX)116_storage": {
         "encoding": "inplace",
         "label": "struct YarHub.WrappedYarTX",
         "members": [
           {
-            "astId": 96,
+            "astId": 104,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "yarTx",
             "offset": 0,
             "slot": "0",
-            "type": "t_struct(YarTX)613_storage"
+            "type": "t_struct(YarTX)746_storage"
           },
           {
-            "astId": 99,
+            "astId": 107,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "status",
             "offset": 0,
-            "slot": "7",
-            "type": "t_enum(TxStatus)93"
+            "slot": "8",
+            "type": "t_enum(TxStatus)101"
           },
           {
-            "astId": 101,
+            "astId": 109,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "lockedFees",
-            "offset": 0,
-            "slot": "8",
-            "type": "t_uint256"
-          },
-          {
-            "astId": 103,
-            "contract": "contracts/YarHub.sol:YarHub",
-            "label": "usedFees",
             "offset": 0,
             "slot": "9",
             "type": "t_uint256"
           },
           {
-            "astId": 105,
+            "astId": 111,
+            "contract": "contracts/YarHub.sol:YarHub",
+            "label": "usedFees",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 113,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "initialTxHash",
             "offset": 0,
-            "slot": "10",
+            "slot": "11",
             "type": "t_bytes32"
           },
           {
-            "astId": 107,
+            "astId": 115,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "targetTxHash",
             "offset": 0,
-            "slot": "11",
+            "slot": "12",
             "type": "t_bytes32"
           }
         ],
-        "numberOfBytes": "384"
+        "numberOfBytes": "416"
       },
-      "t_struct(YarTX)613_storage": {
+      "t_struct(YarTX)746_storage": {
         "encoding": "inplace",
         "label": "struct YarLib.YarTX",
         "members": [
           {
-            "astId": 600,
+            "astId": 731,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "initialChainId",
             "offset": 0,
@@ -922,7 +1096,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 602,
+            "astId": 733,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "sender",
             "offset": 0,
@@ -930,7 +1104,7 @@
             "type": "t_address"
           },
           {
-            "astId": 604,
+            "astId": 735,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "payer",
             "offset": 0,
@@ -938,7 +1112,7 @@
             "type": "t_address"
           },
           {
-            "astId": 606,
+            "astId": 737,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "targetChainId",
             "offset": 0,
@@ -946,7 +1120,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 608,
+            "astId": 739,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "target",
             "offset": 0,
@@ -954,7 +1128,7 @@
             "type": "t_address"
           },
           {
-            "astId": 610,
+            "astId": 741,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "value",
             "offset": 0,
@@ -962,15 +1136,23 @@
             "type": "t_uint256"
           },
           {
-            "astId": 612,
+            "astId": 743,
             "contract": "contracts/YarHub.sol:YarHub",
             "label": "data",
             "offset": 0,
             "slot": "6",
             "type": "t_bytes_storage"
+          },
+          {
+            "astId": 745,
+            "contract": "contracts/YarHub.sol:YarHub",
+            "label": "_nonce",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256"
           }
         ],
-        "numberOfBytes": "224"
+        "numberOfBytes": "256"
       },
       "t_uint256": {
         "encoding": "inplace",

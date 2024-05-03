@@ -10,5 +10,6 @@ library YarLib {
         address target;
         uint256 value;
         bytes data;
+        uint256 _nonce;
     }
 }

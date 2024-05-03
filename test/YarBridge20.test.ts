@@ -205,6 +205,7 @@ describe('YarBridge20', function () {
         'ETH',
         18,
       ]),
+      _nonce: 0
     }
 
     // Юзер вызывает транзакцию, которая создаст запрос в YarRequest, поссле чего в target сети будет развернут bridged token
@@ -308,6 +309,7 @@ describe('YarBridge20', function () {
         amount,
         recipient.address,
       ]),
+      _nonce: 1
     }
 
     // Отправка юзером токенов в мост
@@ -535,6 +537,7 @@ describe('YarBridge20', function () {
         'USDT',
         6,
       ]),
+      _nonce: 0
     }
 
     // Юзер вызывает транзакцию, которая создаст запрос в YarRequest, поссле чего в target сети будет развернут bridged token
@@ -641,6 +644,7 @@ describe('YarBridge20', function () {
         amount,
         recipient.address,
       ]),
+      _nonce: 1
     }
 
     // Отправка юзером токенов в мост

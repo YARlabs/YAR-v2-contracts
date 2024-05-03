@@ -8,6 +8,12 @@ import { YarResponse } from "./YarResponse.sol";
 contract YarHub {
     address public relayer;
 
+    uint256 public feesRatio;
+
+    uint256 public totalLockedFees;
+    uint256 public feesBalance;
+    uint256 public earnedFees;
+
     enum TxStatus {
         NotExists,
         WaitForPay,
@@ -43,20 +49,42 @@ contract YarHub {
 
     event Approve(address account, uint256 intiailChainId, address spender, uint256 amount);
 
+    event EarnedFees(uint256 amount);
+
     mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
         public allowance;
 
-    constructor(address initialRelayer) {
+    constructor(address initialRelayer, uint256 initialFeesRatio) {
         relayer = initialRelayer;
+        require(initialFeesRatio <= 10000, "initialFeesRatio > 100%");
+        feesRatio = initialFeesRatio;
     }
 
     mapping(address account => uint256 feeTokenAmount) public deposits;
+
+    function setFeesRatio(uint256 newFeesRation) external {
+        require(msg.sender == relayer, "only relayer!");
+        require(newFeesRation <= 10000, "newFeesRation > 100%");
+        feesRatio = newFeesRation;
+    }
+
+    function withdrawFees(uint256 amount) external {
+        require(msg.sender == relayer, "only relayer!");
+        require(amount <= feesBalance, "feesBalance!");
+        feesBalance -= amount;
+        (bool success, bytes memory result) = msg.sender.call{ value: amount }("");
+        if (success == false) {
+            assembly {
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
 
     function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32) {
         return keccak256(abi.encode(yarTX));
     }
 
-    function deposit(address account, uint256 feeTokenAmount) external {
+    function deposit(address account, uint256 feeTokenAmount) public {
         require(msg.sender == relayer, "only relayer!");
         deposits[account] += feeTokenAmount;
         emit Deposit(account, feeTokenAmount);
@@ -102,6 +130,7 @@ contract YarHub {
         require(msg.sender == relayer, "only relayer!");
         bytes32 yarTxHash = keccak256(abi.encode(yarTX));
         require(wrappedYarTXs[yarTxHash].status == TxStatus.WaitForPay, "only WaitForPay!");
+
         require(deposits[yarTX.payer] >= feeTokensToLock, "feeTokensToLock!");
         if (yarTX.payer != yarTX.sender) {
             require(
@@ -113,6 +142,8 @@ contract YarHub {
         deposits[yarTX.payer] -= feeTokensToLock;
         wrappedYarTXs[yarTxHash].lockedFees = feeTokensToLock;
         wrappedYarTXs[yarTxHash].status = TxStatus.InProgress;
+
+        totalLockedFees += feeTokensToLock;
 
         emit ExecuteTransaction(yarTX, getYarTxHash(yarTX));
     }
@@ -150,10 +181,18 @@ contract YarHub {
         wrappedYarTXs[yarTxHash].usedFees = usedFees;
         wrappedYarTXs[yarTxHash].targetTxHash = targetTxHash;
 
+        feesBalance += usedFees;
+
+        uint256 txEarnedFees = (((1e18 * usedFees) / (10000 + feesRatio)) * feesRatio) / 1e18;
+        earnedFees += txEarnedFees;
+
         uint256 lockedFees = wrappedYarTXs[yarTxHash].lockedFees;
         uint256 feesToReturn = lockedFees > usedFees ? lockedFees - usedFees : 0;
         deposits[yarTX.payer] += feesToReturn;
 
+        totalLockedFees -= lockedFees;
+
+        emit EarnedFees(txEarnedFees);
         emit CommitTransaction(yarTX, getYarTxHash(yarTX), status, usedFees, feesToReturn);
     }
 }
