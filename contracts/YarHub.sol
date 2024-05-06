@@ -60,6 +60,8 @@ contract YarHub {
         feesRatio = initialFeesRatio;
     }
 
+    receive() external payable {}
+
     mapping(address account => uint256 feeTokenAmount) public deposits;
 
     function setFeesRatio(uint256 newFeesRation) external {
