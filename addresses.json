@@ -7,6 +7,12 @@
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"
         },
+        "YarBridge721": {
+          "address": "0x2D7490bC1813c808ac04f1FcB065BEaf7bfeC44d"
+        },
+        "YarERC721": {
+          "address": "0xE576869Fa0DF5740D13cCE2964A177664A7ab47E"
+        },
         "YarRequest": {
           "address": "0x24e03AbB3f168a4deD0171060eFDB9a170bE193d"
         },
@@ -23,6 +29,12 @@
       "contracts": {
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"
+        },
+        "YarBridge721": {
+          "address": "0x2D7490bC1813c808ac04f1FcB065BEaf7bfeC44d"
+        },
+        "YarERC721": {
+          "address": "0xE576869Fa0DF5740D13cCE2964A177664A7ab47E"
         },
         "YarRequest": {
           "address": "0x24e03AbB3f168a4deD0171060eFDB9a170bE193d"
@@ -43,6 +55,12 @@
         },
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"
+        },
+        "YarBridge721": {
+          "address": "0x2D7490bC1813c808ac04f1FcB065BEaf7bfeC44d"
+        },
+        "YarERC721": {
+          "address": "0xE576869Fa0DF5740D13cCE2964A177664A7ab47E"
         },
         "YarHub": {
           "address": "0x2d260f17EB559E18D481510C7D11FA30096BFeFA"

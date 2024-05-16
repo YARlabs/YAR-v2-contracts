@@ -7,6 +7,8 @@
     "postinstall": "cd scaffold && yarn install",
     "generateTsAbisFromDeploy": "hardhat run ./scripts/generateTsAbisFromDeploy.ts",
     "generateTsAbisFromIgnition": "hardhat run ./scripts/generateTsAbisFromIgnition.ts",
+    "peer:add:721": "hardhat run ./scripts/addPeersToBridge721.ts",
+    "mint:nft": "hardhat run ./scripts/mintNft.ts",
     "hardhat:node": "hardhat node",
     "hardhat:deploy": "hardhat deploy --network localhost",
     "scaffold": "cd scaffold && yarn start"
