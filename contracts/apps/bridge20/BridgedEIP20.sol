@@ -15,11 +15,10 @@ contract BridgedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     function initialize(
         uint256 _originalChain,
         address _originalToken,
-        string memory _originalTokenName,
-        string memory _originalTokenSymbol,
+        string calldata _originalTokenName,
+        string calldata _originalTokenSymbol,
         uint8 _originalTokenDecimals
     ) external initializer {
-
         ERC20Upgradeable.__ERC20_init(
             string(abi.encodePacked("y", _originalTokenName)),
             string(abi.encodePacked("y", _originalTokenSymbol))
@@ -42,14 +41,6 @@ contract BridgedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
 
     function burn(address _from, uint256 _amount) external onlyOwner {
         _burn(_from, _amount);
-    }
-
-    function permissionedTransferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external onlyOwner {
-        _transfer(from, to, amount);
     }
 
     function decimals() public view virtual override returns (uint8) {

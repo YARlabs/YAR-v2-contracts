@@ -7,7 +7,8 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { YarLib } from "../../YarLib.sol";
 import { YarRequest } from "../../YarRequest.sol";
 import { YarResponse } from "../../YarResponse.sol";
-import { ERC1967ProxyInitializable } from "./ERC1967ProxyInitializable.sol";
+import { ERC1967ProxyInitializable } from "../../utils/ERC1967ProxyInitializable.sol";
+import { ERC1967Utils } from "../../utils/ERC1967Utils.sol";
 import { BridgedEIP20 } from "./BridgedEIP20.sol";
 
 contract YarBridge20 {
@@ -57,9 +58,14 @@ contract YarBridge20 {
         owner = msg.sender;
     }
 
-    function needDeploy(uint256 originalChainId, address originalToken) external view returns(bool) {
-        if(originalChainId == chainId) return false; // no deploy for original chain
-        bool alreadyDeployed = isBridgedToken[getBridgedTokenAddress(originalChainId, originalToken)];
+    function needDeploy(
+        uint256 originalChainId,
+        address originalToken
+    ) external view returns (bool) {
+        if (originalChainId == chainId) return false; // no deploy for original chain
+        bool alreadyDeployed = isBridgedToken[
+            getBridgedTokenAddress(originalChainId, originalToken)
+        ];
         return alreadyDeployed == false; // deploy if not exists deployment
     }
 
@@ -120,9 +126,7 @@ contract YarBridge20 {
             0
         );
 
-        YarRequest(yarRequest).send(yarTx);
-
-        return yarTx;
+        return YarRequest(yarRequest).send(yarTx);
     }
 
     function transferFrom(
@@ -191,33 +195,14 @@ contract YarBridge20 {
             0
         );
 
-        YarRequest(yarRequest).send(yarTX);
-
-        return yarTX;
+        return YarRequest(yarRequest).send(yarTX);
     }
 
     function getBridgedTokenAddress(
         uint256 originalChainId,
         address originalToken
     ) public view returns (address) {
-        bytes32 salt = keccak256(abi.encodePacked(originalChainId, originalToken));
-        return
-            address(
-                uint160(
-                    uint(
-                        keccak256(
-                            abi.encodePacked(
-                                bytes1(0xff),
-                                address(this),
-                                salt,
-                                keccak256(
-                                    abi.encodePacked(type(ERC1967ProxyInitializable).creationCode)
-                                )
-                            )
-                        )
-                    )
-                )
-            );
+        return ERC1967Utils.getAddress(keccak256(abi.encodePacked(originalChainId, originalToken)));
     }
 
     function _deployBridgedToken(

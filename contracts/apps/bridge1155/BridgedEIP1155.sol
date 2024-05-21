@@ -5,12 +5,21 @@ import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ER
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-
-contract BridgeEIP1155 is Initializable, ERC1155Upgradeable, OwnableUpgradeable {
+contract BridgedEIP1155 is Initializable, ERC1155Upgradeable, OwnableUpgradeable {
     uint256 public originalChainId;
-    bytes public originalToken;
+    address public originalToken;
 
     mapping(uint256 => string) uris;
+
+    function initialize(
+        uint256 _originalChainId,
+        address _originalToken
+    ) external initializer {
+        ERC1155Upgradeable.__ERC1155_init("");
+        OwnableUpgradeable.__Ownable_init(msg.sender);
+        originalChainId = _originalChainId;
+        originalToken = _originalToken;
+    }
 
     function uri(uint256 _tokenId) public view override returns (string memory) {
         return uris[_tokenId];
@@ -20,28 +29,23 @@ contract BridgeEIP1155 is Initializable, ERC1155Upgradeable, OwnableUpgradeable 
         uint256 l = _tokenIds.length;
         string[] memory _uris = new string[](l);
 
-        for(uint256 i; i < l; i++) {
+        for (uint256 i; i < l; i++) {
             _uris[i] = uris[_tokenIds[i]];
         }
 
         return _uris;
     }
 
-    function initialize(
-        uint256 _originalChainId, 
-        bytes memory _originalToken
-    ) external initializer {
-        ERC1155Upgradeable.__ERC1155_init("");
-        OwnableUpgradeable.__Ownable_init(msg.sender);
-        originalChainId = _originalChainId;
-        originalToken = _originalToken;
-    }
-
-    function getOriginalTokenInfo() external view returns (uint256, bytes memory) {
+    function getOriginalTokenInfo() external view returns (uint256, address) {
         return (originalChainId, originalToken);
     }
 
-    function mint(address _recipient, uint256 _tokenId, uint256 _amount, string calldata _uri) external onlyOwner {
+    function mint(
+        address _recipient,
+        uint256 _tokenId,
+        uint256 _amount,
+        string calldata _uri
+    ) external onlyOwner {
         uris[_tokenId] = _uri;
         _mint(_recipient, _tokenId, _amount, "");
     }
@@ -52,10 +56,10 @@ contract BridgeEIP1155 is Initializable, ERC1155Upgradeable, OwnableUpgradeable 
         uint256[] memory _amounts,
         string[] memory _uris
     ) external onlyOwner {
-        require(_tokenIds.length == _uris.length, "IssuedERC1155: _tokenIds and _uris length mismatch");
+        require(_tokenIds.length == _amounts.length && _tokenIds.length == _uris.length, "length!");
         uint256 l = _tokenIds.length;
 
-        for(uint256 i; i < l; i++) {
+        for (uint256 i; i < l; i++) {
             uris[_tokenIds[i]] = _uris[i];
         }
 
@@ -72,23 +76,5 @@ contract BridgeEIP1155 is Initializable, ERC1155Upgradeable, OwnableUpgradeable 
         uint256[] memory _amounts
     ) external onlyOwner {
         _burnBatch(_account, _tokenIds, _amounts);
-    }
-
-    function permissionedTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        uint256 _amount
-    ) external onlyOwner {
-        _safeTransferFrom(_from, _to, _tokenId, _amount, "");
-    }
-
-    function permissionedBatchTransferFrom(
-        address _from,
-        address _to,
-        uint256[] memory _tokenIds,
-        uint256[] memory _amounts
-    ) external onlyOwner {
-        _safeBatchTransferFrom(_from, _to, _tokenIds, _amounts, "");
     }
 }

@@ -1,6 +1,6 @@
 import { ethers, network } from 'hardhat'
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers'
-import { YarERC1155__factory } from '../../typechain-types'
+import { MockERC1155__factory } from '../../typechain-types'
 
 export default class ERC721Minter {
   public static async mint(
@@ -14,7 +14,7 @@ export default class ERC721Minter {
 
     await setBalance(signers[0].address, ethers.parseEther('1'))
 
-    const token = YarERC1155__factory.connect(tokenAddress, signers[0])
+    const token = MockERC1155__factory.connect(tokenAddress, signers[0])
     await (await token.mint(recipient, tokenId, value, url)).wait()
 
     return tokenId;
@@ -31,7 +31,7 @@ export default class ERC721Minter {
 
     await setBalance(signers[0].address, ethers.parseEther('1'))
 
-    const token = YarERC1155__factory.connect(tokenAddress, signers[0])
+    const token = MockERC1155__factory.connect(tokenAddress, signers[0])
     await (await token.mintBatch(recipient, tokenIds, values, url)).wait()
 
     return tokenIds;

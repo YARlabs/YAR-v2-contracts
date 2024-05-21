@@ -8,10 +8,9 @@ import { YarLib } from "../../YarLib.sol";
 import { YarRequest } from "../../YarRequest.sol";
 import { YarResponse } from "../../YarResponse.sol";
 
-import { ERC1967ProxyInitializable } from "./ERC1967ProxyInitializable.sol";
-import { BridgeEIP721 } from "./BridgeEIP721.sol";
-
-
+import { ERC1967ProxyInitializable } from "../../utils/ERC1967ProxyInitializable.sol";
+import { ERC1967Utils } from "../../utils/ERC1967Utils.sol";
+import { BridgedEIP721 } from "./BridgedEIP721.sol";
 
 contract YarBridge721 is IERC721Receiver {
     address public owner;
@@ -23,12 +22,6 @@ contract YarBridge721 is IERC721Receiver {
     address public bridgedTokenImplementation;
 
     mapping(address bridgedToken => bool exists) public isBridgedToken;
-
-    mapping(address => bool) public issuedTokens;
-
-    function isIssuedTokenPublished(address _issuedToken) public view returns (bool) {
-        return issuedTokens[_issuedToken];
-    }
 
     mapping(uint256 chainId => address peer) public peers;
 
@@ -48,36 +41,20 @@ contract YarBridge721 is IERC721Receiver {
     ) {
         yarRequest = intialYarRequest;
         yarResponse = intialYarResponse;
-        bridgedTokenImplementation = address(new BridgeEIP721());
+        bridgedTokenImplementation = address(new BridgedEIP721());
         chainId = block.chainid;
         owner = msg.sender;
     }
 
-    function getTokenAddress(
+    function getBridgedTokenAddress(
         uint256 originalChainId,
-        address token721
+        address originalToken
     ) public view returns (address) {
-        bytes memory originalToken = abi.encode(token721);
-        bytes32 salt = keccak256(abi.encodePacked(originalChainId, originalToken));
-        return
-            address(
-                uint160(
-                    uint(
-                        keccak256(
-                            abi.encodePacked(
-                                bytes1(0xff),
-                                address(this),
-                                salt,
-                                keccak256(abi.encodePacked(type(ERC1967ProxyInitializable).creationCode))
-                            )
-                        )
-                    )
-                )
-            );
+        return ERC1967Utils.getAddress(keccak256(abi.encodePacked(originalChainId, originalToken)));
     }
 
     function transferTo(
-        address token721,
+        address token,
         uint256 tokenId,
         uint256 targetChainId,
         address recipient
@@ -86,31 +63,31 @@ contract YarBridge721 is IERC721Receiver {
         string memory tokenSymbol;
         string memory tokenUri;
 
-        IERC721Metadata token = IERC721Metadata(token721);
+        IERC721Metadata _token = IERC721Metadata(token);
 
-        try token.name() returns (string memory _tokenName) {
+        try _token.name() returns (string memory _tokenName) {
             tokenName = _tokenName;
         } catch {
             tokenName = "";
         }
 
-        try token.symbol() returns (string memory _tokenSymbol) {
+        try _token.symbol() returns (string memory _tokenSymbol) {
             tokenSymbol = _tokenSymbol;
         } catch {
             tokenSymbol = "";
         }
 
-        try token.tokenURI(tokenId) returns (string memory _tokenUri) {
+        try _token.tokenURI(tokenId) returns (string memory _tokenUri) {
             tokenUri = _tokenUri;
         } catch {
             tokenUri = "";
         }
 
-        bool _isBridgedToken = isBridgedToken[token721];
-        uint256 originalChainId = _isBridgedToken ? BridgeEIP721(token721).originalChainId() : chainId;
-        bytes memory originalToken = _isBridgedToken ? BridgeEIP721(token721).originalToken() : abi.encode(token721);
+        bool _isBridgedToken = isBridgedToken[token];
+        uint256 originalChainId = _isBridgedToken ? BridgedEIP721(token).originalChainId() : chainId;
+        address originalToken = _isBridgedToken ? BridgedEIP721(token).originalToken() : token;
 
-        token.safeTransferFrom(msg.sender, address(this), tokenId);
+        _token.safeTransferFrom(msg.sender, address(this), tokenId);
 
         bytes memory targetTx = abi.encodeWithSelector(
             YarBridge721.transferFrom.selector,
@@ -134,18 +111,16 @@ contract YarBridge721 is IERC721Receiver {
             0
         );
 
-        YarRequest(yarRequest).send(yarTx);
-
-        return yarTx;
+        return YarRequest(yarRequest).send(yarTx);
     }
 
     function transferFrom(
         uint256 originalChainId,
-        bytes calldata originalToken,
+        address originalToken,
         uint256 tokenId,
-        string memory tokenName,
-        string memory tokenSymbol,
-        string memory tokenUri,
+        string calldata tokenName,
+        string calldata tokenSymbol,
+        string calldata tokenUri,
         address recipient
     ) external {
         require(msg.sender == yarResponse, "Only YarResponse!");
@@ -154,63 +129,39 @@ contract YarBridge721 is IERC721Receiver {
         require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
 
         if (originalChainId == chainId) {
-            address originalTokenAddress = abi.decode(originalToken, (address));
-            IERC721Metadata token = IERC721Metadata(originalTokenAddress);
-            token.safeTransferFrom(address(this), recipient, tokenId);
+            IERC721Metadata(originalToken).safeTransferFrom(address(this), recipient, tokenId);
         } else {
-            address issuedTokenAddress = getBridgedTokenAddress(originalChainId, originalToken);
-            if (!isIssuedTokenPublished(issuedTokenAddress)) {
-                publicNewToken(originalChainId, originalToken, tokenName, tokenSymbol);
+            address bridgedToken = getBridgedTokenAddress(originalChainId, originalToken);
+            if (isBridgedToken[bridgedToken] == false) {
+                _deployBridgedToken(originalChainId, originalToken, tokenName, tokenSymbol);
             }
 
-            BridgeEIP721(issuedTokenAddress).mint(recipient, tokenId, tokenUri);
+            BridgedEIP721(bridgedToken).mint(recipient, tokenId, tokenUri);
         }
     }
-
-    function publicNewToken(
+    
+    function _deployBridgedToken(
         uint256 originalChainId,
-        bytes calldata originalToken,
-        string memory tokenName,
-        string memory tokenSymbol
-    ) internal returns (address)  {
+        address originalToken,
+        string calldata name,
+        string calldata symbol
+    ) internal returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(originalChainId, originalToken));
         ERC1967ProxyInitializable bridgedToken = new ERC1967ProxyInitializable{ salt: salt }();
         bridgedToken.init(
             bridgedTokenImplementation,
             abi.encodeWithSelector(
-                BridgeEIP721.initialize.selector,
+                BridgedEIP721.initialize.selector,
                 originalChainId,
                 originalToken,
-                tokenName,
-                tokenSymbol
+                name,
+                symbol
             )
         );
 
         address bridgedTokenAddress = address(bridgedToken);
         isBridgedToken[bridgedTokenAddress] = true;
         return bridgedTokenAddress;
-    }
-
-    function getBridgedTokenAddress(
-        uint256 originalChainId,
-        bytes calldata originalToken
-    ) public view returns (address) {
-        bytes32 salt = keccak256(abi.encodePacked(originalChainId, originalToken));
-        return
-            address(
-                uint160(
-                    uint(
-                        keccak256(
-                            abi.encodePacked(
-                                bytes1(0xff),
-                                address(this),
-                                salt,
-                                keccak256(abi.encodePacked(type(ERC1967ProxyInitializable).creationCode))
-                            )
-                        )
-                    )
-                )
-            );
     }
 
     function onERC721Received(

@@ -9,11 +9,11 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployer = signers[0]
   const relayer = signers[1]
 
-  const alreadyDeployed = (await getOrNull('YarERC721')) != null
+  const alreadyDeployed = (await getOrNull('MockERC721')) != null
   if (alreadyDeployed) return
 
-  await deploy('YarERC721', {
-    contract: 'YarERC721',
+  await deploy('MockERC721', {
+    contract: 'MockERC721',
     from: deployer.address,
     args: [
       "YAR NFT",
@@ -22,6 +22,6 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   })
 }
 
-deploy.tags = ['any_chain', 'YarERC721']
-deploy.dependencies = ['YarBridge721']
+deploy.tags = ['mock', 'MockERC721']
+deploy.dependencies = ['YarBridge721Mock']
 export default deploy

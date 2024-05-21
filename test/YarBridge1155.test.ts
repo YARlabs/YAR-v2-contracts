@@ -5,16 +5,16 @@ import {
   YarBridge1155Mock,
   YarBridge1155__factory,
   YarBridge1155Mock__factory,
-  BridgeEIP1155,
-  BridgeEIP1155__factory,
+  BridgedEIP1155,
+  BridgedEIP1155__factory,
   YarHub,
   YarHub__factory,
   YarRequest,
   YarRequest__factory,
   YarResponse,
   YarResponse__factory,
-  YarERC1155,
-  YarERC1155__factory,
+  MockERC1155,
+  MockERC1155__factory,
 } from '../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
@@ -32,8 +32,8 @@ describe('YarBridge1155', function () {
     let yarHub: YarHub
     let yarBridge1155: YarBridge1155
     let yarBridge1155Mock: YarBridge1155Mock
-    let bridgeEIP1155: BridgeEIP1155
-    let yarErc1155: YarERC1155
+    let bridgedEIP1155: BridgedEIP1155
+    let mockERC1155: MockERC1155
     let chainId: BigNumberish
 
     let initSnapshot: string
@@ -67,8 +67,8 @@ describe('YarBridge1155', function () {
             ethers.provider,
         )
 
-        yarErc1155 = YarERC1155__factory.connect(
-            (await deployments.get('YarERC1155')).address,
+        mockERC1155 = MockERC1155__factory.connect(
+            (await deployments.get('MockERC1155')).address,
             ethers.provider,
         )
 
@@ -95,8 +95,8 @@ describe('YarBridge1155', function () {
 
         // [0] STEP №0
         // Минтим NFT пользователю 1
-        await ERC1155Minter.mint(await yarErc1155.getAddress(), user.address, tokenId, mintBalance, tokenUrl);
-        assert(await yarErc1155.balanceOf(user.address, tokenId) == BigInt(mintBalance), 'mint!');
+        await ERC1155Minter.mint(await mockERC1155.getAddress(), user.address, tokenId, mintBalance, tokenUrl);
+        assert(await mockERC1155.balanceOf(user.address, tokenId) == BigInt(mintBalance), 'mint!');
 
         // ---------------------------
 
@@ -178,7 +178,7 @@ describe('YarBridge1155', function () {
         // [5] STEP №5
         // Чтобы приложение могло забрать NFT у пользователя, пользователь должен разрешить передачу ERC1155
 
-        const txApproveErc1155 = await yarErc1155.connect(user).setApprovalForAll(
+        const txApproveErc1155 = await mockERC1155.connect(user).setApprovalForAll(
             await yarBridge1155.getAddress(),
             true
         );
@@ -186,13 +186,13 @@ describe('YarBridge1155', function () {
         // Только для тестов
         // Проверяем получение ивента Approve в контракте с NFT
         await expect(txApproveErc1155)
-            .to.emit(yarErc1155, 'ApprovalForAll')
+            .to.emit(mockERC1155, 'ApprovalForAll')
             .withArgs(user.address, await yarBridge1155.getAddress(), true)
 
         // Только для тестов
         // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
         const yarTxTransferTo = await yarBridge1155.connect(user).transferTo.staticCall(
-            await yarErc1155.getAddress(),
+            await mockERC1155.getAddress(),
             tokenId,
             2,
             targetChainId,
@@ -200,7 +200,7 @@ describe('YarBridge1155', function () {
         );
 
         const txTransferTo = await yarBridge1155.connect(user).transferTo(
-            await yarErc1155.getAddress(),
+            await mockERC1155.getAddress(),
             tokenId,
             2,
             targetChainId,
@@ -221,16 +221,16 @@ describe('YarBridge1155', function () {
         const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTxTransferTo) as any)
         await txDeliverTransfer.wait();
 
-        const nftAddress = await yarBridge1155Mock.connect(user).getTokenAddress.staticCall(chainId, await yarErc1155.getAddress());
+        const nftAddress = await yarBridge1155Mock.connect(user).getBridgedTokenAddress(chainId, await mockERC1155.getAddress());
 
-        bridgeEIP1155 = BridgeEIP1155__factory.connect(
+        bridgedEIP1155 = BridgedEIP1155__factory.connect(
             nftAddress,
             ethers.provider,
         )
 
-        assert(await bridgeEIP1155.balanceOf.staticCall(user2.address, tokenId) === 2n, 'Invalid balance on received address');
-        assert(await bridgeEIP1155.uri.staticCall(tokenId) === tokenUrl, 'Invalid Url on received address');
-        assert(await yarErc1155.balanceOf.staticCall(user.address, tokenId) == 8n, 'Invalid balance after send nft');
+        assert(await bridgedEIP1155.balanceOf.staticCall(user2.address, tokenId) === 2n, 'Invalid balance on received address');
+        assert(await bridgedEIP1155.uri.staticCall(tokenId) === tokenUrl, 'Invalid Url on received address');
+        assert(await mockERC1155.balanceOf.staticCall(user.address, tokenId) == 8n, 'Invalid balance after send nft');
     })
 
     it('Example: bridge 1155 batch', async () => {
@@ -244,9 +244,9 @@ describe('YarBridge1155', function () {
 
         // [0] STEP №0
         // Минтим NFT пользователю 1
-        await ERC1155Minter.mintBatch(await yarErc1155.getAddress(), user.address, tokenIds, mintBalance, tokenUrls);
+        await ERC1155Minter.mintBatch(await mockERC1155.getAddress(), user.address, tokenIds, mintBalance, tokenUrls);
         for (let i = 0; i < tokenIds.length; i++) {
-            assert(await yarErc1155.balanceOf(user.address, tokenIds[i]) == BigInt(mintBalance[i]), 'mint!');
+            assert(await mockERC1155.balanceOf(user.address, tokenIds[i]) == BigInt(mintBalance[i]), 'mint!');
         }
 
         // ---------------------------
@@ -329,7 +329,7 @@ describe('YarBridge1155', function () {
         // [5] STEP №5
         // Чтобы приложение могло забрать NFT у пользователя, пользователь должен разрешить передачу ERC1155
 
-        const txApproveErc1155 = await yarErc1155.connect(user).setApprovalForAll(
+        const txApproveErc1155 = await mockERC1155.connect(user).setApprovalForAll(
             await yarBridge1155.getAddress(),
             true
         );
@@ -337,13 +337,13 @@ describe('YarBridge1155', function () {
         // Только для тестов
         // Проверяем получение ивента Approve в контракте с NFT
         await expect(txApproveErc1155)
-            .to.emit(yarErc1155, 'ApprovalForAll')
+            .to.emit(mockERC1155, 'ApprovalForAll')
             .withArgs(user.address, await yarBridge1155.getAddress(), true)
 
         // Только для тестов
         // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
         const yarTxTransferTo = await yarBridge1155.connect(user).transferToBatch.staticCall(
-            await yarErc1155.getAddress(),
+            await mockERC1155.getAddress(),
             tokenIds,
             [2, 3, 4],
             targetChainId,
@@ -351,7 +351,7 @@ describe('YarBridge1155', function () {
         );
 
         const txTransferTo = await yarBridge1155.connect(user).transferToBatch(
-            await yarErc1155.getAddress(),
+            await mockERC1155.getAddress(),
             tokenIds,
             [2, 3, 4],
             targetChainId,
@@ -372,19 +372,19 @@ describe('YarBridge1155', function () {
         const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTxTransferTo) as any)
         await txDeliverTransfer.wait();
 
-        const nftAddress = await yarBridge1155Mock.connect(user).getTokenAddress.staticCall(chainId, await yarErc1155.getAddress());
+        const nftAddress = await yarBridge1155Mock.connect(user).getBridgedTokenAddress(chainId, await mockERC1155.getAddress());
 
-        bridgeEIP1155 = BridgeEIP1155__factory.connect(
+        bridgedEIP1155 = BridgedEIP1155__factory.connect(
             nftAddress,
             ethers.provider,
         )
 
         for (let i = 0; i < tokenIds.length; i++) {
-            assert(await bridgeEIP1155.balanceOf.staticCall(user2.address, tokenIds[i]) === BigInt([2, 3, 4][i]), 'Invalid balance on received address');
-            assert(await bridgeEIP1155.uri.staticCall(tokenIds[i]) === tokenUrls[i], 'Invalid Url on received address');
+            assert(await bridgedEIP1155.balanceOf.staticCall(user2.address, tokenIds[i]) === BigInt([2, 3, 4][i]), 'Invalid balance on received address');
+            assert(await bridgedEIP1155.uri.staticCall(tokenIds[i]) === tokenUrls[i], 'Invalid Url on received address');
 
             assert(
-                await yarErc1155.balanceOf.staticCall(user.address, tokenIds[i]) == BigInt(mintBalance[i]) - BigInt([2, 3, 4][i]),
+                await mockERC1155.balanceOf.staticCall(user.address, tokenIds[i]) == BigInt(mintBalance[i]) - BigInt([2, 3, 4][i]),
                 'Invalid balance after send nft');
         }
     });

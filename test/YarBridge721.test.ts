@@ -5,16 +5,16 @@ import {
   YarBridge721Mock,
   YarBridge721__factory,
   YarBridge721Mock__factory,
-  BridgeEIP721,
-  BridgeEIP721__factory,
+  BridgedEIP721,
+  BridgedEIP721__factory,
   YarHub,
   YarHub__factory,
   YarRequest,
   YarRequest__factory,
   YarResponse,
   YarResponse__factory,
-  YarERC721,
-  YarERC721__factory,
+  MockERC721,
+  MockERC721__factory,
 } from '../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
@@ -31,8 +31,8 @@ describe('YarBridge721', function () {
   let yarHub: YarHub
   let yarBridge721: YarBridge721
   let yarBridge721Mock: YarBridge721Mock
-  let bridgeEIP721: BridgeEIP721
-  let yarErc721: YarERC721
+  let bridgedEIP721: BridgedEIP721
+  let mockERC721: MockERC721
   let chainId: BigNumberish
 
   let initSnapshot: string
@@ -66,8 +66,8 @@ describe('YarBridge721', function () {
       ethers.provider,
     )
 
-    yarErc721 = YarERC721__factory.connect(
-      (await deployments.get('YarERC721')).address,
+    mockERC721 = MockERC721__factory.connect(
+      (await deployments.get('MockERC721')).address,
       ethers.provider,
     )
 
@@ -92,8 +92,8 @@ describe('YarBridge721', function () {
 
     // [0] STEP №0
     // Минтим NFT пользователю 1
-    await ERC721Minter.mint(await yarErc721.getAddress(), user.address, tokenId);
-    assert(await yarErc721.balanceOf(user.address) == 1n, 'mint!');
+    await ERC721Minter.mint(await mockERC721.getAddress(), user.address, tokenId);
+    assert(await mockERC721.balanceOf(user.address) == 1n, 'mint!');
 
     // ---------------------------
 
@@ -106,8 +106,8 @@ describe('YarBridge721', function () {
     const txDeposit = await yarRequest.connect(user).deposit(depositToYar, { value: depositToYar })
 
     await expect(txDeposit)
-    .to.emit(yarRequest, 'Deposit')
-    .withArgs(user.address, ethers.ZeroAddress, depositToYar)
+      .to.emit(yarRequest, 'Deposit')
+      .withArgs(user.address, ethers.ZeroAddress, depositToYar)
 
     // ---------------------------
 
@@ -166,7 +166,7 @@ describe('YarBridge721', function () {
     // Проверяем средства разрешены к списанию
     assert(
       (await yarHub.allowance(user.address, chainId, await yarBridge721.getAddress())) ==
-        approveAmount,
+      approveAmount,
       'approveAmount!',
     )
 
@@ -175,7 +175,7 @@ describe('YarBridge721', function () {
     // [5] STEP №5
     // Чтобы приложение могло забрать NFT у пользователя, пользователь должен разрешить передачу ERC721
 
-    const txApproveErc721 = await yarErc721.connect(user).approve(
+    const txApproveErc721 = await mockERC721.connect(user).approve(
       await yarBridge721.getAddress(),
       tokenId,
     );
@@ -183,13 +183,13 @@ describe('YarBridge721', function () {
     // Только для тестов
     // Проверяем получение ивента Approve в контракте с NFT
     await expect(txApproveErc721)
-      .to.emit(yarErc721, 'Approval')
+      .to.emit(mockERC721, 'Approval')
       .withArgs(user.address, await yarBridge721.getAddress(), tokenId)
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
     const yarTxTransferTo = await yarBridge721.connect(user).transferTo.staticCall(
-      await yarErc721.getAddress(),
+      await mockERC721.getAddress(),
       tokenId,
       targetChainId,
       user2.address
@@ -198,7 +198,7 @@ describe('YarBridge721', function () {
     const txTransferTo = await yarBridge721
       .connect(user)
       .transferTo(
-        await yarErc721.getAddress(),
+        await mockERC721.getAddress(),
         tokenId,
         targetChainId,
         user2.address
@@ -206,27 +206,27 @@ describe('YarBridge721', function () {
     await txTransferTo.wait();
 
     const txCreateTransactionTransfer = await yarHub
-    .connect(relayer)
-    .createTransaction(Object.values(yarTxTransferTo) as any, txTransferTo.hash)
+      .connect(relayer)
+      .createTransaction(Object.values(yarTxTransferTo) as any, txTransferTo.hash)
     await txCreateTransactionTransfer.wait();
 
     const txExecuteTransactionTransfer = await yarHub
-    .connect(relayer)
-    .executeTransaction(Object.values(yarTxTransferTo) as any, 0)
+      .connect(relayer)
+      .executeTransaction(Object.values(yarTxTransferTo) as any, 0)
     await txExecuteTransactionTransfer.wait();
 
     const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTxTransferTo) as any)
     await txDeliverTransfer.wait();
 
-    const nftAddress = await yarBridge721Mock.connect(user).getTokenAddress.staticCall(chainId, await yarErc721.getAddress());
+    const nftAddress = await yarBridge721Mock.connect(user).getBridgedTokenAddress(chainId, await mockERC721.getAddress());
 
-    bridgeEIP721 = BridgeEIP721__factory.connect(
+    bridgedEIP721 = BridgedEIP721__factory.connect(
       nftAddress,
       ethers.provider,
     )
 
-    assert(await bridgeEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
-    assert(await yarErc721.balanceOf.staticCall(user.address) == 0n, 'Invalid balance after send nft');
+    assert(await bridgedEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
+    assert(await mockERC721.balanceOf.staticCall(user.address) == 0n, 'Invalid balance after send nft');
   })
 
   it('Example: bridge 721 with send back', async () => {
@@ -237,8 +237,8 @@ describe('YarBridge721', function () {
 
     // [0] STEP №0
     // Минтим NFT пользователю 1
-    await ERC721Minter.mint(await yarErc721.getAddress(), user.address, tokenId);
-    assert(await yarErc721.balanceOf(user.address) == 1n, 'mint!');
+    await ERC721Minter.mint(await mockERC721.getAddress(), user.address, tokenId);
+    assert(await mockERC721.balanceOf(user.address) == 1n, 'mint!');
 
     // ---------------------------
 
@@ -251,8 +251,8 @@ describe('YarBridge721', function () {
     const txDeposit = await yarRequest.connect(user).deposit(depositToYar, { value: depositToYar })
 
     await expect(txDeposit)
-    .to.emit(yarRequest, 'Deposit')
-    .withArgs(user.address, ethers.ZeroAddress, depositToYar)
+      .to.emit(yarRequest, 'Deposit')
+      .withArgs(user.address, ethers.ZeroAddress, depositToYar)
 
     // ---------------------------
 
@@ -311,7 +311,7 @@ describe('YarBridge721', function () {
     // Проверяем средства разрешены к списанию
     assert(
       (await yarHub.allowance(user.address, chainId, await yarBridge721.getAddress())) ==
-        approveAmount,
+      approveAmount,
       'approveAmount!',
     )
 
@@ -319,8 +319,7 @@ describe('YarBridge721', function () {
 
     // [5] STEP №5
     // Чтобы приложение могло забрать NFT у пользователя, пользователь должен разрешить передачу ERC721
-
-    const txApproveErc721 = await yarErc721.connect(user).approve(
+    const txApproveErc721 = await mockERC721.connect(user).approve(
       await yarBridge721.getAddress(),
       tokenId,
     );
@@ -328,13 +327,13 @@ describe('YarBridge721', function () {
     // Только для тестов
     // Проверяем получение ивента Approve в контракте с NFT
     await expect(txApproveErc721)
-      .to.emit(yarErc721, 'Approval')
+      .to.emit(mockERC721, 'Approval')
       .withArgs(user.address, await yarBridge721.getAddress(), tokenId)
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
     const yarTxTransferTo = await yarBridge721.connect(user).transferTo.staticCall(
-      await yarErc721.getAddress(),
+      await mockERC721.getAddress(),
       tokenId,
       targetChainId,
       user2.address
@@ -343,7 +342,7 @@ describe('YarBridge721', function () {
     const txTransferTo = await yarBridge721
       .connect(user)
       .transferTo(
-        await yarErc721.getAddress(),
+        await mockERC721.getAddress(),
         tokenId,
         targetChainId,
         user2.address
@@ -351,27 +350,27 @@ describe('YarBridge721', function () {
     await txTransferTo.wait();
 
     const txCreateTransactionTransfer = await yarHub
-    .connect(relayer)
-    .createTransaction(Object.values(yarTxTransferTo) as any, txTransferTo.hash)
+      .connect(relayer)
+      .createTransaction(Object.values(yarTxTransferTo) as any, txTransferTo.hash)
     await txCreateTransactionTransfer.wait();
 
     const txExecuteTransactionTransfer = await yarHub
-    .connect(relayer)
-    .executeTransaction(Object.values(yarTxTransferTo) as any, 0)
+      .connect(relayer)
+      .executeTransaction(Object.values(yarTxTransferTo) as any, 0)
     await txExecuteTransactionTransfer.wait();
 
     const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTxTransferTo) as any)
     await txDeliverTransfer.wait();
 
-    const nftAddress = await yarBridge721Mock.connect(user).getTokenAddress.staticCall(chainId, await yarErc721.getAddress());
+    const nftAddress = await yarBridge721Mock.connect(user).getBridgedTokenAddress(chainId, await mockERC721.getAddress());
 
-    bridgeEIP721 = BridgeEIP721__factory.connect(
+    bridgedEIP721 = BridgedEIP721__factory.connect(
       nftAddress,
       ethers.provider,
     )
 
-    assert(await bridgeEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
-    assert(await yarErc721.balanceOf(user.address) == 0n, 'Invalid balance after send nft');
+    assert(await bridgedEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
+    assert(await mockERC721.balanceOf(user.address) == 0n, 'Invalid balance after send nft');
 
     // Пробуем переслать NFT обратно
 
@@ -384,10 +383,8 @@ describe('YarBridge721', function () {
     const txDeposit2 = await yarRequest.connect(user2).deposit(depositToYar, { value: depositToYar })
 
     await expect(txDeposit2)
-    .to.emit(yarRequest, 'Deposit')
-    .withArgs(user2.address, ethers.ZeroAddress, depositToYar)
-
-    // ---------------------------
+      .to.emit(yarRequest, 'Deposit')
+      .withArgs(user2.address, ethers.ZeroAddress, depositToYar)
 
     // ---------------------------
 
@@ -437,7 +434,7 @@ describe('YarBridge721', function () {
     // Проверяем средства разрешены к списанию
     assert(
       (await yarHub.allowance(user2.address, chainId, await yarBridge721Mock.getAddress())) ==
-        approveAmount,
+      approveAmount,
       'approveAmount!',
     )
     // ---------------------------
@@ -445,7 +442,7 @@ describe('YarBridge721', function () {
     // [5] STEP №5
     // Чтобы приложение могло забрать NFT у пользователя, пользователь должен разрешить передачу ERC721
 
-    const txApproveErc7212 = await bridgeEIP721.connect(user2).approve(
+    const txApproveErc7212 = await bridgedEIP721.connect(user2).approve(
       await yarBridge721Mock.getAddress(),
       tokenId,
     );
@@ -453,21 +450,21 @@ describe('YarBridge721', function () {
     // Только для тестов
     // Проверяем получение ивента Approve в контракте с NFT
     await expect(txApproveErc7212)
-      .to.emit(bridgeEIP721, 'Approval')
+      .to.emit(bridgedEIP721, 'Approval')
       .withArgs(user2.address, await yarBridge721Mock.getAddress(), tokenId)
 
     // Только для тестов
     // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
     // ! Чтобы этот тест работал, необходимо закоментировать проверку initialChainId & targetChainId в YarRequest.send
     const yarTxTransferTo2 = await yarBridge721Mock.connect(user2).transferTo.staticCall(
-      await bridgeEIP721.getAddress(),
+      await bridgedEIP721.getAddress(),
       tokenId,
       chainId,
       user.address,
     );
-
+    console.log('awww1')
     const txTransferTo2 = await yarBridge721Mock.connect(user2).transferTo(
-      await bridgeEIP721.getAddress(),
+      await bridgedEIP721.getAddress(),
       tokenId,
       chainId,
       user.address,
@@ -475,19 +472,19 @@ describe('YarBridge721', function () {
     await txTransferTo2.wait();
 
     const txCreateTransactionTransfer2 = await yarHub
-    .connect(relayer)
-    .createTransaction(Object.values(yarTxTransferTo2) as any, txTransferTo2.hash)
+      .connect(relayer)
+      .createTransaction(Object.values(yarTxTransferTo2) as any, txTransferTo2.hash)
     await txCreateTransactionTransfer2.wait();
 
     const txExecuteTransactionTransfer2 = await yarHub
-    .connect(relayer)
-    .executeTransaction(Object.values(yarTxTransferTo2) as any, 0)
+      .connect(relayer)
+      .executeTransaction(Object.values(yarTxTransferTo2) as any, 0)
     await txExecuteTransactionTransfer2.wait();
 
     const txDeliverTransfer2 = await yarResponse.connect(relayer).deliver(Object.values(yarTxTransferTo2) as any)
     await txDeliverTransfer2.wait();
 
-    assert(await bridgeEIP721.balanceOf.staticCall(user2) === 0n, 'BACK: Invalid balance on received address');
-    assert(await yarErc721.balanceOf(user.address) == 1n, 'BACK: Invalid balance after send nft');
+    assert(await bridgedEIP721.balanceOf.staticCall(user2) === 0n, 'BACK: Invalid balance on received address');
+    assert(await mockERC721.balanceOf(user.address) == 1n, 'BACK: Invalid balance after send nft');
   })
 })

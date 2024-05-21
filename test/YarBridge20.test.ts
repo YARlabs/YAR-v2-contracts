@@ -75,7 +75,7 @@ describe('YarBridge20', function () {
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
   })
 
-  it('Example: native tarnsfer', async () => {
+  it('Example: native transfer', async () => {
     // ---------------------------
 
     const token = ethers.ZeroAddress // Отправляем чем бридж нативный токен
@@ -201,8 +201,8 @@ describe('YarBridge20', function () {
       data: yarBridge20.interface.encodeFunctionData('deployFrom', [
         chainId,
         token,
-        'Ethereum',
-        'ETH',
+        await yarBridge20.nativeName(),
+        await yarBridge20.nativeSymbol(),
         18,
       ]),
       _nonce: 0
@@ -403,7 +403,7 @@ describe('YarBridge20', function () {
     // ---------------------------
   })
 
-  it('Example: eip20 tarnsfer', async () => {
+  it('Example: eip20 transfer', async () => {
     // ---------------------------
 
     const token = IERC20Metadata__factory.connect(USDT, ethers.provider)

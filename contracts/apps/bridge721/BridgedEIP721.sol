@@ -5,19 +5,19 @@ import { ERC721Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract BridgeEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
+contract BridgedEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     uint256 public originalChainId;
-    bytes public originalToken;
+    address public originalToken;
     string public originalTokenName;
     string public originalTokenSymbol;
 
-    mapping(uint256 => string) uris;
+    mapping(uint256 => string) public uris;
 
     function initialize(
         uint256 _originalChainId,
-        bytes memory _originalToken,
-        string memory _originalTokenName,
-        string memory _originalTokenSymbol
+        address _originalToken,
+        string calldata _originalTokenName,
+        string calldata _originalTokenSymbol
     ) external initializer {
         ERC721Upgradeable.__ERC721_init(
             string(abi.encodePacked("y", _originalTokenName)),
@@ -34,7 +34,11 @@ contract BridgeEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         return uris[_tokenId];
     }
 
-    function getOriginalTokenInfo() external view returns (uint256, bytes memory, string memory, string memory) {
+    function getOriginalTokenInfo()
+        external
+        view
+        returns (uint256, address, string memory, string memory)
+    {
         return (originalChainId, originalToken, originalTokenName, originalTokenSymbol);
     }
 
@@ -43,15 +47,7 @@ contract BridgeEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         _safeMint(_recipient, _tokenId);
     }
 
-    function burn( uint256 _tokenId) external onlyOwner {
+    function burn(uint256 _tokenId) external onlyOwner {
         _burn(_tokenId);
-    }
-
-    function permissionedTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external onlyOwner {
-        _safeTransfer(_from, _to, _tokenId);
     }
 }

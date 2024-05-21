@@ -1,4 +1,4 @@
-import { YarERC721__factory } from '../typechain-types'
+import { MockERC721__factory } from '../typechain-types'
 import config from '../hardhat.config';
 import { ethers } from 'ethers';
 
@@ -11,7 +11,7 @@ async function app() {
     const wallet = new ethers.Wallet(process.env.DEPLOYER!).connect(provider)
 
     const contractAddress = '0xE576869Fa0DF5740D13cCE2964A177664A7ab47E';
-    const Contract = YarERC721__factory.connect(contractAddress, wallet);
+    const Contract = MockERC721__factory.connect(contractAddress, wallet);
 
     const newOwner = '0x71CccbB4F914e3c7151C3071E21D7cEe2A030051';
     const tokenId = 100;
