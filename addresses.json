@@ -4,6 +4,9 @@
       "name": "bscTestnet",
       "chainId": "97",
       "contracts": {
+        "YarBridge1155": {
+          "address": "0xCE07f33831D2a36e4935eA6a8Ff6059f49Fa52Da"
+        },
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"
         },
@@ -27,6 +30,9 @@
       "name": "polygonTestnet",
       "chainId": "80002",
       "contracts": {
+        "YarBridge1155": {
+          "address": "0xCE07f33831D2a36e4935eA6a8Ff6059f49Fa52Da"
+        },
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"
         },
@@ -52,6 +58,9 @@
       "contracts": {
         "Multicall3": {
           "address": "0xc8dA05D15D278792ff0c26bC4436F1F801A06c63"
+        },
+        "YarBridge1155": {
+          "address": "0xCE07f33831D2a36e4935eA6a8Ff6059f49Fa52Da"
         },
         "YarBridge20": {
           "address": "0x119A340E8f6294eDeA95677a2Fdb5a6E8Ad3164c"

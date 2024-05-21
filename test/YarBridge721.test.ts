@@ -1,11 +1,6 @@
 import { assert, expect, use } from 'chai'
 import { deployments, ethers, network } from 'hardhat'
 import {
-  IERC20Metadata__factory,
-  YarBridge721,
-  YarBridge721Mock,
-  YarBridge721Mock__factory,
-  YarBridge721__factory,
   YarBridge721,
   YarBridge721Mock,
   YarBridge721__factory,
@@ -23,8 +18,6 @@ import {
 } from '../typechain-types'
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers'
 import { BigNumberish } from 'ethers'
-import { YarLib } from '../typechain-types/contracts/YarRequest'
-import { USDT } from '../constants/externalAddresses'
 import ERC721Minter from './utils/ERC721Minter'
 
 describe('YarBridge721', function () {
@@ -233,7 +226,7 @@ describe('YarBridge721', function () {
     )
 
     assert(await bridgeEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
-    assert(await yarErc721.balanceOf(user.address) == 0n, 'Invalid balance after send nft');
+    assert(await yarErc721.balanceOf.staticCall(user.address) == 0n, 'Invalid balance after send nft');
   })
 
   it('Example: bridge 721 with send back', async () => {

@@ -7,6 +7,7 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
 import { YarLib } from "../../YarLib.sol";
 import { YarRequest } from "../../YarRequest.sol";
 import { YarResponse } from "../../YarResponse.sol";
+
 import { ERC1967ProxyInitializable } from "./ERC1967ProxyInitializable.sol";
 import { BridgeEIP721 } from "./BridgeEIP721.sol";
 
