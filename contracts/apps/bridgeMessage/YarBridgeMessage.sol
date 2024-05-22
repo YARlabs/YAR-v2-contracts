@@ -40,6 +40,7 @@ contract YarBridgeMessage {
     ) external returns (YarLib.YarTX memory) {
         bytes memory targetTx = abi.encodeWithSelector(
             YarBridgeMessage.sendFrom.selector,
+            msg.sender,
             message
         );
 
@@ -59,10 +60,16 @@ contract YarBridgeMessage {
         return yarTx;
     }
 
-    string[] public messages;
+    struct Message {
+        address sender;
+        string message;
+        uint256 timestamp;
+    }
+
+    Message[] public messages;
     uint256 public messageCount;
 
-    function getMessages(uint offset, uint limit) public view returns (string[] memory) {
+    function getMessages(uint offset, uint limit) public view returns (Message[] memory) {
         require(offset < messageCount, "Offset out of range");
 
         uint end = offset + limit;
@@ -71,7 +78,7 @@ contract YarBridgeMessage {
         }
 
         uint resultSize = end - offset;
-        string[] memory result = new string[](resultSize);
+        Message[] memory result = new Message[](resultSize);
 
         uint index = 0;
         for (uint i = messageCount - offset; i > messageCount - end; i--) {
@@ -83,6 +90,7 @@ contract YarBridgeMessage {
     }
 
     function sendFrom(
+        address sender,
         string calldata message
     ) external {
         require(msg.sender == yarResponse, "Only YarResponse!");
@@ -90,7 +98,11 @@ contract YarBridgeMessage {
         YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
         require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
 
-        messages.push(message);
+        messages.push(Message(
+            sender,
+            message,
+            block.timestamp
+        ));
         messageCount++;
     }
 }

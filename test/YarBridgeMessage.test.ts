@@ -188,6 +188,8 @@ describe('YarBridgeMessage', function () {
         await txDeliverTransfer.wait();
 
         const messageInChain = await yarBridgeMessageMock.connect(user).getMessages.staticCall(0, 1);
-        assert(messageInChain?.[0] === message, 'message!');
+        console.log({ messageInChain });
+        assert(messageInChain?.[0].sender === user.address, 'message!');
+        assert(messageInChain?.[0].message === message, 'message!');
     })
 })
