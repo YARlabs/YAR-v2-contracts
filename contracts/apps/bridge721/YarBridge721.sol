@@ -23,16 +23,25 @@ contract YarBridge721 is IERC721Receiver {
 
     mapping(address bridgedToken => bool exists) public isBridgedToken;
 
-    mapping(uint256 chainId => address peer) public peers;
+    struct PeerInfo {
+        address peerAddress;
+        string nativeSymbol;
+    }
+    mapping(uint256 => PeerInfo) public peers;
 
-    function setPeer(uint256 newChainId, address newPeer) external {
+    function setPeer(uint256 newChainId, address newPeer, string calldata newPeerNativeSymbol) external {
         require(msg.sender == owner, "only owner!");
-        peers[newChainId] = newPeer;
+        peers[newChainId] = PeerInfo(newPeer, newPeerNativeSymbol);
     }
 
-    function getPeer(uint256 _chainId) public view returns (address) {
-        address peer = peers[_chainId];
-        return peer == address(0) ? address(this) : peer;
+    function getPeer(uint256 _chainId) public view returns (PeerInfo memory) {
+        PeerInfo memory peer = peers[_chainId];
+
+        if (peer.peerAddress == address(0)) {
+            return PeerInfo(address(this), "");
+        } else {
+            return peer;
+        }
     }
 
     constructor(
@@ -105,7 +114,7 @@ contract YarBridge721 is IERC721Receiver {
             address(this),
             msg.sender,
             targetChainId,
-            getPeer(targetChainId),
+            getPeer(targetChainId).peerAddress,
             0,
             targetTx,
             0
@@ -126,7 +135,7 @@ contract YarBridge721 is IERC721Receiver {
         require(msg.sender == yarResponse, "Only YarResponse!");
 
         YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
-        require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
+        require(getPeer(trustedYarTx.initialChainId).peerAddress == trustedYarTx.sender, "not peer!");
 
         if (originalChainId == chainId) {
             IERC721Metadata(originalToken).safeTransferFrom(address(this), recipient, tokenId);
@@ -139,7 +148,7 @@ contract YarBridge721 is IERC721Receiver {
             BridgedEIP721(bridgedToken).mint(recipient, tokenId, tokenUri);
         }
     }
-    
+
     function _deployBridgedToken(
         uint256 originalChainId,
         address originalToken,
@@ -154,6 +163,7 @@ contract YarBridge721 is IERC721Receiver {
                 BridgedEIP721.initialize.selector,
                 originalChainId,
                 originalToken,
+                getPeer(originalChainId).nativeSymbol,
                 name,
                 symbol
             )

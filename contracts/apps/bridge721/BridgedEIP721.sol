@@ -10,22 +10,25 @@ contract BridgedEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     address public originalToken;
     string public originalTokenName;
     string public originalTokenSymbol;
+    string public originalNativeSymbol;
 
     mapping(uint256 => string) public uris;
 
     function initialize(
         uint256 _originalChainId,
         address _originalToken,
+        string calldata _originalNativeSymbol,
         string calldata _originalTokenName,
         string calldata _originalTokenSymbol
     ) external initializer {
         ERC721Upgradeable.__ERC721_init(
-            string(abi.encodePacked("y", _originalTokenName)),
-            string(abi.encodePacked("y", _originalTokenSymbol))
+            string(abi.encodePacked(_originalTokenName, ":", _originalNativeSymbol)),
+            string(abi.encodePacked(_originalTokenSymbol, ":", _originalNativeSymbol))
         );
         OwnableUpgradeable.__Ownable_init(msg.sender);
         originalTokenName = _originalTokenName;
         originalTokenSymbol = _originalTokenSymbol;
+        originalNativeSymbol = _originalNativeSymbol;
         originalChainId = _originalChainId;
         originalToken = _originalToken;
     }
@@ -37,9 +40,9 @@ contract BridgedEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     function getOriginalTokenInfo()
         external
         view
-        returns (uint256, address, string memory, string memory)
+        returns (uint256, address, string memory, string memory, string memory)
     {
-        return (originalChainId, originalToken, originalTokenName, originalTokenSymbol);
+        return (originalChainId, originalToken, originalNativeSymbol, originalTokenName, originalTokenSymbol);
     }
 
     function mint(address _recipient, uint256 _tokenId, string calldata _uri) external onlyOwner {

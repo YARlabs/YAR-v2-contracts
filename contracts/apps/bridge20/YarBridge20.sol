@@ -25,20 +25,29 @@ contract YarBridge20 {
 
     uint256 public chainId;
 
-    mapping(uint256 chainId => address peer) public peers;
+    struct PeerInfo {
+        address peerAddress;
+        string nativeSymbol;
+    }
+    mapping(uint256 => PeerInfo) public peers;
 
     string public nativeName;
     string public nativeSymbol;
     uint8 public nativeDecimals;
 
-    function setPeer(uint256 newChainId, address newPeer) external {
+    function setPeer(uint256 newChainId, address newPeer, string calldata newPeerNativeSymbol) external {
         require(msg.sender == owner, "only owner!");
-        peers[newChainId] = newPeer;
+        peers[newChainId] = PeerInfo(newPeer, newPeerNativeSymbol);
     }
 
-    function getPeer(uint256 _chainId) public view returns (address) {
-        address peer = peers[_chainId];
-        return peer == address(0) ? address(this) : peer;
+    function getPeer(uint256 _chainId) public view returns (PeerInfo memory) {
+        PeerInfo memory peer = peers[_chainId];
+
+        if (peer.peerAddress == address(0)) {
+            return PeerInfo(address(this), "");
+        } else {
+            return peer;
+        }
     }
 
     constructor(
@@ -113,7 +122,7 @@ contract YarBridge20 {
             address(this),
             msg.sender,
             targetChainId,
-            getPeer(targetChainId),
+            getPeer(targetChainId).peerAddress,
             0,
             abi.encodeWithSelector(
                 YarBridge20.deployFrom.selector,
@@ -137,7 +146,7 @@ contract YarBridge20 {
     ) external {
         require(msg.sender == yarResponse, "only yarResponse!");
         YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
-        require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
+        require(getPeer(trustedYarTx.initialChainId).peerAddress == trustedYarTx.sender, "not peer!");
         if (originalChainId == chainId) {
             if (originalToken == address(0)) {
                 (bool success, bytes memory result) = recipient.call{ value: amount }("");
@@ -189,7 +198,7 @@ contract YarBridge20 {
             address(this),
             msg.sender,
             targetChainId,
-            getPeer(targetChainId),
+            getPeer(targetChainId).peerAddress,
             0,
             targetTx,
             0
@@ -220,6 +229,7 @@ contract YarBridge20 {
                 BridgedEIP20.initialize.selector,
                 originalChainId,
                 originalToken,
+                getPeer(originalChainId).nativeSymbol,
                 name,
                 symbol,
                 decimals

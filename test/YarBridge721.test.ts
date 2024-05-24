@@ -73,8 +73,8 @@ describe('YarBridge721', function () {
 
     chainId = (await ethers.provider.getNetwork()).chainId
 
-    await yarBridge721.connect(deployer).setPeer(111, await yarBridge721Mock.getAddress())
-    await yarBridge721Mock.connect(deployer).setPeer(chainId, await yarBridge721.getAddress())
+    await yarBridge721.connect(deployer).setPeer(111, await yarBridge721Mock.getAddress(), "YARMOCK")
+    await yarBridge721Mock.connect(deployer).setPeer(chainId, await yarBridge721.getAddress(), "YAR")
 
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
   })
@@ -227,6 +227,8 @@ describe('YarBridge721', function () {
 
     assert(await bridgedEIP721.balanceOf.staticCall(user2) === 1n, 'Invalid balance on received address');
     assert(await mockERC721.balanceOf.staticCall(user.address) == 0n, 'Invalid balance after send nft');
+
+    assert(await bridgedEIP721.symbol.staticCall() === 'YARNFT:YAR', 'symbol!');
   })
 
   it('Example: bridge 721 with send back', async () => {

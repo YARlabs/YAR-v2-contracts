@@ -9,30 +9,33 @@ contract BridgedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     uint256 public originalChain;
     address public originalToken;
     uint8 internal originalTokenDecimals;
+    string public originalNativeSymbol;
     string public originalTokenName;
     string public originalTokenSymbol;
 
     function initialize(
         uint256 _originalChain,
         address _originalToken,
+        string calldata _originalNativeSymbol,
         string calldata _originalTokenName,
         string calldata _originalTokenSymbol,
         uint8 _originalTokenDecimals
     ) external initializer {
         ERC20Upgradeable.__ERC20_init(
-            string(abi.encodePacked("y", _originalTokenName)),
-            string(abi.encodePacked("y", _originalTokenSymbol))
+            string(abi.encodePacked(_originalTokenName, ":", _originalNativeSymbol)),
+            string(abi.encodePacked(_originalTokenSymbol, ":", _originalNativeSymbol))
         );
         OwnableUpgradeable.__Ownable_init(msg.sender);
         originalTokenName = _originalTokenName;
         originalTokenSymbol = _originalTokenSymbol;
+        originalNativeSymbol = _originalNativeSymbol;
         originalChain = _originalChain;
         originalToken = _originalToken;
         originalTokenDecimals = _originalTokenDecimals;
     }
 
-    function getOriginalTokenInfo() external view returns (uint256, address, string memory, string memory, uint8) {
-        return (originalChain, originalToken, originalTokenName, originalTokenSymbol, decimals());
+    function getOriginalTokenInfo() external view returns (uint256, address, string memory, string memory, string memory, uint8) {
+        return (originalChain, originalToken, originalNativeSymbol, originalTokenName, originalTokenSymbol, decimals());
     }
 
     function mint(address _recipient, uint256 _amount) external onlyOwner {

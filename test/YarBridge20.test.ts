@@ -64,8 +64,8 @@ describe('YarBridge20', function () {
     )
     chainId = (await ethers.provider.getNetwork()).chainId
 
-    await yarBridge20.connect(deployer).setPeer(111, await yarBridge20Mock.getAddress())
-    await yarBridge20Mock.connect(deployer).setPeer(chainId, await yarBridge20.getAddress())
+    await yarBridge20.connect(deployer).setPeer(111, await yarBridge20Mock.getAddress(), 'YARMOCK')
+    await yarBridge20Mock.connect(deployer).setPeer(chainId, await yarBridge20.getAddress(), 'YAR')
 
     initSnapshot = await ethers.provider.send('evm_snapshot', [])
   })
@@ -596,6 +596,10 @@ describe('YarBridge20', function () {
       await token.getAddress(),
     )
     assert(await yarBridge20Mock.isBridgedToken(bridgedToken), 'bridged token not created!')
+    assert(
+      (await IERC20Metadata__factory.connect(bridgedToken, ethers.provider).symbol()) == "USDT:YAR",
+      'bridged token invalid symbol',
+    )
 
     // ---------------------------
 
