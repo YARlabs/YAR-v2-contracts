@@ -112,6 +112,8 @@ contract YarBridge20 {
         if (isBridgedToken[token]) {
             originalChain = BridgedEIP20(token).originalChain();
             originalToken = BridgedEIP20(token).originalToken();
+            name = BridgedEIP20(token).originalTokenName();
+            symbol = BridgedEIP20(token).originalTokenSymbol();
         } else {
             originalChain = chainId;
             originalToken = token;
