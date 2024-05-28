@@ -32,6 +32,11 @@ contract YarHub {
     }
 
     mapping(bytes32 yarTxHash => WrappedYarTX hubTx) public wrappedYarTXs;
+    
+    mapping(address account => uint256 feeTokenAmount) public deposits;
+    
+    mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
+        public allowance;
 
     event CreateTransaction(YarLib.YarTX yarTx, bytes32 yarTxHash);
 
@@ -51,9 +56,6 @@ contract YarHub {
 
     event EarnedFees(uint256 amount);
 
-    mapping(address account => mapping(uint256 chainId => mapping(address spender => uint256 amount)))
-        public allowance;
-
     constructor(address initialRelayer, uint256 initialFeesRatio) {
         relayer = initialRelayer;
         require(initialFeesRatio <= 10000, "initialFeesRatio > 100%");
@@ -61,8 +63,6 @@ contract YarHub {
     }
 
     receive() external payable {}
-
-    mapping(address account => uint256 feeTokenAmount) public deposits;
 
     function setFeesRatio(uint256 newFeesRation) external {
         require(msg.sender == relayer, "only relayer!");

@@ -1,6 +1,9 @@
-# Протокол YAR
+# Документация
+
+## Протокол
 
 Протокол YAR реализует сеть доставки ончейн транзакций во внешние сети.
+<br>
 Он состоит из следующих элементов:
 
 0. Стандартная EVM транзакция, которую требуется доставить
@@ -11,7 +14,17 @@
 5. EVM-совеместимый блокчейн YarChain
 6. Сеть валидаторов Relayers
 
-# 0. Стандартная EVM транзакция
+Которые объединяется в следующую последовательность:
+
+1. Инициатор(EOA кошелек или смарт контракт) вызывают YarRequest.send(...)
+2. YarRequest генерирует событе Send
+3. Relayers получив событие Send добавляет ожидающую транакцию в YarHub
+4. После добавления транзакции в очередь, Relayers переводят транзакции в исполнение, блокируя достаточную сумму комиссий
+5. Relayers вызывают YarResponse.deliver(...), которая исполнит транзакцию по адресу назначения
+6. После исполнения транзакции, Relayers обновляет стататус транзакции, и возвращает неизрасходованные комисии
+
+
+### 0. Стандартная EVM транзакция
 
 На отправляемые транзакции не накладывается никаких ограничений:
 
@@ -19,7 +32,7 @@
 2. Транзакция может переводить натиный токен, то есть использовать параметр [value]
 3. Транзакция может представлять собой еще один кроссчейн вызов, позволяя составлять сложные последовательности передачи данных из множества сетей
 
-# 1. Смарт-контракт YarRequest
+### 1. Смарт-контракт YarRequest
 
 Отправная точка протокола.
 Отвечает за передачу событий валидаторам.
@@ -75,7 +88,7 @@ function deposit(uint256 amount) public payable;
 function approve(address spender, uint256 amount) public;
 ```
 
-# 2. Смарт-контракт YarResponse
+### 2. Смарт-контракт YarResponse
 
 Является входной точкой для отправки транзакций сетью валидаторов Relayers. Происходит это посредством функции [deliver], которая развертывает кроссчейн транзакцию [yarTx] и доставляет ее адресату
 
@@ -95,7 +108,7 @@ function deliver(YarLib.YarTX calldata yarTx) external payable {
 function trustedYarTx() external view returns (YarLib.YarTX memory);
 ```
 
-# 3. Смарт-контракт YarHub
+### 3. Смарт-контракт YarHub
 
 YarHub хранит все ожидающие, исполненыне и провалившиеся кроссчейн транзакции, которые доступны в сопоставленнии [wrappedYarTXs]
 
@@ -114,3 +127,251 @@ keccak256(abi.encode(yarTX))
 ```solidity
 function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32);
 ```
+
+Так же YarHub хранит депозиты пользователей в токенах Yar, используемуе для оплаты комиссий.
+<br>
+Баланс зачисляется на депозит только с адреса relayer, после обработки события Deposit
+<br>
+Посмотреть текущий баланс 
+
+```solidity
+uint256 balance = yarHub.deposits(account);
+```
+
+### 4. Solidity структура YarLib.YarTX
+
+```solidity
+library YarLib {
+    struct YarTX {
+        uint256 initialChainId; // идентификатор текущей сети
+        address sender; // Ваш смарт контракт [Example]
+        address payer; // Пользователь, который вызывает Example, и платит комиссию в Yar
+        uint256 targetChainId; // идентификатор сети, в которую будет доставлена транзакция
+        address target; // Адрес в сети [TARGET], по которому будет вызвана транзакция
+        uint256 value; // Сумма нативного токена [TARGET] сети, которые будут переданны с транзакцией
+        bytes data; // Закодированные данные транзакции (bytes4 для сигнатуры функции + аргументы функции)
+        uint256 _nonce; // Этот параметр будет перепорпеделен в YarRequest, устанавливайте его в 0
+    }
+}
+```
+
+## Комиссии
+
+Для оплаты газа в сети доставки, протокол взымает с баланса пользователя достаточную сумму в токенах Yar, которая хранится в сети Yar, на смарт-контракте YarHub
+<br>
+Что бы сеть Relayers исполнила транзакцию, пользователь предварительно вносит достаточную сумму на депозит.
+<br>
+Если на момент исполенения транзакции у пользователя не будет достаточного депозита, транзакция останется в очереди.
+<br>
+Делается это посреством вызова функции deposit в смарт-контракте YarRequest, из любой поддерживаемой сети
+
+```solidity
+yarRequest.deposit(amount);
+```
+
+В каждой сети используется свой токен оплаты, обычно это нативный токен сети, но может быть и eip20 токен.
+<br>
+Посмотреть какой токен используется можно 
+
+```solidity
+address feeToken = yarRequest.feeToken();
+```
+
+Если feeToken == address(0), тогда используется нативный токен сети, иначе указанный eip20 
+<br>
+
+Например вызвав функцию YarRequest.deposit(1e18) в сети Ethereum, с коешлька пользователя будет списан 1ETH, который затем по текущему курсу конвертируется в токены YAR, которые будут зачислены на депозит пользоваетеля в YarHub
+
+<br>
+
+Что бы осуществлять вызов кроссчейн транзакций с адреса произвольного смарт контракта, но оплачивать комиссию yar с адреса пользователя, требуется что бы пользователь разрешил приложению списывать депозит от его имени. 
+
+```solidity
+yarRequest.approve(appAddress, yarAmount)
+```
+
+## Сценарии использования
+
+Протокол YAR позволяет отправлять произвольные транзакции на любой адрес, будь то адрес смарт-контракта или же EOA кошелек
+
+### Отправка транзакций на EOA кошелек
+
+Обычно они имеют смысл только в переводе нативного токена сети, сумма которого указана в параметре value.
+
+На примере обычной транзакции в рамках одной сети
+
+```typescript
+sender.sendTransaction({
+    from: sender.address, // отправитель
+    to: recipeint.address, // получатель
+    value: 1e18 // сумма отправленных средств
+})
+```
+
+Тогда для доставки подобной транзакции в другую сеть, это выглядит так
+
+```typescript
+yarRequest.send({
+    initialChainId, 
+    sender: sender.address, // отправитель
+    payer: sender.address, // отправитель
+    targetChainId,
+    target: recipient.address, // получатель
+    value: 1e18, // сумма отправленных средств
+    data: '0x',
+    _nonce: 0
+})
+```
+
+После исполнения этой транзакции сеть Relayers переведет 1e18 нативный токенов сети target на адрес recipient 
+
+### Отправка транзакций на смарт-контракт
+
+Отправка транзакций на произвольный смарт-контракт имеет смысл тогда, когда вызываемый метод не зависит от адреса msg.sender.
+Например адрес передается в аргументах, или это мета-транзакции, или account abstraction.
+
+На примере обычной транзакции в рамках одной сети
+
+```typescript
+sender.sendTransaction({
+    from: sender.address, // отправитель
+    to: smartContract.address, // вызываемый смарт-контракт
+    value: 0 // сумма отправленных средств,
+    data: '0x11111...' // закодированная транзакция
+})
+```
+
+Тогда для доставки подобной транзакции в другую сеть, это выглядит так
+
+```typescript
+yarRequest.send({
+    initialChainId, 
+    sender: sender.address, // отправитель
+    payer: sender.address, // отправитель
+    targetChainId,
+    target: smartContract.address, // вызываемый смарт-контракт
+    value: 0, // сумма отправленных средств
+    data: '0x11111...' // закодированная транзакция
+    _nonce: 0
+})
+```
+
+Исполняя эту транзакцию, смарт контракт YarResponse распарсит байты из data и вызовет указанную в них функцию по адресу target. С этой транзакцией так же можно передать параметр value, если требуется
+
+### Кроссчейн API
+
+Основной потенциал протокола Yar состоит в том, что позволяет реализовать сообщение между смарт контрактами одного приложения расположенных в разных сетях.
+
+<br>
+Создайте пустой смарт контракт
+
+```solidity
+contract Example {
+
+}
+```
+
+Зарегестрируйте в смарт-контракте адреса [YarRequest] и [YarResponse]:
+
+```solidity
+contract Example {
+    address public yarRequest;
+    address public yarResponse;
+
+    constructor(
+        address intialYarRequest,
+        address intialYarResponse
+    ) {
+        yarRequest = intialYarRequest;
+        yarResponse = intialYarResponse;
+    }
+}
+```
+
+
+
+Для того что бы отправить кроссчейн транзакцию со смарт-контракта, в [YarRequest] потребуется отправить модель данных [YarLib.YarTX]
+
+```solidity
+library YarLib {
+    struct YarTX {
+        uint256 initialChainId; // идентификатор текущей сети
+        address sender; // Ваш смарт контракт [Example]
+        address payer; // Пользователь, который вызывает Example, и платит комиссию в Yar
+        uint256 targetChainId; // идентификатор сети, в которую будет доставлена транзакция
+        address target; // Адрес в сети [TARGET], по которому будет вызвана транзакция
+        uint256 value; // Сумма нативного токена [TARGET] сети, которые будут переданны с транзакцией
+        bytes data; // Закодированные данные транзакции (bytes4 для сигнатуры функции + аргументы функции)
+        uint256 _nonce; // Этот параметр будет перепорпеделен в YarRequest, устанавливайте его в 0
+    }
+}
+```
+
+Импортируйте YarLib в свой смарт контракт
+
+```solidity
+import { YarLib } from "./YarLib.sol";
+
+contract Example {
+    ...
+}
+```
+
+Разработаем функцию приемник, которая будет принимать строку данных. Не забудьте добавить проверку, что msg.sender равен адресу YarResponse
+
+```solidity
+contract Example {
+    string public lastMessage;
+
+    function exampleReceiveMessage(string calldata message) external {
+        require(msg.sender == yarResponse, "only yarResponse!");
+        lastMessage = message;
+    }
+}
+```
+
+Теперь что бы эту функцию можно было вызвать из другой сети, реализуем функцию отправки сообщения. 
+
+
+```solidity
+contract Example {
+    function exampleSendMessage(
+        string calldata message, 
+        uint256 targetChainId
+    ) external returns(YarLib.YarTX) {
+        ...
+    }
+}
+```
+
+Где message - отправляемое сообщение
+<br>
+targetChainId - сеть в которую будет доставлено сообщение
+<br>
+returns(YarLib.YarTX) - Используется в эмуляции, для расчета расходов на газ
+<br>
+
+Закодируйте вызов функции [exampleReceiveMessage]
+
+```solidity
+bytes memory encodedTX = abi.encodeWithSelector(
+    Example.exampleReceiveMessage.selector,
+    message
+)
+```
+
+Затем создайте YarTX
+
+```solidity
+YarLib.YarTX memory yarTx = YarLib.YarTX(
+    block.chainid,
+    address(this),
+    msg.sender,
+    targetChainId,
+    targetAddress,
+    0,
+    encodedTX,
+    0
+);
+```
+
