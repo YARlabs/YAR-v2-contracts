@@ -9,7 +9,7 @@
     "generateTsAbisFromIgnition": "hardhat run ./scripts/generateTsAbisFromIgnition.ts",
     "peer:add:20": "hardhat run ./scripts/addPeersToBridge20.ts",
     "peer:add:721": "hardhat run ./scripts/addPeersToBridge721.ts",
-    "mint:nft": "hardhat run ./scripts/mintNft.ts",
+    "mint:nft:721": "hardhat run ./scripts/mintNft721.ts",
     "mint:nft:1155": "hardhat run ./scripts/mintNft1155.ts",
     "hardhat:node": "hardhat node",
     "hardhat:deploy": "hardhat deploy --network localhost",
