@@ -165,11 +165,13 @@ describe('YarBridgeMessage', function () {
         // Модель транзакции которую Relayers будут доставлять в YarHub и target сеть
         const yarTx = await yarBridgeMessage.connect(user).sendTo.staticCall(
             targetChainId,
+            user2.address,
             message,
         );
 
         const txTransferTo = await yarBridgeMessage.connect(user).sendTo(
             targetChainId,
+            user2.address,
             message,
         )
         await txTransferTo.wait();
@@ -187,9 +189,10 @@ describe('YarBridgeMessage', function () {
         const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTx) as any)
         await txDeliverTransfer.wait();
 
-        const messageInChain = await yarBridgeMessageMock.connect(user).getMessages.staticCall(0, 1);
+        const messageInChain = await yarBridgeMessageMock.connect(user2).getMessages.staticCall(user2.address, 0, 1);
         console.log({ messageInChain });
         assert(messageInChain?.[0].sender === user.address, 'message!');
+        assert(messageInChain?.[0].receiver === user2.address, 'message!');
         assert(messageInChain?.[0].message === message, 'message!');
     })
 })

@@ -3,8 +3,8 @@ import config from '../hardhat.config';
 import { ethers } from 'ethers';
 
 async function app() {
-    const networkKey = 'bscTestnet';
-    // const networkKey = 'polygonTestnet';
+    // const networkKey = 'bscTestnet';
+    const networkKey = 'polygonTestnet';
     const network = config.networks![networkKey];
 
     const provider = new ethers.JsonRpcProvider((network as any).url);
@@ -14,7 +14,7 @@ async function app() {
     const Contract = MockERC1155__factory.connect(contractAddress, wallet);
 
     const newOwner = '0x71CccbB4F914e3c7151C3071E21D7cEe2A030051';
-    const tokenId = 5;
+    const tokenId = 100;
     const amount = 10;
     const url = 'https://files.izzz.io/nft/67f36071-c11f-46e7-a6fb-b215339bd85e.json?id=3';
 

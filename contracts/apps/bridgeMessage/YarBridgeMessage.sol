@@ -36,11 +36,13 @@ contract YarBridgeMessage {
 
     function sendTo(
         uint256 targetChainId,
+        address receiver,
         string memory message
     ) external returns (YarLib.YarTX memory) {
         bytes memory targetTx = abi.encodeWithSelector(
             YarBridgeMessage.sendFrom.selector,
             msg.sender,
+            receiver,
             message
         );
 
@@ -62,6 +64,7 @@ contract YarBridgeMessage {
 
     struct Message {
         address sender;
+        address receiver;
         string message;
         uint256 timestamp;
     }
@@ -69,7 +72,7 @@ contract YarBridgeMessage {
     Message[] public messages;
     uint256 public messageCount;
 
-    function getMessages(uint offset, uint limit) public view returns (Message[] memory) {
+    function getMessages(address receiver, uint offset, uint limit) public view returns (Message[] memory) {
         require(offset < messageCount, "Offset out of range");
 
         uint end = offset + limit;
@@ -82,8 +85,10 @@ contract YarBridgeMessage {
 
         uint index = 0;
         for (uint i = messageCount - offset; i > messageCount - end; i--) {
-            result[index] = messages[i - 1];
-            index++;
+            if (messages[i - 1].receiver == receiver) {
+                result[index] = messages[i - 1];
+                index++;
+            }
         }
 
         return result;
@@ -91,6 +96,7 @@ contract YarBridgeMessage {
 
     function sendFrom(
         address sender,
+        address receiver,
         string calldata message
     ) external {
         require(msg.sender == yarResponse, "Only YarResponse!");
@@ -100,6 +106,7 @@ contract YarBridgeMessage {
 
         messages.push(Message(
             sender,
+            receiver,
             message,
             block.timestamp
         ));
