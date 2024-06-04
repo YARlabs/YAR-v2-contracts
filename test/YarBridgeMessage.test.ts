@@ -189,10 +189,16 @@ describe('YarBridgeMessage', function () {
         const txDeliverTransfer = await yarResponse.connect(relayer).deliver(Object.values(yarTx) as any)
         await txDeliverTransfer.wait();
 
-        const messageInChain = await yarBridgeMessageMock.connect(user2).getMessages.staticCall(user2.address, 0, 1);
+        const messageInChain = await yarBridgeMessageMock.connect(user2).getMessages.staticCall(user2.address, ethers.ZeroAddress, 0, 1);
         console.log({ messageInChain });
         assert(messageInChain?.[0].sender === user.address, 'message!');
         assert(messageInChain?.[0].receiver === user2.address, 'message!');
         assert(messageInChain?.[0].message === message, 'message!');
+
+        const messageInChain2 = await yarBridgeMessageMock.connect(user2).getMessages.staticCall(ethers.ZeroAddress, user.address, 0, 1);
+        console.log({ messageInChain2 });
+        assert(messageInChain2?.[0].sender === user.address, 'message!');
+        assert(messageInChain2?.[0].receiver === user2.address, 'message!');
+        assert(messageInChain2?.[0].message === message, 'message!');
     })
 })

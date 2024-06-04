@@ -72,7 +72,7 @@ contract YarBridgeMessage {
     Message[] public messages;
     uint256 public messageCount;
 
-    function getMessages(address receiver, uint offset, uint limit) public view returns (Message[] memory) {
+    function getMessages(address receiver, address sender, uint offset, uint limit) public view returns (Message[] memory) {
         require(offset < messageCount, "Offset out of range");
 
         uint end = offset + limit;
@@ -86,6 +86,9 @@ contract YarBridgeMessage {
         uint index = 0;
         for (uint i = messageCount - offset; i > messageCount - end; i--) {
             if (messages[i - 1].receiver == receiver) {
+                result[index] = messages[i - 1];
+                index++;
+            } else if (messages[i - 1].sender == sender) {
                 result[index] = messages[i - 1];
                 index++;
             }

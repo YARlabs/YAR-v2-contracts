@@ -55,6 +55,36 @@ const config: HardhatUserConfig = {
       url: 'https://rpc.ankr.com/polygon_amoy',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     },
+    ethTestnet: {
+      chainId: 11155111,
+      url: 'https://rpc.ankr.com/eth_sepolia',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    optimismTestnet: {
+      chainId: 11155420,
+      url: 'https://rpc.ankr.com/optimism_sepolia',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    arbitrumTestnet: {
+      chainId: 421614,
+      url: 'https://rpc.ankr.com/arbitrum_sepolia',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    avalanceTestnet: {
+      chainId: 43113,
+      url: 'https://rpc.ankr.com/avalanche_fuji',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    baseTestnet: {
+      chainId: 84532,
+      url: 'https://rpc.ankr.com/base_sepolia',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    skaleTestnet: {
+      chainId: 1444673419,
+      url: 'https://testnet.skalenodes.com/v1/juicy-low-small-testnet',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    }
   },
 }
 

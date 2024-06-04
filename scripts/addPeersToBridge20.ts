@@ -3,12 +3,7 @@ import config from '../hardhat.config';
 import { YarBridge20__factory } from '../typechain-types';
 import { deployments } from 'hardhat'
 import addresses from '../addresses.json';
-
-const nativeCurrencyByChainId: any = {
-    97: "BNB",
-    80002: "MATIC",
-    10226688: "YAR",
-}
+import { tickerByChainId } from './utils/currency';
 
 async function app() {
     const keys = Object.keys(config.networks!).filter(_ => _ !== 'hardhat');
@@ -29,14 +24,27 @@ async function app() {
 
         for (const peer of peers) {
             if ((peer as any).chainId == network.chainId) continue;
-            const peerAddress: string | undefined = (addresses as any)[peer?.chainId!][0].contracts.YarBridge20?.address;
-            const nativeCurrency = nativeCurrencyByChainId[peer?.chainId!];
+            console.log(peer?.chainId);
+            const peerAddress: string | undefined = (addresses as any)[peer?.chainId!]?.[0].contracts.YarBridge20?.address;
+            const nativeCurrency = tickerByChainId[peer?.chainId!];
 
-            const tx = await Contract.setPeer(peer?.chainId!, peerAddress!, nativeCurrency || '');
-            await tx.wait();
+            if (!peerAddress) {
+                console.log('YarBridge not found in', peer?.chainId);
+                break;
+            }
+
+            if (!nativeCurrency) {
+                console.log('Native currency for peer', peer?.chainId, 'not found');
+                break;
+            }
 
             const peerFromContract = await Contract.getPeer.staticCall(peer?.chainId!);
-            console.log(peer?.chainId, peerFromContract);
+            if (peerFromContract.peerAddress !== ethers.ZeroAddress) continue;
+
+            // const tx = await Contract.setPeer(peer?.chainId!, peerAddress!, nativeCurrency || '');
+            // await tx.wait();
+
+            console.log(peer?.chainId, await Contract.getPeer.staticCall(peer?.chainId!));
         }
         console.log(network.chainId, address, '\n');
     }
