@@ -6,7 +6,7 @@ import addresses from '../addresses.json';
 import { tickerByChainId } from './utils/currency';
 
 async function app() {
-    const keys = Object.keys(config.networks!).filter(_ => _ !== 'hardhat');
+    const keys = Object.keys(config.networks!).filter(_ => !['hardhat', 'arbitrumTestnet'].includes(_));
 
     for (const key of keys) {
         const network = config.networks![key];
@@ -19,6 +19,8 @@ async function app() {
         const address: string | undefined = (addresses as any)[network.chainId!][0].contracts.YarBridge721?.address;
 
         if (!address) continue;
+
+        console.log('Добавляю пиры для chainId:', network.chainId);
 
         const Contract = YarBridge721__factory.connect(address, wallet);
 
@@ -38,16 +40,16 @@ async function app() {
             }
 
             const peerFromContract = await Contract.getPeer.staticCall(peer?.chainId!);
-            if (peerFromContract.peerAddress !== ethers.ZeroAddress) continue;
+            if (peerFromContract.nativeSymbol !== '') {console.log('Пир', peer?.chainId, 'уже был добавлен'); continue;}
 
-            // const tx = await Contract.setPeer(peer?.chainId!, peerAddress!, nativeCurrency);
-            // await tx.wait();
+            const tx = await Contract.setPeer(peer?.chainId!, peerAddress!, nativeCurrency);
+            await tx.wait();
 
-            console.log(peer?.chainId, await Contract.getPeer.staticCall(peer?.chainId!));
+            console.log('Пир', peer?.chainId, 'добавлен');
         }
-        console.log(network.chainId, address, '\n');
-    }
 
+        console.log('\n');
+    }
 
     console.log('Done!');
     process.exit(1);
