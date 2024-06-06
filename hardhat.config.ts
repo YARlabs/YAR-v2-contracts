@@ -84,6 +84,21 @@ const config: HardhatUserConfig = {
       chainId: 1444673419,
       url: 'https://testnet.skalenodes.com/v1/juicy-low-small-testnet',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    phantomTestnet: {
+      chainId: 4002,
+      url: 'https://rpc.ankr.com/fantom_testnet',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    mantleTestnet: {
+      chainId: 5003,
+      url: 'https://rpc.sepolia.mantle.xyz',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    lineaTestnet: {
+      chainId: 59141,
+      url: 'https://rpc.sepolia.linea.build',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     }
   },
 }

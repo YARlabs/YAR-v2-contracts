@@ -28,10 +28,88 @@
             }
         }
     ],
+    "4002": [
+        {
+            "name": "phantomTestnet",
+            "chainId": "4002",
+            "contracts": {
+                "YarBridge1155": {
+                    "address": "0x26Fb2cF8725e2D57C4C7a77d72d78506AffC8C4B"
+                },
+                "YarBridge20": {
+                    "address": "0x56373ad43806fD632c3F5D7254D6969997b055D8"
+                },
+                "YarBridge721": {
+                    "address": "0x2C63E1935722F13fd898e47fd94D5b75Bc9F9393"
+                },
+                "YarBridgeMessage": {
+                    "address": "0xdC5b20009d1664E42299fE8316402358720A7bA0"
+                },
+                "YarRequest": {
+                    "address": "0x31A596C0B1258Eb6f4ABE2A5DC20507B83792C6c"
+                },
+                "YarResponse": {
+                    "address": "0xF45E0f4e67E07bCE2EFD185dFDaD8430A4183F67"
+                }
+            }
+        }
+    ],
+    "5003": [
+        {
+            "name": "mantleTestnet",
+            "chainId": "5003",
+            "contracts": {
+                "YarBridge1155": {
+                    "address": "0x26Fb2cF8725e2D57C4C7a77d72d78506AffC8C4B"
+                },
+                "YarBridge20": {
+                    "address": "0x56373ad43806fD632c3F5D7254D6969997b055D8"
+                },
+                "YarBridge721": {
+                    "address": "0x2C63E1935722F13fd898e47fd94D5b75Bc9F9393"
+                },
+                "YarBridgeMessage": {
+                    "address": "0xdC5b20009d1664E42299fE8316402358720A7bA0"
+                },
+                "YarRequest": {
+                    "address": "0x31a596c0b1258eb6f4abe2a5dc20507b83792c6c"
+                },
+                "YarResponse": {
+                    "address": "0xF45E0f4e67E07bCE2EFD185dFDaD8430A4183F67"
+                }
+            }
+        }
+    ],
     "43113": [
         {
             "name": "avalanceTestnet",
             "chainId": "43113",
+            "contracts": {
+                "YarBridge1155": {
+                    "address": "0x26Fb2cF8725e2D57C4C7a77d72d78506AffC8C4B"
+                },
+                "YarBridge20": {
+                    "address": "0x56373ad43806fD632c3F5D7254D6969997b055D8"
+                },
+                "YarBridge721": {
+                    "address": "0x2C63E1935722F13fd898e47fd94D5b75Bc9F9393"
+                },
+                "YarBridgeMessage": {
+                    "address": "0xdC5b20009d1664E42299fE8316402358720A7bA0"
+                },
+                "YarRequest": {
+                    "address": "0x31A596C0B1258Eb6f4ABE2A5DC20507B83792C6c"
+                },
+                "YarResponse": {
+                    "address": "0xF45E0f4e67E07bCE2EFD185dFDaD8430A4183F67"
+                }
+            }
+        }
+    ],
+    "59141": [
+        {
+            "name": "lineaTestnet",
+            "chainId": "59141",
             "contracts": {
                 "YarBridge1155": {
                     "address": "0x26Fb2cF8725e2D57C4C7a77d72d78506AffC8C4B"

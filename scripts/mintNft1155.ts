@@ -13,10 +13,10 @@ async function app() {
     const contractAddress = '0xbB9b33A380768feC37D90F1DB9a151058f3118b0';
     const Contract = MockERC1155__factory.connect(contractAddress, wallet);
 
-    const newOwner = '0x71CccbB4F914e3c7151C3071E21D7cEe2A030051';
-    const tokenId = 100;
+    const newOwner = '0x51155c8E42b1d0caEF3A0c6653d7b18db384d38f';
+    const tokenId = 112;
     const amount = 10;
-    const url = 'https://files.izzz.io/nft/67f36071-c11f-46e7-a6fb-b215339bd85e.json?id=3';
+    const url = 'https://files.izzz.io/nft/67f36071-c11f-46e7-a6fb-b215339bd85e.json?tokenId='+tokenId;
 
     console.log("Mint...");
     const tx = await Contract.mint(newOwner, tokenId, amount, url);

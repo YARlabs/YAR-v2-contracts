@@ -8,5 +8,8 @@ export const tickerByChainId: Record<number, string> = {
     421614: "ARB",
     43113: "AVAX",
     84532: "BASE",
-    1444673419: "SKL"
+    1444673419: "SKL",
+    4002: "FTM",
+    5003: "MNT",
+    59141: "LINEA",
 }
