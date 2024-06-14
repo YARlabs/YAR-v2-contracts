@@ -456,3 +456,62 @@ contract Example {
     }
 }
 ```
+
+Теперь что бы пользователь смог отправить из одного вашего смарт контракта транзакцию в другой ваш смарт контракт во внешней сети, у него дожен быть баланс в YarHub.
+
+Пополнить его можно через YarRequest
+
+```typescript
+yarRequest.connect(user).deposit(nativeTokenAmount)
+```
+
+И выдать разрешение на списание средств вашему приложению 
+
+```typescript
+yarRequest.connect(user).approve(yourAppFromInitialChainAddress,yarAmount)
+```
+
+И после чего вызвать ваше приложение
+
+
+```typescript
+example.connect(user).exampleSendMessage('Hello!', targetChainId)
+```
+
+Затем всю остальную работы выпонит сеть YAR
+
+Сначала пополнит депозит в YarHub
+
+```typescript
+yarHub.connect(relayers).deposit(user.address, yarTokenAmount)
+```
+
+Затем запишет разрешение на перевод приложению
+
+```typescript
+yarHub.connect(relayers).approve(user.address, initialChainId, yourAppFromInitialChainAddress, yarTokenAmount)
+```
+
+Добавит транзакцию пользователя в очередь 
+
+```typescript
+yarHub.connect(relayers).createTransaction(yarTX, initialNativeTxHash)
+```
+
+Возьмет в работу, временно заблокировав достаточную сумму средств на депозите пользователя
+
+```typescript
+yarHub.connect(relayers).executeTransaction(yarTX, feeTokensToLock)
+``` 
+
+И доставит ее в сеть назначения 
+
+```typescript
+yarResponse.connect(relayers).deliver(yarTX)
+``` 
+
+Где смарт контракт YarResponse выполняет транзакцию 
+
+```solidity
+yarTx.target.call{ value: yarTx.value }(yarTx.data);
+```
