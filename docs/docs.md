@@ -23,7 +23,6 @@
 5. Relayers вызывают YarResponse.deliver(...), которая исполнит транзакцию по адресу назначения
 6. После исполнения транзакции, Relayers обновляет стататус транзакции, и возвращает неизрасходованные комисии
 
-
 ### 0. Стандартная EVM транзакция
 
 На отправляемые транзакции не накладывается никаких ограничений:
@@ -108,6 +107,8 @@ function deliver(YarLib.YarTX calldata yarTx) external payable {
 function trustedYarTx() external view returns (YarLib.YarTX memory);
 ```
 
+!!! Передача флагов включающий/выключабщих запись полей trustedYarTx в storage может сэкономить газ
+
 ### 3. Смарт-контракт YarHub
 
 YarHub хранит все ожидающие, исполненыне и провалившиеся кроссчейн транзакции, которые доступны в сопоставленнии [wrappedYarTXs]
@@ -132,7 +133,7 @@ function getYarTxHash(YarLib.YarTX calldata yarTX) public pure returns (bytes32)
 <br>
 Баланс зачисляется на депозит только с адреса relayer, после обработки события Deposit
 <br>
-Посмотреть текущий баланс 
+Посмотреть текущий баланс
 
 ```solidity
 uint256 balance = yarHub.deposits(account);
@@ -155,6 +156,8 @@ library YarLib {
 }
 ```
 
+!!! YarTX._nonce требует рефакторинга
+
 ## Комиссии
 
 Для оплаты газа в сети доставки, протокол взымает с баланса пользователя достаточную сумму в токенах Yar, которая хранится в сети Yar, на смарт-контракте YarHub
@@ -171,20 +174,20 @@ yarRequest.deposit(amount);
 
 В каждой сети используется свой токен оплаты, обычно это нативный токен сети, но может быть и eip20 токен.
 <br>
-Посмотреть какой токен используется можно 
+Посмотреть какой токен используется можно
 
 ```solidity
 address feeToken = yarRequest.feeToken();
 ```
 
-Если feeToken == address(0), тогда используется нативный токен сети, иначе указанный eip20 
+Если feeToken == address(0), тогда используется нативный токен сети, иначе указанный eip20
 <br>
 
 Например вызвав функцию YarRequest.deposit(1e18) в сети Ethereum, с коешлька пользователя будет списан 1ETH, который затем по текущему курсу конвертируется в токены YAR, которые будут зачислены на депозит пользоваетеля в YarHub
 
 <br>
 
-Что бы осуществлять вызов кроссчейн транзакций с адреса произвольного смарт контракта, но оплачивать комиссию yar с адреса пользователя, требуется что бы пользователь разрешил приложению списывать депозит от его имени. 
+Что бы осуществлять вызов кроссчейн транзакций с адреса произвольного смарт контракта, но оплачивать комиссию yar с адреса пользователя, требуется что бы пользователь разрешил приложению списывать депозит от его имени.
 
 ```solidity
 yarRequest.approve(appAddress, yarAmount)
@@ -202,9 +205,9 @@ yarRequest.approve(appAddress, yarAmount)
 
 ```typescript
 sender.sendTransaction({
-    from: sender.address, // отправитель
-    to: recipeint.address, // получатель
-    value: 1e18 // сумма отправленных средств
+  from: sender.address, // отправитель
+  to: recipeint.address, // получатель
+  value: 1e18, // сумма отправленных средств
 })
 ```
 
@@ -212,18 +215,18 @@ sender.sendTransaction({
 
 ```typescript
 yarRequest.send({
-    initialChainId, 
-    sender: sender.address, // отправитель
-    payer: sender.address, // отправитель
-    targetChainId,
-    target: recipient.address, // получатель
-    value: 1e18, // сумма отправленных средств
-    data: '0x',
-    _nonce: 0
+  initialChainId,
+  sender: sender.address, // отправитель
+  payer: sender.address, // отправитель
+  targetChainId,
+  target: recipient.address, // получатель
+  value: 1e18, // сумма отправленных средств
+  data: '0x',
+  _nonce: 0,
 })
 ```
 
-После исполнения этой транзакции сеть Relayers переведет 1e18 нативный токенов сети target на адрес recipient 
+После исполнения этой транзакции сеть Relayers переведет 1e18 нативный токенов сети target на адрес recipient
 
 ### Отправка транзакций на смарт-контракт
 
@@ -245,7 +248,7 @@ sender.sendTransaction({
 
 ```typescript
 yarRequest.send({
-    initialChainId, 
+    initialChainId,
     sender: sender.address, // отправитель
     payer: sender.address, // отправитель
     targetChainId,
@@ -288,8 +291,6 @@ contract Example {
 }
 ```
 
-
-
 Для того что бы отправить кроссчейн транзакцию со смарт-контракта, в [YarRequest] потребуется отправить модель данных [YarLib.YarTX]
 
 ```solidity
@@ -317,7 +318,11 @@ contract Example {
 }
 ```
 
-Разработаем функцию приемник, которая будет принимать строку данных. Не забудьте добавить проверку, что msg.sender равен адресу YarResponse
+Разработаем функцию приемник, которая будет принимать строку данных.
+Здесь потребуется выполнить 2 проверки, что бы идентицифицровать отправителей:
+
+1. Проверьте что msg.sender равен адресу YarResponse
+2. Проверьте что yarTX.sender равен адресу вашего смарт контракта из initial сети
 
 ```solidity
 contract Example {
@@ -325,18 +330,49 @@ contract Example {
 
     function exampleReceiveMessage(string calldata message) external {
         require(msg.sender == yarResponse, "only yarResponse!");
+        YarLib.YarTX memory yarTx = YarResponse(yarResponse).trustedYarTx();
+        // Используется проверка на address(this)
+        // - это сработает если оба смарт-окнтра имеют один и тот же адрес
+        // Если у ваших смарт контрактов разные адреса, то придется их регестрировать отдельно
+        require(yarTx.sender == address(this), "only app!");
         lastMessage = message;
     }
 }
 ```
 
-Теперь что бы эту функцию можно было вызвать из другой сети, реализуем функцию отправки сообщения. 
+Пример регистрации адресов своих приложений из внешних сетей
 
+```solidity
+contract Example {
+
+    mapping(uint256 chainId => address peer) public peers;
+
+    function setPeer(uint256 newChainId, address newPeer) external {
+        require(msg.sender == owner, "only owner!");
+        peers[newChainId] = newPeer;
+    }
+
+    function getPeer(uint256 _chainId) public view returns (address) {
+        address peer = peers[_chainId];
+        return peer == address(0) ? address(this) : peer;
+    }
+
+
+    function exampleReceiveMessage(string calldata message) external {
+        require(msg.sender == yarResponse, "only yarResponse!");
+        YarLib.YarTX memory yarTx = YarResponse(yarResponse).trustedYarTx();
+        require(yarTx.sender == getPeer(yarTx.initialChainId), "only app!");
+        ...
+    }
+}
+```
+
+Теперь что бы эту функцию можно было вызвать из другой сети, реализуем функцию отправки сообщения.
 
 ```solidity
 contract Example {
     function exampleSendMessage(
-        string calldata message, 
+        string calldata message,
         uint256 targetChainId
     ) external returns(YarLib.YarTX) {
         ...
@@ -365,7 +401,7 @@ bytes memory encodedTX = abi.encodeWithSelector(
 ```solidity
 YarLib.YarTX memory yarTx = YarLib.YarTX(
     block.chainid,
-    address(this),
+    address(this), // если адреса ваших приложений идентичные
     msg.sender,
     targetChainId,
     targetAddress,
@@ -375,3 +411,48 @@ YarLib.YarTX memory yarTx = YarLib.YarTX(
 );
 ```
 
+или
+
+```solidity
+YarLib.YarTX memory yarTx = YarLib.YarTX(
+    block.chainid,
+    getPeer(targetChainId), // для получения адреса вашего приложения в target сети
+    msg.sender,
+    targetChainId,
+    targetAddress,
+    0,
+    encodedTX,
+    0
+);
+```
+
+И отправьте эту модель в YarRequest
+
+```solidity
+contract Example {
+    function exampleSendMessage(
+        string calldata message,
+        uint256 targetChainId
+    ) external returns(YarLib.YarTX) {
+        bytes memory encodedTX = abi.encodeWithSelector(
+            Example.exampleReceiveMessage.selector,
+            message
+        );
+
+        YarLib.YarTX memory yarTx = YarLib.YarTX(
+            block.chainid,
+            address(this), // если адреса ваших приложений идентичные
+            msg.sender,
+            targetChainId,
+            targetAddress,
+            0,
+            encodedTX,
+            0
+        );
+
+        // Отправляем транзакцию
+        // Возврат модели может быть полезен для симуляции транзакций и предварительного расчета комиссиий
+        return YarRequest(yarRequest).send(yarTX);
+    }
+}
+```
