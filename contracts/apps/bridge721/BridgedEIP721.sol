@@ -22,8 +22,8 @@ contract BridgedEIP721 is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         string calldata _originalTokenSymbol
     ) external initializer {
         ERC721Upgradeable.__ERC721_init(
-            string(abi.encodePacked(_originalTokenName, ":", _originalNativeSymbol)),
-            string(abi.encodePacked(_originalTokenSymbol, ":", _originalNativeSymbol))
+            string(abi.encodePacked("y", _originalTokenName, ".", _originalNativeSymbol)),
+            string(abi.encodePacked("y", _originalTokenSymbol, ".", _originalNativeSymbol))
         );
         OwnableUpgradeable.__Ownable_init(msg.sender);
         originalTokenName = _originalTokenName;

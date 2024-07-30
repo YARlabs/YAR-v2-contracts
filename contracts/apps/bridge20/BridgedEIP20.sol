@@ -22,8 +22,8 @@ contract BridgedEIP20 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         uint8 _originalTokenDecimals
     ) external initializer {
         ERC20Upgradeable.__ERC20_init(
-            string(abi.encodePacked(_originalTokenName, ":", _originalNativeSymbol)),
-            string(abi.encodePacked(_originalTokenSymbol, ":", _originalNativeSymbol))
+            string(abi.encodePacked("y", _originalTokenName, ".", _originalNativeSymbol)),
+            string(abi.encodePacked("y", _originalTokenSymbol, ".", _originalNativeSymbol))
         );
         OwnableUpgradeable.__Ownable_init(msg.sender);
         originalTokenName = _originalTokenName;
