@@ -87,11 +87,10 @@ contract YarBridge20 {
     ) external {
         require(msg.sender == yarResponse, "only yarRequest!");
         YarLib.YarTX memory trustedYarTx = YarResponse(yarResponse).trustedYarTx();
-        require(getPeer(trustedYarTx.initialChainId) == trustedYarTx.sender, "not peer!");
+        require(getPeer(trustedYarTx.initialChainId).peerAddress == trustedYarTx.sender, "not peer!");
 
         address bridgedToken = getBridgedTokenAddress(originalChainId, originalToken);
         require(isBridgedToken[bridgedToken] == false, "already exists!");
-        
 
         _deployBridgedToken(originalChainId, originalToken, name, symbol, decimals);
     }

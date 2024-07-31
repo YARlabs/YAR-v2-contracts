@@ -87,7 +87,7 @@ const config: HardhatUserConfig = {
     },
     phantomTestnet: {
       chainId: 4002,
-      url: 'https://rpc.ankr.com/fantom_testnet',
+      url: 'https://rpc.testnet.fantom.network',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     },
     mantleTestnet: {
