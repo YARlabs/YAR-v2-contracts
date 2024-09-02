@@ -1,220 +1,222 @@
 # YarLib
 
-Вспомогательная библиотека, хранящая общий код.
-используется в YarRequest, YarResponse, YarHub. Может использоваться сторонними приложениями
+An auxiliary library that stores common code. It is used in YarRequest, YarResponse, YarHub and can be used by third-party applications.
 
 ```solidity
 library YarLib {
-    // Модель со всеми данными кросс-чейн транзакции
+    // A model with all the data of a cross-chain transaction
     struct YarTX {
-        uint256 initialChainId; // сеть отправки
-        address sender; // кто платит комиссию в YarHub
-        address app; // Кто отправил запрос в YarRequest
-        uint256 targetChainId; // сеть доставки
-        address target; // Адрес по которому будет передано [value] и выполнена [data]
-        uint256 value; // Сколько нативных токенов отправить на адрес [target]
-        bytes data; // 0x или закодированный вызов функции
-        uint256 depositToYarAmount; // Сколько комиссий было отправленно вместе с транзакцией, может быть 0, если у пользователя уже был депозит
+        uint256 initialChainId; // sending network
+        address sender; // who pays the fee in YarHub
+        address app; // who sent the request in YarRequest
+        uint256 targetChainId; // destination network
+        address target; // address to which [value] will be sent and [data] will be executed
+        uint256 value; // how many native tokens to send to the [target] address
+        bytes data; // 0x or encoded function call
+        uint256 depositToYarAmount; // the amount of fees sent with the transaction, could be 0 if the user already had a deposit
     }
 }
 ```
 
 # YarRequest
 
-Развернут в каждой сети, в том числе и в YarChain
+Deployed in each network, including YarChain.
 
 ```solidity
 interface YarRequest {
-    // Событие на основании которого ожидающая транзакция добавляется в YarHub
+    // Event based on which the pending transaction is added to YarHub
     event Send(
-        YarLib.YarTX yarTx // Модель кросс-чейн транзакции
+        YarLib.YarTX yarTx // Cross-chain transaction model
     );
 
-    // Событие на основании которого зачисляется баланс для опалаты коммисий на счет [depositor] в YarHub
+    // Event based on which the balance for paying fees is credited to the [depositor]'s account in YarHub
     event Deposit(
-        address depositor, // Кому зачислить
-        address feesToken, // Токен оплаты в initial сети
-        uint256 amount // количество feesToken принятых в качестве оплаты
+        address depositor, // who to credit
+        address feesToken, // payment token in the initial network
+        uint256 amount // amount of feesToken accepted as payment
     );
 
-    // Адрес мультисиг кошелька, на который будут переводиться средства в счет оплаты депозита
+    // Address of the multisig wallet to which funds will be transferred to pay the deposit
     function relayer() external view returns(address);
 
-    // Токен принимаемый в качестве оплаты комиссий
-    // Если feeToken == address(0), то это нативный токен текущей сети
+    // Token accepted as payment of fees
+    // If feeToken == address(0), it is the native token of the current network
     function feeToken() external view returns(address);
 
-    // Проверяет разрешил ли [sender], отправить транзакцию [yarTxHash] с адреса [app]
+    // Checks whether [sender] allowed the transaction [yarTxHash] to be sent from the [app] address
     function approvals(
-        address sender, // Кто оплатит комиссию
-        address app, // Кто инициурет транзакцию
-        bytes32 yarTxHash // Хэш получаемый из YarLib.YarTX
+        address sender, // who will pay the fee
+        address app, // who initiates the transaction
+        bytes32 yarTxHash // hash generated from YarLib.YarTX
     ) external view returns(bool);
 
-    // Используется для пополнения депозита в YarHub
-    // Оплата производиться в текущем feeToken
+    // Used to top up the deposit in YarHub
+    // Payment is made in the current feeToken
     function deposit(
-        address account, // На чей счет зачислить
-        uint256 amount // Сколько feeToken было принято в initial сети
+        address account, // whose account to credit
+        uint256 amount // how much feeToken was accepted in the initial network
     ) external payable;
 
-    // Эта функция позволяет за одну транзакцию
-    // Выдать approve и вызвать приложение которое
-    // Сможет от имени пользователя совершить кросс-чейн транзакцию 
+    // This function allows in one transaction
+    // to issue approval and call an application that
+    // can perform a cross-chain transaction on behalf of the user
     function approveAndCallApp(
-        bytes calldata appData, // Закодированный вызов функции, который будет выполнен по адресу yarTX.app
-        YarLib.YarTX calldata yarTX // Кросс-чейн транзакция на которую будет выдано разрешение, от yarTX.sender к yarTX.app
+        bytes calldata appData, // encoded function call to be executed at yarTX.app address
+        YarLib.YarTX calldata yarTX // cross-chain transaction to which permission will be granted, from yarTX.sender to yarTX.app
     ) external payable;
 
-    // Разрешает приложению [yarTX.app] отправить транзакцию [yarTX], которую оплатит [yarTX.sender] 
+    // Grants permission for [yarTX.app] to send the transaction [yarTX], which will be paid by [yarTX.sender]
     function approve(YarLib.YarTX calldata yarTX) external;
 
-    // Отправить кроссчейн транзакцию с адреса [yarTx.app], которую оплатит [yarTx.sender]
+    // Send a cross-chain transaction from the [yarTx.app] address, which will be paid by [yarTx.sender]
     function sendFrom(YarLib.YarTX calldata yarTX) external payable;
 
-    // Вызывает _approve, если
-    // signature соответствует подписи [yarTX.sender]
+    // Calls _approve if
+    // the signature matches the [yarTX.sender]'s signature
     function permit(
         YarLib.YarTX calldata yarTX,
         uint256 signatureExpired,
         bytes calldata signature
     ) external;
 
-    // Отправляет кросс-чейн транзакцию
-    // Где msg.sender == yarTX.sender == yarTx.app
+    // Sends a cross-chain transaction
+    // where msg.sender == yarTX.sender == yarTx.app
     function send(YarLib.YarTX calldata yarTX) external payable;
 }
 ```
 
 # YarResponse
 
-Развернут в каждой сети, в том числе и в YarChain
+Deployed in each network, including YarChain.
 
 ```solidity
 interface YarResponse {
-    // Адрес мультисиг кошелька, на который будут переводиться средства в счет оплаты депозита
+    // Address of the multisig wallet to which funds will be transferred to pay the deposit
     function relayer() external view returns(address);
 
-    // Геттер в котором временно сохраняется текущая исполняемая транзакция
-    // Он устанавливается до вызова target, и очищается после
+    // Getter that temporarily stores the current executing transaction
+    // It is set before calling the target and cleared afterward
     function trustedYarTx() external view returns(YarLib.YarTX);
 
-    // Вызывается только с адреса [relayer]
-    // Доставка транзакции в target сети
+    // Can only be called from the [relayer] address
+    // Transaction delivery in the target network
     function deliver(YarLib.YarTX calldata yarTx) external payable;
 }
 ```
 
 # YarHub
 
-Развернут только в сети YAR.
+Deployed only on the YAR network.
 
 ```solidity
 interface YarHub {
-    // Вспомогательный тип данных для обозначения статуса транзакции
+    // Auxiliary data type for denoting the transaction status
     enum TxStatus {
-        NotExists, // Транзакция не существует
-        WaitForPay, // Ожидает пополнения депозита
-        InProgress, // Депозит заблокирован, и транзакция передана на выполение в YarResponse
-        Completed, // Транзакция выполнена успешно, депозит разблокирован
-        Rejected // Транзакция завершилась ошибкой, депозит разблокирован
+        NotExists, // Transaction does not exist
+        WaitForPay, // Waiting for deposit top-up
+        InProgress, // Deposit is locked, and the transaction is handed over to YarResponse for execution
+        Completed, // Transaction completed successfully, deposit unlocked
+        Rejected // Transaction ended with an error, deposit unlocked
     }
 
-    // Обернутая YarLib.YarTX, с дополнительными полями используемыми только в YarHub
+    // Wrapped YarLib.YarTX with additional fields used only in YarHub
     struct WrappedYarTX {
-        YarLib.YarTX yarTx; // Модель транзакции
-        TxStatus status; // Текущий статус
-        uint256 lockedFees; // Сколько было заблокировано с депозита отправителя. Устанавливается после execute
-        uint256 usedFees; // Сколько комиссий было израсходовано. Устанавливается после commit
-        bytes32 initialTxHash; // Хэш транзакции инициировавшей перевод в initial сети
-        bytes32 targetTxHash; // Хэш транзакции в target сети
+        YarLib.YarTX yarTx; // Transaction model
+        TxStatus status; // Current status
+        uint256 lockedFees; // Amount locked from the sender's deposit. Set after execute
+        uint256 usedFees; // Amount of fees spent. Set after commit
+        bytes32 initialTxHash; // Hash of the transaction that initiated the transfer in the initial network
+        bytes32 targetTxHash; // Hash of the transaction in the target network
     }
 
-    // Одноименный ивент функции
+    // Event with the same name as the function
     event CreateTransaction(YarLib.YarTX yarTx);
 
-    // Одноименный ивент функции
+    // Event with the same name as the function
     event ExecuteTransaction(YarLib.YarTX yarTx);
 
-    // Срабатывает когда транзакция была отправлена в target сеть и завершилась
-    // или успешно, тогда status = TxStatus.Completed
-    // или c оишбкой, тогда status = TxStatus.Rejected
+    // Triggered when the transaction has been sent to the target network and completed
+    // successfully, then status = TxStatus.Completed
+    // or with an error, then status = TxStatus.Rejected
     event CommitTransaction(YarLib.YarTX yarTx, TxStatus status, uint256 usedFees, uint256 feesToReturn);
 
-    // Одноименный ивент функции
+    // Event with the same name as the function
     event Deposit(
-        address account, // На чей счет зачислен
-        uint256 amount // Сколько токенов комиссии зачислено
+        address account, // whose account was credited
+        uint256 amount // amount of fee tokens credited
     );
 
-    // Вызывается с адреса relayer
-    // Если было событие пополнения депозита из initial сети,
-    // Тогда эта функция должна быть вызвана до executeTransaction
-    // Иначе вторая завершится ошибкой "feeTokensToLock!"
-    // Зачисляет [feeTokenAmount] токенов на баланс [account]
+    // Called from the relayer address
+    // If there was a deposit top-up event from the initial network,
+    // this function must be called before executeTransaction
+    // Otherwise, the second will fail with "feeTokensToLock!"
+    // Credits [feeTokenAmount] tokens to the [account]'s balance
     function deposit(address account, uint256 feeTokenAmount) external;
 
-    // Вызывается с адреса relayer
-    // Добавляет новую траназкцию в память
-    // Статус новой транзакции - WaitForPay
+    // Called from the relayer address
+    // Adds a new transaction to memory
+    // The status of the new transaction is WaitForPay
     // lockedFees - 0
     // usedFees - 0
-    // initialTxHash = initialTxHash - хэш транзакции в initial сети
+    // initialTxHash = initialTxHash - hash of the transaction in the initial network
     function createTransaction(YarLib.YarTX calldata yarTX, bytes32 initialTxHash) external;
 
-    // Вызывается с адреса relayer
-    // Если транзакция до этого не была создана будет ошибка "only WaitForPay!"
-    // Параметр feeTokensToLock - это расчетное число, с запасом, которое будет временно списано с баланса пользователя
-    // если в deposits[yarTX.sender] средств меньше чем feeTokensToLock, транзакция завершится ошибкой "feeTokensToLock!"
-    // Если удалось списать депозит, излучает ивент ExecuteTransaction,
-    // На основании которого транзакция должна быть доставлена в target сеть
+    // Called from the relayer address
+    // If the transaction has not been created before, an error "only WaitForPay!" occurs
+    // The parameter feeTokensToLock is a calculated amount, with a reserve, which will be temporarily deducted from the user's balance
+    // if deposits[yarTX.sender] funds are less than feeTokensToLock, the transaction will fail with "feeTokensToLock!"
+    // If the deposit is successfully deducted, emits the ExecuteTransaction event,
+    // based on which the transaction must be delivered to the target network
     function executeTransaction(YarLib.YarTX calldata yarTX, uint256 feeTokensToLock) external;
 
-    // Вызывается с адреса relayer
-    // После совершения успешной транзакции в target сети, устанавливаем статус в TxStatus.Completed
-    // Требуется указать usedFees - то сколько в итоге можем списать со счета юзера
-    // Если usedFees превышает заблокированные средства, то ничего не возвращаем
-    // Иначе зачисляет разницу на баланс пользователя
+    // Called from the relayer address
+    // After successfully completing a transaction in the target network, sets the status to TxStatus.Completed
+    // It is required to specify usedFees - the amount that can ultimately be deducted from the user's account
+    // If usedFees exceed locked funds, nothing is returned
+    // Otherwise, credits the difference to the user's balance
     function completeTransaction(YarLib.YarTX calldata yarTX, bytes32 targetTxHash, uint256 usedFees) external;
 
-    // Вызывается с адреса relayer
-    // После ошибки транзакции в target сети, устанавливаем статус в TxStatus.Rejected
-    // Требуется указать usedFees - то сколько в итоге можем списать со счета юзера
-    // Если usedFees превышает заблокированные средства, то ничего не возвращаем
-    // Иначе зачисляет разницу на баланс пользователя
-    function rejectTransaction(YarLib.YarTX calldata yarTX, bytes32 targetTxHash, uint256 usedFees) external
+    // Called from the relayer address
+    // After a transaction error in the target network, sets the status to TxStatus.Rejected
+    // It is required to specify usedFees - the amount that can ultimately be deducted from the user's account
+    // If usedFees exceed locked funds, nothing is returned
+    // Otherwise, credits the difference to the user's balance
+    function rejectTransaction(YarLib.YarTX calldata yarTX, bytes32 targetTxHash, uint256 usedFees) external;
 }
 ```
 
-Базовый алгоритм:
 
-YarRequest -> emit Deposit(address depositor, address feesToken, uint256 amount)
--> emit Send(YarLib.YarTX yarTx)
+### Basic Algorithm:
 
-Relayer's в первую очередь должны обработать депозиты, выполнив перерасчет feesToken и amount, к feeTokenAmount сети Yar
-После чего отправить транзакции:
-YarHub.connect(relayer).deposit(depositor, feeTokenAmount)
+1. **YarRequest** emits the following events:
+   - `Deposit(address depositor, address feesToken, uint256 amount)`
+   - `Send(YarLib.YarTX yarTx)`
 
-После чего Relayer's приступает к обработке событий Send:
-Сначала отправляя транзакции, которые создадут ожидающие транзакции
-YarHub.connect(relayer).createTransaction(yarTx)
+2. **Relayers** must first process the deposits, recalculating the `feesToken` and `amount` into `feeTokenAmount` of the Yar network.
 
-Затем повторно расчитывается требуемо число комиссий, но уже для токенов Yar, и передается в качестве feeTokensToLock
-YarHub.connect(relayer).executeTransaction(yarTx, feeTokensToLock)
+3. After recalculation, they send transactions:
+   - `YarHub.connect(relayer).deposit(depositor, feeTokenAmount)`
 
-Если средств у пользователя было достаточно, сработает событие
--> emit ExecuteTransaction(YarLib.YarTX yarTx)
-На основании которого транзакцию можно доставлять в target сеть
-Но если средств не достаточно, то транзакция завершится ошибкой "feeTokensToLock!"
+4. Then, Relayers start processing the `Send` events:
+   - First, sending transactions that create pending transactions:
+     - `YarHub.connect(relayer).createTransaction(yarTx)`
 
-После события ExecuteTransaction и ее выполнения, расчитывается итоговый расход комиссий и передается далее как "usedFees"
-В зависимости как транзакция исполнилась,
-сеть Relayer's отправляет или
-YarHub.connect(relayer).completeTransaction(yarTx, usedFees)
-или
-YarHub.connect(relayer).rejectTransaction(yarTx, usedFees)
+5. Then, the required fee amount is recalculated again but now for Yar tokens, and passed as `feeTokensToLock`:
+   - `YarHub.connect(relayer).executeTransaction(yarTx, feeTokensToLock)`
 
-# Run UI
+6. If the user has sufficient funds, the event triggers:
+   - `ExecuteTransaction(YarLib.YarTX yarTx)`
+   - Based on this event, the transaction can be delivered to the target network.
+   - If funds are insufficient, the transaction will fail with the error "feeTokensToLock!"
+
+7. After the `ExecuteTransaction` event and its execution, the final fee expenditure is calculated and passed on as `usedFees`. Depending on how the transaction executed, the Relayer network sends either:
+   - `YarHub.connect(relayer).completeTransaction(yarTx, usedFees)`
+   - or
+   - `YarHub.connect(relayer).rejectTransaction(yarTx, usedFees)`
+
+---
+
+### Run UI
 
 ```shell
 cd scaffold
@@ -228,9 +230,13 @@ yarn install
 yarn start
 ```
 
-# Dev environment
+---
 
-ubuntu 22.04
+### Dev Environment Setup
+
+1. Use Ubuntu 22.04:
+   
+```shell
 sudo apt-get update
 sudo apt-get -y install curl
 sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain nightly -y
@@ -242,3 +248,4 @@ source ~/.nvm/nvm.sh && nvm install --lts
 sudo apt-get -y install git
 sudo curl -L https://foundry.paradigm.xyz | bash
 foundryup
+```
