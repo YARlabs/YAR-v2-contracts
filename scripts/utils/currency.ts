@@ -12,4 +12,5 @@ export const tickerByChainId: Record<number, string> = {
     4002: "FTM",
     5003: "MNT",
     59141: "LINEA",
+    51: "XDC"
 }

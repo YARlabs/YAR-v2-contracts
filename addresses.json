@@ -1,4 +1,30 @@
 {
+    "51": [
+        {
+            "name": "xdcTestnet",
+            "chainId": "51",
+            "contracts": {
+                "YarBridge1155": {
+                    "address": "0x016b7d8F850EEAaCcb09552C5276E7a874272D29"
+                },
+                "YarBridge20": {
+                    "address": "0x82250becFAAFdE7b1747144D53cE99Dee60F48E9"
+                },
+                "YarBridge721": {
+                    "address": "0x49f35564C575b2f4d92b0B481ae7a876d7B87531"
+                },
+                "YarBridgeMessage": {
+                    "address": "0x388f2763E9aE99B93f2192B92000071f1762B6aa"
+                },
+                "YarRequest": {
+                    "address": "0x47d0592780e3cB6587639B694dC35dd9B1010423"
+                },
+                "YarResponse": {
+                    "address": "0x8D8718bf8cb4F0d62974979F37415B934A0059aE"
+                }
+            }
+        }
+    ],
     "97": [
         {
             "name": "bscTestnet",

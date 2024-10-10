@@ -99,6 +99,11 @@ const config: HardhatUserConfig = {
       chainId: 59141,
       url: 'https://rpc.sepolia.linea.build',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
+    },
+    xdcTestnet: {
+      chainId: 51,
+      url: 'https://erpc.apothem.network',
+      accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
     }
   },
 }
