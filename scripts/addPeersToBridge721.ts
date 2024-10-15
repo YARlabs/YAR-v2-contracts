@@ -1,53 +1,56 @@
 import { ethers } from 'ethers';
-import config from '../hardhat.config';
 import { YarBridge721__factory } from '../typechain-types';
-import { deployments } from 'hardhat'
+import config from '../hardhat.config';
 import addresses from '../addresses.json';
-import { tickerByChainId } from './utils/currency';
+
+const blackListKeys = ['hardhat', 'arbitrumTestnet'];
+
+const getAddressByChainId = (chainId: string) => {
+    return (addresses as any)[chainId]?.[0]?.contracts?.YarBridge721?.address;
+}
 
 async function app() {
-    const keys = Object.keys(config.networks!).filter(_ => !['hardhat', 'arbitrumTestnet'].includes(_));
-
+    const keys = Object.keys(config.networks!).filter(_ => !blackListKeys.includes(_));
     for (const key of keys) {
-        const network = config.networks![key];
-        if (!network || !(network as any)?.url) continue;
+        const network = config.networks[key];
+        if (!network || !network.url) continue;
 
-        const provider = new ethers.JsonRpcProvider((network as any).url);
+        const provider = new ethers.JsonRpcProvider(network.url);
         const wallet = new ethers.Wallet(process.env.DEPLOYER!).connect(provider);
 
-        const peers = keys.map(_ => config.networks![_]).filter(_ => _);
-        const address: string | undefined = (addresses as any)[network.chainId!][0].contracts.YarBridge721?.address;
-
+        const address = getAddressByChainId(network.chainId);
         if (!address) continue;
 
+        const peers = keys.map(_ => config.networks[_]).filter(_ => _);
         console.log('Добавляю пиры для chainId:', network.chainId);
 
         const Contract = YarBridge721__factory.connect(address, wallet);
-
         for (const peer of peers) {
-            if ((peer as any).chainId == network.chainId) continue;
-            const peerAddress: string | undefined = (addresses as any)[peer?.chainId!]?.[0].contracts.YarBridge721?.address;
-            const nativeCurrency = tickerByChainId[peer?.chainId!];
+            if (peer.chainId == network.chainId) continue;
 
+            const peerAddress = getAddressByChainId(peer.chainId);
             if (!peerAddress) {
-                console.log('YarBridge not found in', peer?.chainId);
-                break;
+                console.log('YarBridge not found in', peer.chainId);
+                continue;
             }
 
-            if (!nativeCurrency) {
-                console.log('Native currency for peer', peer?.chainId, 'not found');
-                break;
+            const peerTokenSymbol = peer.tokenSymbol;
+            if (!peerTokenSymbol) {
+                console.log('Native currency for peer', peer.chainId, 'not found');
+                continue;
             }
 
-            const peerFromContract = await Contract.getPeer.staticCall(peer?.chainId!);
-            if (peerFromContract.nativeSymbol !== '') {console.log('Пир', peer?.chainId, 'уже был добавлен'); continue;}
+            const currentPeer = await Contract.getPeer.staticCall(peer.chainId);
+            if (currentPeer.nativeSymbol && currentPeer.nativeSymbol == peerTokenSymbol) {
+                console.log('Пир', peer?.chainId, 'уже был добавлен как:', currentPeer.nativeSymbol);
+                continue;
+            }
 
-            const tx = await Contract.setPeer(peer?.chainId!, peerAddress!, nativeCurrency);
+            const tx = await Contract.setPeer(peer.chainId, peerAddress, peerTokenSymbol);
             await tx.wait();
 
-            console.log('Пир', peer?.chainId, 'добавлен');
+            console.log('Пир', peer?.chainId, currentPeer.nativeSymbol === '' ? 'добавлен' : 'изменен');
         }
-
         console.log('\n');
     }
 

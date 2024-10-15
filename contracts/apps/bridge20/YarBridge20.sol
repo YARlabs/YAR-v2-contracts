@@ -29,11 +29,25 @@ contract YarBridge20 {
         address peerAddress;
         string nativeSymbol;
     }
+
     mapping(uint256 => PeerInfo) public peers;
 
     string public nativeName;
     string public nativeSymbol;
     uint8 public nativeDecimals;
+
+    function setNativeInfo(string memory _nativeName, string memory _nativeSymbol) external {
+        require(msg.sender == owner, "only owner!");
+
+        nativeName = _nativeName;
+        nativeSymbol = _nativeSymbol;
+    }
+
+    function setDecimals(uint8 _decimals) external {
+        require(msg.sender == owner, "only owner!");
+
+        nativeDecimals = _decimals;
+    }
 
     function setPeer(uint256 newChainId, address newPeer, string calldata newPeerNativeSymbol) external {
         require(msg.sender == owner, "only owner!");
