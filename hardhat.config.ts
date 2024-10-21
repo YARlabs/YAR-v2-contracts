@@ -100,7 +100,7 @@ const config: HardhatUserConfig | any = {
     },
     baseTestnet: {
       tokenName: "BASE",
-      tokenSymbol: "ETH",
+      tokenSymbol: "sFUEL",
       peerSymbol: "BASE",
       chainId: 84532,
       url: 'https://rpc.ankr.com/base_sepolia',
@@ -132,7 +132,7 @@ const config: HardhatUserConfig | any = {
     },
     lineaTestnet: {
       tokenName: "Linea",
-      tokenSymbol: "LINEA",
+      tokenSymbol: "ETH",
       peerSymbol: "LINEA",
       chainId: 59141,
       url: 'https://rpc.sepolia.linea.build',
