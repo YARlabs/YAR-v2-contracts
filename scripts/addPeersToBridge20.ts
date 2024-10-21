@@ -16,8 +16,8 @@ async function app() {
     for (const key of keys) {
         const network = config.networks[key];
         if (!network || !network.url) continue;
-        // if ([   59141, 1444673419, 4002, 10226688, 51, 97, 80002, 11155111, 11155420, 84532, 5003].includes(network.chainId)) continue;
-        console.log(network.url);
+
+        // if (![97, 51].includes(network.chainId)) continue;
 
         const provider = new ethers.JsonRpcProvider(network.url);
         const wallet = new ethers.Wallet(process.env.DEPLOYER!).connect(provider);
@@ -38,7 +38,7 @@ async function app() {
                 continue;
             }
 
-            const peerTokenSymbol = peer.tokenSymbol;
+            const peerTokenSymbol = peer.peerSymbol;
             if (!peerTokenSymbol) {
                 console.log('Native currency for peer', peer.chainId, 'not found');
                 continue;

@@ -34,7 +34,7 @@ async function app() {
                 continue;
             }
 
-            const peerTokenSymbol = peer.tokenSymbol;
+            const peerTokenSymbol = peer.peerSymbol;
             if (!peerTokenSymbol) {
                 console.log('Native currency for peer', peer.chainId, 'not found');
                 continue;

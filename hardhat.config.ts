@@ -45,6 +45,7 @@ const config: HardhatUserConfig | any = {
     yarTestnet: {
       tokenName: "YAR chain",
       tokenSymbol: "YAR",
+      peerSymbol: "YAR",
       chainId: 10226688,
       url: 'https://rpc1.testnet.yarchain.org',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -52,6 +53,7 @@ const config: HardhatUserConfig | any = {
     bscTestnet: {
       tokenName: "Binance smart chain",
       tokenSymbol: "BNB",
+      peerSymbol: "BSC",
       chainId: 97,
       url: 'https://rpc.ankr.com/bsc_testnet_chapel',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -59,6 +61,7 @@ const config: HardhatUserConfig | any = {
     polygonTestnet: {
       tokenName: "Polygon",
       tokenSymbol: "POL",
+      peerSymbol: "POL",
       chainId: 80002,
       url: 'https://rpc.ankr.com/polygon_amoy',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -66,6 +69,7 @@ const config: HardhatUserConfig | any = {
     ethTestnet: {
       tokenName: "Ethereum",
       tokenSymbol: "ETH",
+      peerSymbol: "ETH",
       chainId: 11155111,
       url: 'https://rpc.ankr.com/eth_sepolia',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -73,6 +77,7 @@ const config: HardhatUserConfig | any = {
     optimismTestnet: {
       tokenName: "Optimism",
       tokenSymbol: "ETH",
+      peerSymbol: "OP",
       chainId: 11155420,
       url: 'https://rpc.ankr.com/optimism_sepolia',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -80,6 +85,7 @@ const config: HardhatUserConfig | any = {
     arbitrumTestnet: {
       tokenName: "Arbitrum",
       tokenSymbol: "ETH",
+      peerSymbol: "ARB",
       chainId: 421614,
       url: 'https://rpc.ankr.com/arbitrum_sepolia',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -87,6 +93,7 @@ const config: HardhatUserConfig | any = {
     avalanceTestnet: {
       tokenName: "Avalance",
       tokenSymbol: "AVAX",
+      peerSymbol: "AVAX",
       chainId: 43113,
       url: 'https://rpc.ankr.com/avalanche_fuji',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -94,6 +101,7 @@ const config: HardhatUserConfig | any = {
     baseTestnet: {
       tokenName: "BASE",
       tokenSymbol: "ETH",
+      peerSymbol: "BASE",
       chainId: 84532,
       url: 'https://rpc.ankr.com/base_sepolia',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -101,6 +109,7 @@ const config: HardhatUserConfig | any = {
     skaleTestnet: {
       tokenName: "SKALE",
       tokenSymbol: "SKL",
+      peerSymbol: "SKL",
       chainId: 1444673419,
       url: 'https://testnet.skalenodes.com/v1/juicy-low-small-testnet',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -108,6 +117,7 @@ const config: HardhatUserConfig | any = {
     phantomTestnet: {
       tokenName: "Fantom",
       tokenSymbol: "FTM",
+      peerSymbol: "FTM",
       chainId: 4002,
       url: 'https://rpc.testnet.fantom.network',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -115,6 +125,7 @@ const config: HardhatUserConfig | any = {
     mantleTestnet: {
       tokenName: "Mantle",
       tokenSymbol: "MNT",
+      peerSymbol: "MNT",
       chainId: 5003,
       url: 'https://rpc.sepolia.mantle.xyz',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -122,6 +133,7 @@ const config: HardhatUserConfig | any = {
     lineaTestnet: {
       tokenName: "Linea",
       tokenSymbol: "LINEA",
+      peerSymbol: "LINEA",
       chainId: 59141,
       url: 'https://rpc.sepolia.linea.build',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
@@ -129,6 +141,7 @@ const config: HardhatUserConfig | any = {
     xdcTestnet: {
       tokenName: "XDC",
       tokenSymbol: "XDC",
+      peerSymbol: "XDC",
       chainId: 51,
       url: 'https://erpc.apothem.network',
       accounts: [process.env.DEPLOYER!, process.env.RELAYER!],
